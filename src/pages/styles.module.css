@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Orbitron:wght@400..900&display=swap');
+
+/* TODO: LOGIN COMPONENT */
+    /* TODO: CONTAINER LEFT */
+    .container_left{
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        align-items: center;
+        justify-content: center;
+        top: 9vh;
+        left: 8vh;
+    }
+    .container_left h1{
+        color: #fff;
+        font-size: 80px;
+        font-family: "Inter", serif;
+        font-weight: bold;
+        font-style: normal;
+        width: 50%;
+        margin-bottom: 8%;
+        text-align: center;
+    }
+
+
+    /* TODO: CONTAINER RIGHT */
+    .container_right{
+        width: 45%;
+        height: 100vh;
+        background-color: #61191A;
+        right: 0;
+        float: right;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .container_login{
+        position: relative;
+        top: -5%;
+        left: 5%;
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        width: fit-content;
+    }
+    .container_login h1{
+        color: #fff;
+        font-size: 80px;
+        background-color: transparent;
+        font-family: "Inter", serif;
+        font-weight: bold;
+        font-style: normal;
+        margin-bottom: 15%;
+    }
+    .container_login input{
+        background-color: transparent;
+        color: #fff;
+        font-size: 35px;
+        outline: none;
+        offset: none;
+        border: none;
+        border-bottom: 1px solid #fff;
+        transition: 0.9s;
+    }
+    .container_login input:focus{
+        border-bottom: 1px solid #ff3f3f;
+    }
+    .container_login input::placeholder{
+        color: #b8b8b860;
+    }
+    #input_user{
+        width: 85%;
+        margin-bottom: 15%;
+    }
+    #input_password{
+        width: 35%;
+        margin-bottom: 40%;
+    }
+
+    .button_login{
+        background-color: #0F1D4E;
+        color: #fff;
+        font-family: "Inter", serif;
+        font-weight: bold;
+        font-style: normal;
+        font-size: 18px;
+        border: none;
+        width: 25%;
+        height: 50px;
+        border-radius: 35px;
+        box-shadow: #000 1px 4px 10px;
+        cursor: pointer;
+    }
+
