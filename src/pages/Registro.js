@@ -16,10 +16,13 @@ function Registro() {
   const [modalMessageError, setModalMessageError] = useState('');
 
   //TODO: INPUT VALUES
+  const [imagem, setImagem] = useState(null)
+  const [selectedImage, setSelectedImage] = useState(null);
+  const inputRef = useRef(null);
   const [nome, setNome] = useState('');
   const [sexo, setSexo] = useState('');
   const [data_nasc, setDataNasc] = useState('');
-  const [estado, setEstado] = useState('');
+  const [estadoAtual, setEstadoAtual] = useState('');
   const [nacionalidade, setNacionalidade] = useState('');
   const [naturalidade, setNaturalidade] = useState('');
   const [raca, setRaca] = useState('');
@@ -40,6 +43,7 @@ function Registro() {
 
   const [cpf, setCpf] = useState('')
   const [pisPasep, setPisPasep] = useState('');
+  const [selectCnh, setSelectCnh] = useState('')
   const [cnh, setCnh] = useState('')
   const [rg, setRg] = useState('')
   const [rgDataExped, setRgDataExped] = useState('')
@@ -54,11 +58,77 @@ function Registro() {
   const [docMilitarSerie, setDocMilitarSerie] = useState('')
 
   const [logadouro, setLogadouro] = useState('')
-  const [logadouroNumero, setLogadouroNumero] = useState('')
+  const [numCasa, setNumCasa] = useState('')
   const [cep, setCep] = useState('')
   const [bairro, setBairro] = useState('')
-  const [logadouroEstado, setLogadouroEstado] = useState('')
-  const [cidade, setCidade] = useState('')
+  const [cidades, setCidades] = useState([])
+  const estadosCidades = {
+    "Amazonas" : ["Manaus", "Parintins", "Itacoatiara", "Manacapuru", "Coari", "Tefé", "Tabatinga", "Maués", "São Gabriel da Cachoeira",
+      "Humaitá", "Lábrea", "Borba", "Autazes", "Manicoré", "Careiro", "Presidente Figueiredo", "Nova Olinda do Norte", "Boca do Acre",
+      "Iranduba", "Barreirinha"],
+    "Acre" : ["Acrelândia", "Assis Brasil", "Brasiléia", "Bujari", "Capixaba", "Cruzeiro do Sul", "Epitaciolândia", "Feijó", "Jordão",
+      "Mâncio Lima", "Manoel Urbano", "Marechal Thaumaturgo", "Plácido de Castro", "Porto Acre", "Porto Walter", "Rio Branco", "Rodrigues Alves",
+      "Santa Rosa do Purus", "Sena Madureira", "Senador Guiomard", "Tarauacá","Xapuri"],  
+    "Alagoas" : ["Água Branca", "Anadia", "Arapiraca", "Atalaia", "Barra de Santo Antônio", "Barra de São Miguel", "Batalha", "Belém",
+      "Belo Monte", "Boca da Mata", "Branquinha", "Cacimbinhas", "Cajueiro", "Campestre", "Campo Alegre", "Campo Grande", "Canapi",
+      "Capela", "Carneiros", "Chã Preta", "Coité do Nóia", "Colônia Leopoldina", "Coqueiro Seco", "Coruripe", "Craíbas", "Delmiro Gouveia",
+      "Dois Riachos", "Estrela de Alagoas", "Feira Grande", "Feliz Deserto", "Flexeiras", "Girau do Ponciano", "Ibateguara", "Igaci", "Igreja Nova",
+      "Inhapi", "Jacaré dos Homens", "Jacuípe", "Japaratinga", "Jaramataia", "Jequiá da Praia", "Joaquim Gomes", "Jundiá", "Junqueiro",
+      "Lagoa da Canoa", "Limoeiro de Anadia", "Maceió", "Major Isidoro", "Mar Vermelho", "Maragogi", "Maravilha", "Marechal Deodoro",
+      "Maribondo", "Mata Grande", "Matriz de Camaragibe", "Messias", "Minador do Negrão", "Monteirópolis", "Murici", "Novo Lino",
+      "Olho d'Água das Flores", "Olho d'Água do Casado", "Olho d'Água Grande", "Olivença", "Ouro Branco", "Palestina", "Palmeira dos Índios",
+      "Pão de Açúcar", "Pariconha", "Paripueira", "Passo de Camaragibe", "Paulo Jacinto", "Penedo", "Piaçabuçu", "Pilar", "Pindoba",
+      "Piranhas", "Poço das Trincheiras", "Porto Calvo", "Porto de Pedras", "Porto Real do Colégio", "Quebrangulo", "Rio Largo",
+      "Roteiro", "Santa Luzia do Norte", "Santana do Ipanema", "Santana do Mundaú", "São Brás", "São José da Laje", "São José da Tapera",
+      "São Luís do Quitunde", "São Miguel dos Campos", "São Miguel dos Milagres", "São Sebastião", "Satuba", "Senador Rui Palmeira",
+      "Tanque d'Arca", "Taquarana", "Teotônio Vilela", "Traipu", "União dos Palmares", "Viçosa"],
+    "Amapá" : ["Macapá", "Santana", "Laranjal do Jari", "Oiapoque", "Porto Grande", "Mazagão", "Tartarugalzinho", "Vitória do Jari",
+      "Calçoene", "Ferreira Gomes", "Cutias", "Itaubal", "Serra do Navio", "Pracuúba"],   
+    "Bahia" : ["Salvador", "Feira de Santana", "Vitória da Conquista", "Camaçari", "Itabuna", "Juazeiro", "Lauro de Freitas", "Ilhéus",
+      "Jequié", "Teixeira de Freitas", "Alagoinhas", "Barreiras", "Porto Seguro", "Simões Filho"],  
+    "Ceará" : ["Fortaleza", "Caucaia", "Juazeiro do Norte", "Maracanaú", "Sobral", "Crato", "Itapipoca", "Maranguape", "Iguatu", "Quixadá",
+      "Pacatuba", "Canindé", "Aquiraz", "Crateús", "Pacajus", "Quixeramobim"],  
+    "Espírito Santo" : ["Vitória", "Vila Velha", "Serra", "Cariacica", "Linhares", "Colatina", "Guarapari", "Aracruz", "São Mateus",
+      "Viana", "Nova Venécia", "Barra de São Francisco", "Santa Maria de Jetibá"],  
+    "Goiás" : ["Goiânia", "Aparecida de Goiânia", "Anápolis", "Rio Verde", "Luziânia", "Águas Lindas de Goiás", "Valparaíso de Goiás",
+      "Trindade", "Formosa", "Novo Gama", "Catalão", "Itumbiara", "Jataí", "Senador Canedo", "Caldas Novas"],  
+    "Maranhão" : ["São Luís", "Imperatriz", "Caxias", "Timon", "Codó", "Paço do Lumiar", "Açailândia", "Bacabal", "Balsas", "Barra do Corda",
+      "Pinheiro", "Santa Inês", "Chapadinha", "Itapecuru-Mirim"],  
+    "Mato Grosso" : ["Cuiabá", "Várzea Grande", "Rondonópolis", "Sinop", "Tangará da Serra", "Cáceres", "Sorriso", "Lucas do Rio Verde",
+      "Primavera do Leste", "Barra do Garças", "Alta Floresta", "Pontes e Lacerda"],  
+    "Mato Grosso do Sul" : ["Campo Grande", "Dourados", "Três Lagoas", "Corumbá", "Ponta Porã", "Naviraí", "Nova Andradina", "Aquidauana",
+      "Sidrolândia", "Paranaíba", "Coxim", "Maracaju", "Rio Brilhante", "Amambai"],  
+    "Minas Gerais" : ["Belo Horizonte", "Uberlândia", "Contagem", "Juiz de Fora", "Betim", "Montes Claros", "Ribeirão das Neves", "Uberaba",
+      "Governador Valadares", "Ipatinga", "Sete Lagoas", "Divinópolis", "Poços de Caldas"],  
+    "Pará" : ["Belém", "Ananindeua", "Santarém", "Marabá", "Castanhal", "Parauapebas", "Abaetetuba", "Cametá", "Bragança", "Marituba",
+      "Itaituba", "Altamira", "Tucuruí", "Barcarena", "Breves"],  
+    "Paraíba" : ["João Pessoa", "Campina Grande", "Santa Rita","Patos", "Bayeux", "Sousa", "Cabedelo", "Cajazeiras", "Guarabira", "Sapé",
+      "Mamanguape", "Queimadas", "São Bento", "Monteiro", "Esperança"],  
+    "Paraná" : ["Curitiba","Londrina", "Maringá", "Ponta Grossa", "Cascavel", "São José dos Pinhais", "Foz do Iguaçu", "Colombo", "Guarapuava",
+      "Paranaguá", "Toledo", "Apucarana", "Pinhais", "Araucária"],  
+    "Pernambuco" : ["Recife", "Jaboatão dos Guararapes", "Olinda", "Caruaru", "Petrolina", "Paulista", "Cabo de Santo Agostinho", "Camaragibe",
+      "Garanhuns", "Vitória de Santo Antão", "Igarassu", "São Lourenço da Mata"],  
+    "Piauí" : ["Teresina", "Parnaíba", "Picos", "Floriano", "Piripiri", "Campo Maior", "Barras", "Altos", "José de Freitas", "União",
+      "Pedro II", "Esperantina", "Oeiras"],  
+    "Rio de Janeiro" : ["Rio de Janeiro", "São Gonçalo", "Duque de Caxias", "Nova Iguaçu", "Niterói", "Belford Roxo", "Campos dos Goytacazes",
+      "Petrópolis", "Volta Redonda", "Macaé", "Angra dos Reis"],  
+    "Rio Grande do Norte" : ["Natal", "Mossoró", "Parnamirim", "São Gonçalo do Amarante", "Macaíba", "Ceará-Mirim", "Caicó", "Açu", "Currais Novos",
+      "São José de Mipibu", "Santa Cruz", "Nova Cruz"],  
+    "Rio Grande do Sul" : ["Porto Alegre", "Caxias do Sul", "Pelotas", "Canoas", "Santa Maria", "Gravataí", "Viamão", "Novo Hamburgo","São Leopoldo",
+      "Rio Grande", "Alvorada", "Passo Fundo", "Sapucaia do Sul"],  
+    "Rondônia" : ["Porto Velho", "Ji-Paraná", "Ariquemes", "Vilhena", "Cacoal", "Rolim de Moura", "Jaru", "Guajará-Mirim"],  
+    "Roraima" : ["Boa Vista", "Rorainópolis", "Caracaraí", "Mucajaí", "Alto Alegre", "Pacaraima", "Amajari", "Bonfim"],  
+    "Santa Catarina" : ["Florianópolis", "Joinville", "Blumenau", "São José", "Chapecó", "Criciúma", "Itajaí", "Jaraguá do Sul", "Palhoça",
+      "Lages", "Balneário Camboriú", "Brusque", "Tubarão"],  
+    "São Paulo" : ["São Paulo", "Guarulhos", "Campinas", "São Bernardo do Campo", "Santo André", "Osasco", "São José dos Campos", "Ribeirão Preto",
+      "Sorocaba", "Mauá", "São José do Rio Preto", "Mogi das Cruzes"],  
+    "Sergipe" : ["Aracaju", "Nossa Senhora do Socorro", "Lagarto", "Itabaiana", "Estância", "Tobias Barreto", "Itabaianinha", "Simão Dias",
+      "Nossa Senhora da Glória", "Poço Redondo", "Capela", "Propriá"],  
+    "Tocantins" : ["Palmas", "Araguaína", "Gurupi", "Porto Nacional", "Paraíso do Tocantins", "Guaraí", "Colinas do Tocantins", "Dianópolis",
+      "Tocantinópolis", "Augustinópolis"]  
+  }
+  const [estadoSelecionado, setEstadoSelecionado] = useState('')
+  const [cidadeSelecionada, setCidadeSelecionada] = useState('')
 
   const [banco, setBanco] = useState('')
   const [bancoAgencia, setBancoAgencia] = useState('')
@@ -79,71 +149,59 @@ function Registro() {
   const [matriculaOrigem, setMatriculaOrigem] = useState('')
   const [orgaoOrigem, setOrgaoOrigem] = useState('')
   const [matriculaSeai, setMatriculaSeai] = useState('')
-  const [anexos, setAnexos] = useState('')
-  const [anexo1, setAnexo1] = useState('')
-  const [anexo1Nome, setAnexo1Nome] = useState('')
-  const [anexo2, setAnexo2] = useState('')
-  const [anexo2Nome, setAnexo2Nome] = useState('')
-  const [anexo3, setAnexo3] = useState('')
-  const [anexo3Nome, setAnexo3Nome] = useState('')
-  const [anexo4, setAnexo4] = useState('')
-  const [anexo4Nome, setAnexo4Nome] = useState('')
+  const [files, setFiles] = useState([])
   const [dataEntregaDocs, setDataEntregaDocs] = useState('')
   const [anotacoes, setAnotacoes] = useState('')
 
-  //TODO: INPUT IMAGE
-  const [selectedImage, setSelectedImage] = useState(null);
-  const inputRef = useRef(null);
+  //TODO: INPUT CIDADES
+  const handleEstados = (e) =>{
+    const estadoSelecionado = e.target.value;
+    setEstadoSelecionado(estadoSelecionado);
 
+    if(estadoSelecionado && estadosCidades[estadoSelecionado]){
+      setCidades(estadosCidades[estadoSelecionado]);
+    } else{
+      setCidades([])
+    }
+  }
+
+  const handleCidade = (e) =>{
+    setCidadeSelecionada(e.target.value)
+  }
+
+  //TODO: INPUT IMAGE
   const handleImageChange = (e) =>{
     const file = e.target.files[0];
-    if (file){
+    if (file) {
+      setImagem(file);
+
+      // Criar URL de visualização da imagem
       const reader = new FileReader();
-      reader.onload = () =>{
-        setSelectedImage(reader.result);
+      reader.onload = () => {
+        setSelectedImage(reader.result);  // Armazena a URL da imagem no estado
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file);  // Lê o arquivo como URL de dados
     }
   };
 
+
   //TODO: INPUT FILES
-  const handleFileChange = (e, anexo) =>{
-    const file = e.target.files[0]
-    if(file && file.type === 'application/pdf'){
-      if(anexo === 'anexo1'){
-        setAnexo1(file);
-        setAnexo1Nome(file.name);
-      } else if(anexo === 'anexo2'){
-        setAnexo2(file);
-        setAnexo2Nome(file.name);
-      } else if(anexo === 'anexo3'){
-        setAnexo3(file);
-        setAnexo3Nome(file.name);
-      } else if(anexo === 'anexo4'){
-        setAnexo4(file);
-        setAnexo4Nome(file.name);
-      }
-    } else{
-      setModalMessageError("Anexos apenas do tipo pdf");
-      setOpenModalError(true);
-    }
+  const handleFileChange = (e) =>{
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
   };
 
   //TODO: VALIDATION INPUTS AND SEND TO BACKEND
   const regex = /[0-9!#$%&'"()*+,-./:;?@[\\\]_`{|}~]/
   const regex_num = /^[0-9()-]*$/
-  const regex_cpf = /^[0-9-.]*$/
+  const regex_cpf = /^[-.]*$/
 
-  const naoPossui = (value) =>{
-    return value.trim() === '' ? 'Não Possui' : value;
-  }
-
-  const validateForm = async () =>{
-    if(nome.trim() === ''){
+  const validateForm = () =>{
+    if(nome === ''){
       setModalMessageError("Preencha o nome")
       setOpenModalError(true)
       return
-    } 
+    }
     if(regex.test(nome) === true){
       setModalMessageError("Preencha o nome apenas com letras")
       setOpenModalError(true)
@@ -162,7 +220,7 @@ function Registro() {
       return
     }
 
-    if(estado === ''){
+    if(estadoAtual === ''){
       setModalMessageError("Preencha o estado")
       setOpenModalError(true)
       return
@@ -191,7 +249,7 @@ function Registro() {
     }
 
     if(raca === ''){
-      setModalMessageError("Preencha o Sexo")
+      setModalMessageError("Preencha a raça")
       setOpenModalError(true)
       return
     }
@@ -223,6 +281,7 @@ function Registro() {
       setOpenModalError(true)
       return
     }
+
     if(cpfPai.trim() === ''){
       setModalMessageError("Preencha o cpf do pai")
       setOpenModalError(true)
@@ -231,6 +290,7 @@ function Registro() {
       setModalMessageError("Preencha o cpf do pai corretamente")
       setOpenModalError(true)
     }
+
     if(dataNascPai.trim() === ''){
       setModalMessageError("Preencha a data de nascimento do pai")
       setOpenModalError(true)
@@ -246,6 +306,7 @@ function Registro() {
       setOpenModalError(true)
       return
     }
+
     if(cpfMae.trim() === ''){
       setModalMessageError("Preencha o cpf da mãe")
       setOpenModalError(true)
@@ -254,6 +315,7 @@ function Registro() {
       setModalMessageError("Preencha o cpf da mãe corretamente")
       setOpenModalError(true)
     }
+
     if(dataNascMae.trim() === ''){
       setModalMessageError("Preencha a data de nascimento da mãe")
       setOpenModalError(true)
@@ -285,109 +347,255 @@ function Registro() {
       setOpenModalError(true)
     }
 
-    if(cnh.trim() === ''){
-      setModalMessageError("Preencha a CNH")
+    if(rg.trim() === ''){
+      setModalMessageError("Preencha o RG")
       setOpenModalError(true)
     }
 
-    //TODO: CONST NAO POSSUI
-    const nomeEsposoaf = naoPossui(nomeEsposoa)
-    const nomeFilhosf = naoPossui(nomeFilhos)
-    const curso1f = naoPossui(curso1)
-    const curso2f = naoPossui(curso2)
-    const curso3f = naoPossui(curso3)
-    const curso4f = naoPossui(anexo4)
-    const docMilitarf = naoPossui(docMilitar)
-    const docMilitarSerief = naoPossui(docMilitarSerie) 
-    const anexo1f = naoPossui(anexo1)
-    const anexo2f = naoPossui(anexo2)
-    const anexo3f = naoPossui(anexo3)
-    const anexo4f = naoPossui(anexo4)
+    if(rgDataExped.trim() === ''){
+      setModalMessageError("Preencha a data de expedição do RG")
+      setOpenModalError(true)
+    }
+
+    if(rgOrgaoExped.trim() === ''){
+      setModalMessageError("Preencha o orgão de expedição do RG")
+      setOpenModalError(true)
+    }
+
+    if(rgUf.trim() === ''){
+      setModalMessageError("Preencha a UF do RG")
+      setOpenModalError(true)
+    }
+
+    if(titulo.trim() === ''){
+      setModalMessageError("Preencha o Título")
+      setOpenModalError(true)
+    }
+
+    if(tituloZona.trim() === ''){
+      setModalMessageError("Preencha a zona do título")
+      setOpenModalError(true)
+    }
+
+    if(tituloSecao.trim() === ''){
+      setModalMessageError("Preencha a seção do título")
+      setOpenModalError(true)
+    }
+
+    if(tituloUf.trim() === ''){
+      setModalMessageError("Preencha a UF do título")
+      setOpenModalError(true)
+    }
+
+    if(bairro.trim() === ''){
+      setModalMessageError("Preencha o Bairro")
+      setOpenModalError(true)
+    }
+
+    if(numCasa.trim() === ''){
+      setModalMessageError("Preencha o número da casa")
+      setOpenModalError(true)
+    }
+
+    if(cep.trim() === ''){
+      setModalMessageError("Preencha o CEP")
+      setOpenModalError(true)
+    }
+
+    if(logadouro.trim() === ''){
+      setModalMessageError("Preencha o Logadouro")
+      setOpenModalError(true)
+    }
+
+    if(banco.trim() === ''){
+      setModalMessageError("Preencha o nome do banco")
+      setOpenModalError(true)
+    }
+    if(regex.test(banco) === true){
+      setModalMessageError("Preencha o nome do banco apenas com letras")
+      setOpenModalError(true)
+    }
+
+    if(bancoAgencia.trim() === ''){
+      setModalMessageError("Preencha a agência do banco")
+      setOpenModalError(true)
+    }
+
+    if(bancoConta.trim() === ''){
+      setModalMessageError("Preencha a conta do banco")
+      setOpenModalError(true)
+    }
+
+    if(escolaridade.trim() === ''){
+      setModalMessageError("Preencha a Escolaridade")
+      setOpenModalError(true)
+    }
+
+    if(cursos.trim() === ''){
+      setModalMessageError("Preencha a quantidade de cursos")
+      setOpenModalError(true)
+    }
+
+    if(vinculo.trim() === ''){
+      setModalMessageError("Preencha o Vínculo")
+      setOpenModalError(true)
+    }
+
+    if(setorDepartamento.trim() === ''){
+      setModalMessageError("Preencha o Setor/Departamento")
+      setOpenModalError(true)
+    }
+
+    if(cargoFuncao.trim() === ''){
+      setModalMessageError("Preencha o Cargo/Função")
+      setOpenModalError(true)
+    }
+
+    if(statusServidor.trim() === ''){
+      setModalMessageError("Preencha o Status do servidor")
+      setOpenModalError(true)
+    }
+
+    if(matriculaOrigem.trim() === ''){
+      setModalMessageError("Preencha a Matrícula de Origem")
+      setOpenModalError(true)
+    }
+
+    if(orgaoOrigem.trim() === ''){
+      setModalMessageError("Preencha o Orgão de origem")
+      setOpenModalError(true)
+    }
+
+    if(matriculaSeai.trim() === ''){
+      setModalMessageError("Preencha a Matrícula SEAI")
+      setOpenModalError(true)
+    }
+
+    if(cursos.trim() === ''){
+      setModalMessageError("Preencha a quantidade de cursos")
+      setOpenModalError(true)
+    }
+
+    if(dataEntregaDocs.trim() === ''){
+      setModalMessageError("Preencha a Data de entrega dos documentos")
+      setOpenModalError(true)
+    }
+    return true
+  }
+
+  const submitForm = async () => {
+    const isValidInputs = validateForm();
+
+    if(!isValidInputs){
+      return;
+    }
+
+    const emptyInputs = (value) =>{
+      return value.trim() === '' ? 'Não Possui' : value;
+    }
+
+    const formData = new FormData();
+    formData.append("nome", nome);
+    formData.append("sexo", sexo);
+    formData.append("data_nasc", data_nasc);
+    formData.append("estadoAtual", estadoAtual);
+    formData.append("nacionalidade", nacionalidade);
+    formData.append("naturalidade", naturalidade);
+    formData.append("raca", raca);
+    formData.append("telefone", telefone);
+    formData.append("email", email);
+      
+    formData.append("nomePai", nomePai);
+    formData.append("cpfPai", cpfPai);
+    formData.append("dataNascPai", dataNascPai);
+    formData.append("nomeMae", nomeMae);
+    formData.append("cpfMae", cpfMae);
+    formData.append("dataNascMae", dataNascMae);
+    formData.append("estadoCivil", estadoCivil);
+    formData.append("nomeEsposoa", emptyInputs(nomeEsposoa));
+    formData.append("filhos", filhos);
+    formData.append("nomeFilhos", emptyInputs(nomeFilhos));
+      
+    formData.append("cpf", cpf);
+    formData.append("pisPasep", pisPasep);
+    formData.append("cnh", emptyInputs(cnh));
+    formData.append("rg", rg);
+    formData.append("rgDataExped", rgDataExped);
+    formData.append("rgOrgaoExped", rgOrgaoExped);
+    formData.append("rgUf", rgUf);
+    formData.append("titulo", titulo);
+    formData.append("tituloZona", tituloZona);
+    formData.append("tituloSecao", tituloSecao);
+    formData.append("tituloUf", tituloUf);
+    formData.append("docMilitar", emptyInputs(docMilitar));
+    formData.append("docMilitarSerie", emptyInputs(docMilitarSerie));
+      
+    formData.append("bairro", bairro);
+    formData.append("numCasa", numCasa);
+    formData.append("cep", cep);
+    formData.append("logadouro", logadouro);
+    formData.append("cidadeSelecionada", cidadeSelecionada);
+    formData.append("estadoSelecionado", estadoSelecionado)
+      
+    formData.append("banco", banco);
+    formData.append("bancoAgencia", bancoAgencia);
+    formData.append("bancoConta", bancoConta);
+      
+    formData.append("escolaridade", escolaridade);
+    formData.append("cursos", cursos);
+    formData.append("curso1", emptyInputs(curso1));
+    formData.append("curso2", emptyInputs(curso2));
+    formData.append("curso3", emptyInputs(curso3));
+    formData.append("curso4", emptyInputs(curso4));
+     
+    formData.append("vinculo", vinculo);
+    formData.append("setorDepartamento", setorDepartamento);
+    formData.append("cargoFuncao", cargoFuncao);
+    formData.append("cargoEfetivo", emptyInputs(cargoEfetivo));
+    formData.append("statusServidor", statusServidor);
+    formData.append("matriculaOrigem", matriculaOrigem);
+    formData.append("orgaoOrigem", orgaoOrigem);
+    formData.append("matriculaSeai", matriculaSeai);
+    formData.append("arquivosNome", files)
+    formData.append("dataEntregaDocs", dataEntregaDocs);
+    formData.append("anotacoes", anotacoes);
+
 
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post("http://localhost:3001/cadastrar",{
-        foto: selectedImage,
-        nome,
-        sexo,
-        data_nasc,
-        estado,
-        nacionalidade,
-        naturalidade,
-        raca,
-        telefone,
-        email,
+      const response = await Axios.post('http://localhost:5000/cadastrar', formData, {
+        headers: { 
+          "Content-Type": 'multipart/form-data', 
+        }
+      })
+ 
+      const formDatas = new FormData();
+      formDatas.append('nome', nome)
+      formDatas.append('imagem', imagem);
+      if(files.length > 0){
+      files.forEach(file =>{
+        formDatas.append('pdfs', file)
+      })
+    }
 
-        nomePai,
-        cpfPai,
-        dataNascPai,
-        nomeMae,
-        cpfMae,
-        dataNascMae,
-        estadoCivil,
-        nomeEsposoa:nomeEsposoaf,
-        filhos,
-        nomeFilhos:nomeFilhosf,
+    const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-        cpf,
-        pisPasep,
-        cnh,
-        rg,
-        rgDataExped,
-        rgOrgaoExped,
-        rgUf,
-        titulo,
-        tituloZona,
-        tituloSecao,
-        tituloUf,
-        docMilitar:docMilitarf,
-        docMilitarSerie:docMilitarSerief,
+    setOpenModal(true);
+    setModalMessage("Funcionário cadastrado com sucesso");
 
-        logadouro,
-        logadouroNumero,
-        cep,
-        bairro,
-        logadouroEstado,
-        cidade,
-
-        banco,
-        bancoAgencia,
-        bancoConta,
-
-        escolaridade,
-        cursos,
-        curso1:curso1f,
-        curso2:curso2f,
-        curso3:curso3f,
-        curso4:curso4f,
-
-        vinculo,
-        setorDepartamento,
-        cargoFuncao,
-        cargoEfetivo,
-        statusServidor,
-        matriculaOrigem,
-        orgaoOrigem,
-        matriculaSeai,
-        anexos,
-        anexo1:anexo1f,
-        anexo2:anexo2f,
-        anexo3:anexo3f,
-        anexo4:anexo4f,
-        dataEntregaDocs,
-        anotacoes
-      });
-      window.location.reload() /* **NADA FUNCIONA DPS DO TRY, SERVIDOR NÃO CONECTANDO** */
-    } catch (err){
-      setOpenModalError(true);
+    } catch(err){
       setModalMessageError("Ocorreu um erro, tente novamente");
-      console.log(err);
+      console.error("Erro:", err);
     }
   }
-    
 
-  const teste = () =>{
+  function name(){
+    setOpenModal(true)
   }
 
 
@@ -395,46 +603,37 @@ function Registro() {
     <div className={styles.container_register}>
       <div className={styles.nav_register}>
         <div className={styles.navigation_bar}>
-        <button onClick={teste()}>teste</button>
           <h1 className={styles.link_register}>Registrar Funcionário</h1>
           <Link to={"/historico"} className={styles.link_history}>Histórico de Funcionários</Link>
         </div>
-        {/***TODO: NAVIGATION BAR***/}
-        <div className={styles.navigation_history}>
-          <a href='#'>Dados Pessoais</a>
-          <a href='#'>Documentos</a>
-          <a href='#'>Endereço</a>
-          <a href='#'>Dados Bancários</a>
-          <a href='#'>Formação Escolar</a>
-          <a href='#'>Vínculo</a>
-          <a href='#'>Anotações</a>
-        </div>
       </div>
 
+      <button onClick={name}>modal</button>
 
       <div className={styles.container_record}>
         <div className={styles.record}>
           {/***TODO: INPUT IMAGEM***/}
-          <div className={styles.foto}>
-            <input 
+          <form className={styles.foto} method='post' encType='multipart/form-data'>
+            <input
+              name='imagem'
+              ref={inputRef} 
               className={styles.img}
+              multiple
               type='file' 
               accept='image/*' 
-              ref={inputRef} 
               onChange={handleImageChange}>
             </input>
-            <button onClick={() => inputRef.current.click()}><Paperclip size={25}/></button>
+            <button type='button' onClick={() => inputRef.current?.click()}><Paperclip size={25}/></button>
             {selectedImage && <img src={selectedImage} alt='img selecionada'></img>}
-          </div>
+          </form>
 
           <div className={styles.inputs}>
             {/***TODO: INPUT DADOS PESSOAIS***/}
-            <form className={styles.form_dados_pessoais} autoComplete='off'>
+            <form className={styles.form_dados_pessoais} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="nome">Nome Completo:</label>
                   <input 
-                    className={styles.input_nome} 
                     type='text' 
                     id='nome' 
                     name='nome' 
@@ -471,31 +670,29 @@ function Registro() {
 
                 <div className={styles.div_input}>
                   <label for="estado">Estado:</label>
-                  <select id='estado' name='estado' value={estado} onChange={(e) => {setEstado(e.target.value)}}>
+                  <select id='estado' name='estado' value={estadoAtual} onChange={(e) => {setEstadoAtual(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
                     <option value="AM">AM</option>
                     <option value="Outros">Outros</option>
                   </select>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="nacionalidade">Nacionalidade:</label>
                   <input 
-                    className={styles.input_nacionalidade} 
                     type='text' 
                     id='nacionalidade' 
                     name='nacionalidade' 
-                    value={nacionalidade} 
+                    value={nacionalidade}
                     onChange={(e) => {setNacionalidade(e.target.value)}}>
                   </input>
                 </div>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="Naturalidade">Naturalidade:</label>
-                  <input 
-                    className={styles.input_naturalidade} 
+                  <input
                     type='text' 
                     id='naturalidade' 
                     name='naturalidade' 
@@ -516,7 +713,7 @@ function Registro() {
                   </select>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="telefone">Telefone:</label>
                   <input 
                     type='text' 
@@ -530,11 +727,10 @@ function Registro() {
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="email">Email:</label>
                   <input 
-                    className={styles.input_email} 
-                    type='text' 
+                    type='email' 
                     id='email' 
                     name='email' 
                     value={email} 
@@ -545,19 +741,19 @@ function Registro() {
               </div>
             </form>
 
+
             {/***TODO: INPUT DADOS FAMILIARES***/}
-            <form className={styles.form_dados_familiares} autoComplete='off'>
+            <form className={styles.form_dados_familiares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria}>
                 <hr></hr>
                 <span className={styles.title_divis}>Dados Familiares</span>
               </div>
 
-              <span className={styles.span}>Pai</span>
+              <span className={styles.spandf}>Pai</span>
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="nome_pai">Nome Completo:</label>
                   <input 
-                    className={styles.input_nome_pai} 
                     type='text' 
                     id='nome_pai' 
                     name='nome_pai' 
@@ -567,10 +763,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf_pai">CPF:</label>
                   <input 
-                    className={styles.input_cpf_pai} 
                     type='text' 
                     id='cpf_pai' 
                     name='cpf_pai' 
@@ -586,18 +781,17 @@ function Registro() {
                     type='date' 
                     id='data_nasc_pai' 
                     name='data_nasc_pai' 
-                    value={dataNascPai} 
+                    value={dataNascPai}
                     onChange={(e) => {setDataNascPai(e.target.value)}}>
                   </input>
                 </div>
               </div>
 
-              <span className={styles.span}>Mãe</span>
+              <span className={styles.spandf}>Mãe</span>
               <div className={styles.form_group} id={styles.form_group_mae}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="nome_mae">Nome Completo:</label>
                   <input 
-                    className={styles.input_nome_mae} 
                     type='text' 
                     id='nome_mae' 
                     name='nome_mae' 
@@ -607,10 +801,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf_mae">CPF:</label>
                   <input 
-                    className={styles.input_cpf_mae} 
                     type='text' 
                     id='cpf_mae' 
                     name='cpf_mae' 
@@ -632,36 +825,36 @@ function Registro() {
                 </div>
               </div>
 
-              <div className={styles.form_group}>
-                <div className={styles.div_input} id={styles.input_estado_civil}>
-                  <label for="estado_civil">Estado Civil:</label>
-                  <select id='estado_civil' name='estado_civil' value={estadoCivil} onChange={(e) => {setEstadoCivil(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Solteiro">Solteiro</option>
-                    <option value="Casado">Casado</option>
-                    <option value="Separado">Separado</option>
-                    <option value="Divorciado">Divorciado</option>
-                    <option value="Viúvo">Viúvo</option>
-                  </select>
-                </div>
+              <div id={styles.dado_civil}>
+                <div className={styles.form_group}>
+                  <div className={styles.div_input}>
+                    <label for="estado_civil">Estado Civil:</label>
+                    <select id='estado_civil' name='estado_civil' value={estadoCivil} onChange={(e) => {setEstadoCivil(e.target.value)}}>
+                      <option disabled={true} value="">Selecione</option>
+                      <option value="Solteiro">Solteiro</option>
+                      <option value="Casado">Casado</option>
+                      <option value="Separado">Separado</option>
+                      <option value="Divorciado">Divorciado</option>
+                      <option value="Viúvo">Viúvo</option>
+                    </select>
+                  </div>
 
-                <div className={`${styles.div_input} ${estadoCivil !== "Casado" || estadoCivil === "" ? styles.disabled : ""}`}>
-                  <label for="nome_esposoa">Nome Esposo(a):</label>
-                  <input 
-                    className={styles.input_nome_esposoa} 
-                    type='text' 
-                    id='nome_esposoa' 
-                    name='nome_esposoa' 
-                    value={nomeEsposoa} 
-                    maxLength={85}
-                    disabled={estadoCivil !== "Casado" || estadoCivil === ""} 
-                    onChange={(e) => {setNomeEsposoa(e.target.value)}}>
-                  </input>
+                  <div className={`${styles.div_input} ${estadoCivil !== "Casado" || estadoCivil === "" ? styles.disabled : ""}`} id={styles.inptspan}>
+                    <label for="nome_esposoa">Nome Cônjuge:</label>
+                    <input 
+                      type='text' 
+                      id='nome_esposoa' 
+                      name='nome_esposoa' 
+                      value={nomeEsposoa} 
+                      maxLength={85}
+                      disabled={estadoCivil !== "Casado" || estadoCivil === ""} 
+                      onChange={(e) => {setNomeEsposoa(e.target.value)}}>
+                    </input>
                 </div>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input} id={styles.input_filhos}>
+                <div className={styles.div_input}>
                   <label for="filhos">Filhos:</label>
                   <select id='filhos' name='filhos' value={filhos} onChange={(e) => {setFilhos(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
@@ -672,10 +865,9 @@ function Registro() {
                   </select>
                 </div>
 
-                <div className={`${styles.div_input} ${filhos === "0" || filhos === "" ? styles.disabled : ""}`}>
+                <div className={`${styles.div_input} ${filhos === "0" || filhos === "" ? styles.disabled : ""}`} id={styles.inptspan}>
                   <label for="nome_filhos">Nome Filhos:</label>
                   <input 
-                    className={styles.input_nome_filhos} 
                     type='text' 
                     id='nome_filhos' 
                     name='nome_filhos' 
@@ -685,21 +877,21 @@ function Registro() {
                   </input>
                 </div>
               </div>
-            </form>
+            </div>
+          </form>
 
             {/***TODO: INPUT DOCUMENTOS***/}
-            <form className={styles.form_dados_documentos} autoComplete='off'>
-              <div className={styles.divisoria} id={styles.divis_docs}>
+            <form className={styles.form_dados_documentos} autoComplete='off' method='post' encType='multipart/form-data'>
+              <div className={styles.divisoria}>
                 <hr></hr>
                 <span className={styles.title_divis}>Documentos</span>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf">CPF:</label>
                   <input 
-                    className={styles.input_cpf} 
-                    type='text' 
+                    type='text'
                     id='cpf' 
                     name='cpf' 
                     value={cpf} 
@@ -708,10 +900,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="pis_pasep">PIS/PASEP:</label>
                   <input 
-                    className={styles.input_pis_pasep} 
                     type='text' 
                     id='pis_pasep' 
                     name='pis_pasep' 
@@ -722,24 +913,30 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
+                  <select id='selectCnh' name='selectCnh' value={selectCnh} onChange={(e) => {setSelectCnh(e.target.value)}}>
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                  </select>
+                </div>
+
+                <div className={`${styles.div_input} ${selectCnh === "Não" || selectCnh === "" ? styles.disabled : ""}`} id={styles.inptspan}>
                   <label for="cnh">CNH:</label>
                   <input 
-                    className={styles.input_cnh}
-                    type='text' 
+                    type='number' 
                     id='cnh' 
                     name='cnh' 
                     value={cnh} 
                     maxLength={11}
-                    onChange={(e) => {setCnh(e.target.value)}}>
+                    disabled={selectCnh === "Não" || selectCnh === "" ? styles.disabled : ""}
+                    onChange={(e) => {setCnh(String(e.target.value))}}>
                   </input>
                 </div>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="rg">RG:</label>
                   <input 
-                    className={styles.input_rg} 
                     type='text' 
                     id='rg' 
                     name='rg' 
@@ -766,6 +963,7 @@ function Registro() {
                     <option disabled={true} value="">Selecione</option>
                     <option value="SSP">SSP</option>
                     <option value="PC">PC</option>
+                    <option value="PM">PM</option>
                     <option value="Detran">Detran</option>
                     <option value="Outros">Outros</option>
                   </select>
@@ -773,22 +971,43 @@ function Registro() {
 
                 <div className={styles.div_input}>
                   <label for="rg_uf">UF:</label>
-                  <input 
-                    className={styles.input_rg_uf} 
-                    type='text' 
-                    id='rg_uf' 
-                    name='rg_uf' 
-                    value={rgUf} 
-                    onChange={(e) => {setRgUf(e.target.value)}}>
-                  </input>
+                  <select id="rg_uf" name="rg_uf" value={rgUf} onChange={(e) => {setRgUf(e.target.value)}}>
+                    <option disabled={true} value="">Selecione:</option>
+                    <option value="AM">AM</option>
+                    <option value="AC">AC</option>
+                    <option value="AL">AL</option>
+                    <option value="AP">AP</option>
+                    <option value="BA">BA</option>
+                    <option value="CE">CE</option>
+                    <option value="DF">DF</option>
+                    <option value="ES">ES</option>
+                    <option value="GO">GO</option>
+                    <option value="MA">MA</option>
+                    <option value="MT">MT</option>
+                    <option value="MS">MS</option>
+                    <option value="MG">MG</option>
+                    <option value="PA">PA</option>
+                    <option value="PB">PB</option>
+                    <option value="PR">PR</option>
+                    <option value="PE">PE</option>
+                    <option value="PI">PI</option>
+                    <option value="RJ">RJ</option>
+                    <option value="RN">RN</option>
+                    <option value="RS">RS</option>
+                    <option value="RO">RO</option>
+                    <option value="RR">RR</option>
+                    <option value="SC">SC</option>
+                    <option value="SP">SP</option>
+                    <option value="SE">SE</option>
+                    <option value="TO">TO</option>
+                  </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="titulo">Título:</label>
                   <input 
-                    className={styles.input_titulo} 
                     type='text' 
                     id='titulo' 
                     name='titulo' 
@@ -798,10 +1017,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="titulo_zona">Zona:</label>
                   <input 
-                    className={styles.input_titulo_zona} 
                     type='text' 
                     id='titulo_zona'
                     name='titulo_zona' 
@@ -811,10 +1029,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="titulo_secao">Seção:</label>
                   <input 
-                    className={styles.input_titulo_secao} 
                     type='text' 
                     id='titulo_secao' 
                     name='titulo_secao' 
@@ -826,66 +1043,86 @@ function Registro() {
 
                 <div className={styles.div_input}>
                   <label for="titulo_uf">UF:</label>
-                  <input 
-                    className={styles.input_titulo_uf} 
-                    type='text' 
-                    id='titulo_uf' 
-                    name='titulo_uf' 
-                    value={tituloUf} 
-                    onChange={(e) => {setTituloUf(e.target.value)}} 
-                    maxLength={5}>
-                  </input>
-                </div>
-
-                <div className={styles.div_input}>
-                  <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
+                  <select id="titulo_uf" name="titulo_uf" value={tituloUf} onChange={(e) => {setTituloUf(e.target.value)}}>
+                    <option disabled={true} value="">Selecione:</option>
+                    <option value="AM">AM</option>
+                    <option value="AC">AC</option>
+                    <option value="AL">AL</option>
+                    <option value="AP">AP</option>
+                    <option value="BA">BA</option>
+                    <option value="CE">CE</option>
+                    <option value="DF">DF</option>
+                    <option value="ES">ES</option>
+                    <option value="GO">GO</option>
+                    <option value="MA">MA</option>
+                    <option value="MT">MT</option>
+                    <option value="MS">MS</option>
+                    <option value="MG">MG</option>
+                    <option value="PA">PA</option>
+                    <option value="PB">PB</option>
+                    <option value="PR">PR</option>
+                    <option value="PE">PE</option>
+                    <option value="PI">PI</option>
+                    <option value="RJ">RJ</option>
+                    <option value="RN">RN</option>
+                    <option value="RS">RS</option>
+                    <option value="RO">RO</option>
+                    <option value="RR">RR</option>
+                    <option value="SC">SC</option>
+                    <option value="SP">SP</option>
+                    <option value="SE">SE</option>
+                    <option value="TO">TO</option>
                   </select>
                 </div>
+              </div>
 
-                <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`}>
-                  <label for="doc_militar">Doc. Militar:</label>
-                  <input 
-                    className={styles.input_doc_militar} 
-                    type='text' 
-                    id='doc_militar' 
-                    name='doc_militar' 
-                    value={docMilitar} 
-                    disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
-                    onChange={(e) => {setDocMilitar(e.target.value)}}>
-                  </input>
-                </div>
+              <div className={styles.form_group}>
+                <div className={styles.div_input}>
+                    <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
+                      <option value="Não">Não</option>
+                      <option value="Sim">Sim</option>
+                    </select>
+                  </div>
 
-                <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`}>
-                  <label for="doc_militar_serie">Série:</label>
-                  <input 
-                    className={styles.input_doc_militar_serie} 
-                    type='text' 
-                    id='doc_militar_serie' 
-                    name='doc_militar_serie' 
-                    value={docMilitarSerie} 
-                    disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
-                    onChange={(e) => {setDocMilitarSerie(e.target.value)}}>
-                  </input>
-                </div>
+                  <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`} id={styles.inptspan}>
+                    <label for="doc_militar">Doc. Militar:</label>
+                    <input
+                      type='text' 
+                      id='doc_militar' 
+                      name='doc_militar' 
+                      value={docMilitar} 
+                      maxLength={7}
+                      disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
+                      onChange={(e) => {setDocMilitar(e.target.value)}}>
+                    </input>
+                  </div>
 
-
+                  <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`} id={styles.inptspan}> 
+                    <label for="doc_militar_serie">Série:</label>
+                    <input 
+                      type='text' 
+                      id='doc_militar_serie' 
+                      name='doc_militar_serie' 
+                      value={docMilitarSerie} 
+                      maxLength={2}
+                      disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
+                      onChange={(e) => {setDocMilitarSerie(e.target.value)}}>
+                    </input>
+                  </div>
               </div>
             </form>
 
             {/***TODO: INPUT DADOS ENDEREÇO***/}
-            <form className={styles.form_dados_endereco} autoComplete='off'>
+            <form className={styles.form_dados_endereco} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
                 <span className={styles.title_divis}>Endereço</span>
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="bairro">Bairro:</label>
-                  <input 
-                    className={styles.input_bairro} 
+                  <input
                     type='text' 
                     id='bairro' 
                     name='bairro' 
@@ -895,23 +1132,21 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
-                  <label for="logadouro_numero">Número:</label>
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="num_casa">Número:</label>
                   <input 
-                    className={styles.input_logadouro_numero} 
                     type='text' 
-                    id='logadouro_numero' 
-                    name='logadouro_numero' 
-                    value={logadouroNumero} 
+                    id='num_casa' 
+                    name='num_casa' 
+                    value={numCasa} 
                     maxLength={5}
-                    onChange={(e) => {setLogadouroNumero(e.target.value)}}>
+                    onChange={(e) => {setNumCasa(e.target.value)}}>
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cep">CEP:</label>
                   <input 
-                    className={styles.input_cep} 
                     type='text' 
                     id='cep' 
                     name='cep' 
@@ -936,37 +1171,38 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="estado">Estado:</label>
-                  <select id='estado' name='estado' value={logadouroEstado} onChange={(e) => {setLogadouroEstado(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="AM">AM</option>
-                    <option value="Outros">Outros</option>
+                  <label for='estadoSelecionado'>Estado:</label>
+                  <select id="estadoSelecionado" value={estadoSelecionado} onChange={handleEstados}>
+                    <option value="" disabled>Selecione</option>
+                    {Object.keys(estadosCidades).map(estado =>(
+                      <option key={estado} value={estado}>{estado}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cidade">Cidade:</label>
-                  <select id='cidade' name='cidade' value={cidade} onChange={(e) => {setCidade(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="AM">Manaus</option>
-                    <option value="Outros">Outros</option>
+                  <label for="cidadeSelecionada">Cidade</label>
+                  <select id="cidadeSelecionada" value={cidadeSelecionada} onChange={handleCidade}>
+                    <option value="" disabled>Selecione</option>
+                    {cidades.map((cidade, index) =>(
+                      <option key={index} value={cidade}>{cidade}</option>
+                    ))}
                   </select>
                 </div>
               </div>
             </form>
 
             {/***TODO: INPUT DADOS BANCÁRIOS***/}
-             <form className={styles.form_dados_bancarios} autoComplete='off'>
+             <form className={styles.form_dados_bancarios} autoComplete='off' method='post' encType='multipart/form-data'>
                 <div className={styles.divisoria} id={styles.divis_docs}>
                   <hr></hr>
                   <span className={styles.title_divis}>Dados Bancários</span>
                 </div>
 
                 <div className={styles.form_group}>
-                  <div className={styles.div_input}>
+                  <div className={styles.div_input} id={styles.inptspan}>
                     <label for="banco">Banco:</label>
-                    <input 
-                      className={styles.input_banco} 
+                    <input
                       type='text' 
                       id='banco' 
                       name='banco' 
@@ -976,10 +1212,9 @@ function Registro() {
                     </input>
                   </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="banco_agencia">Agência:</label>
                   <input 
-                    className={styles.input_banco_agencia} 
                     type='text' 
                     id='banco_agencia' 
                     name='banco_agencia' 
@@ -989,10 +1224,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="banco_conta">Conta:</label>
                   <input 
-                    className={styles.input_banco_conta} 
                     type='text' 
                     id='banco_conta' 
                     name='banco_conta' 
@@ -1005,7 +1239,7 @@ function Registro() {
             </form>
 
             {/***TODO: INPUT DADOS ESCOLARES***/}
-            <form className={styles.form_dados_escolares} autoComplete='off'>
+            <form className={styles.form_dados_escolares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
                 <span className={styles.title_divis}>Formação Escolar</span>
@@ -1029,6 +1263,7 @@ function Registro() {
                   <label for="cursos">cursos:</label>
                   <select id='cursos' name='cursos' value={cursos} onChange={(e) => {setCursos(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
+                    <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -1036,66 +1271,67 @@ function Registro() {
                   </select>
                 </div>
 
-                <div className={`${styles.div_input} ${cursos === "" ? styles.disabled : ""}`}>
+                <div className={`${styles.div_input} ${cursos === "" || cursos === "0" ? styles.disabled : ""}`} id={styles.inptspan}>
                   <label for="curso1">Curso 1:</label>
                   <input 
-                    className={styles.input_curso1} 
                     type='text' 
                     id='curso1' 
                     name='curso1' 
                     value={curso1} 
                     maxLength={70}
+                    disabled={cursos === "" || cursos === "0" ? styles.disabled : ""}
                     onChange={(e) => {setCurso1(e.target.value)}}>
-                  </input>
+                  </input> 
                 </div>
               </div>
 
               <div className={styles.form_group}>
-                <div className={`${styles.div_input} ${cursos === "" || cursos === "1" ? styles.disabled : ""}`}>
+                <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" ? styles.disabled : ""}`} id={styles.inptspan}>
                   <label for="curso2">Curso 2:</label>
                   <input 
-                    className={styles.input_curso2} 
                     type='text' 
                     id='curso2' 
                     name='curso2' 
                     value={curso2} 
                     maxLength={70}
+                    disabled={cursos === "" || cursos === "0" || cursos === "1" ? styles.disabled : ""}
                     onChange={(e) => {setCurso2(e.target.value)}}>
                   </input>
                 </div>
 
-                <div className={`${styles.div_input} ${cursos === "" || cursos === "1" || cursos === "2" ? styles.disabled : ""}`}>
+                <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" ? styles.disabled : ""}`} id={styles.inptspan}>
                   <label for="curso3">Curso 3:</label>
                   <input 
-                    className={styles.input_curso3} 
                     type='text' 
                     id='curso3' 
                     name='curso3' 
                     value={curso3} 
                     maxLength={70}
+                    disabled={cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" ? styles.disabled : ""}
                     onChange={(e) => {setCurso3(e.target.value)}}>
                   </input>
                 </div>
               </div>
 
-              <div className={`${styles.div_input} ${cursos === "" || cursos === "1" || cursos === "2" || cursos === "3" ? styles.disabled : ""}`}>
+              <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" || cursos === "3" ? styles.disabled : ""}`}>
                 <div className={styles.div_input}>
                   <label for="curso4">Curso 4:</label>
                   <input 
-                    className={styles.input_curso4} 
                     type='text' 
                     id='curso4' 
                     name='curso4' 
                     value={curso4} 
                     maxLength={70}
+                    disabled={cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" || cursos === "3" ? styles.disabled : ""}
                     onChange={(e) => {setCurso4(e.target.value)}}>
                   </input>
                 </div>
               </div>
             </form>
 
+
             {/***TODO: INPUT DADOS VÍNCULO***/}
-            <form className={styles.form_dados_vinculo} autoComplete='off'>
+            <form className={styles.form_dados_vinculo} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
                 <span className={styles.title_divis}>Vínculo</span>
@@ -1108,8 +1344,8 @@ function Registro() {
                     <option disabled={true} value="">Selecione</option>
                     <option value="Cargo Comissionado">Cargo Comissionado</option>
                     <option value="Estagiário(a)">Estagiário(a)</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
+                    <option value="Temporário">Temporário</option>
+                    <option value="Efetivo">Efetivo</option>
                   </select>
                 </div>
 
@@ -1129,10 +1365,9 @@ function Registro() {
                   </select>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cargoFuncao">Cargo/Função:</label>
                   <input 
-                    className={styles.input_cargoFuncao} 
                     type='text' 
                     id='cargoFuncao' 
                     name='cargoFuncao' 
@@ -1144,10 +1379,9 @@ function Registro() {
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cargoEfetivo">Cargo Efetivo:</label>
                   <input 
-                    className={styles.input_cargoEfetivo} 
                     type='text' 
                     id='cargoEfetivo' 
                     name='cargoEfetivo' 
@@ -1166,10 +1400,9 @@ function Registro() {
                   </select>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="matriculaOrigem">Matricula Origem:</label>
                   <input 
-                    className={styles.input_matriculaOrigem} 
                     type='text' 
                     id='matriculaOrigem' 
                     name='matriculaOrigem' 
@@ -1181,10 +1414,9 @@ function Registro() {
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="orgaoOrigem">Orgão Origem:</label>
                   <input 
-                    className={styles.input_orgaoOrigem} 
                     type='text' 
                     id='orgaoOrigem' 
                     name='orgaoOrigem' 
@@ -1194,10 +1426,9 @@ function Registro() {
                   </input>
                 </div>
 
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.inptspan}>
                   <label for="matriculaSeai">Matricula SEAI:</label>
                   <input 
-                    className={styles.input_matriculaSeai} 
                     type='text' 
                     id='matriculaSeai' 
                     name='matriculaSeai' 
@@ -1206,89 +1437,10 @@ function Registro() {
                     onChange={(e) => {setMatriculaSeai(e.target.value)}}>
                   </input>
                 </div>
-
-                <div className={styles.div_input}>
-                  <label for="anexos">Anexos:</label>
-                  <select id='anexos' name='anexos' value={anexos} onChange={(e) => {setAnexos(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                  </select>
-                </div>
               </div>
-
+                  
               <div className={styles.form_group}>
-                <div className={`${styles.div_input} ${anexos === ""  ? styles.disabled: ""}`} id={styles.anexo}>
-                  <label for="anexo1">Anexo 1:</label>
-                  {anexo1Nome &&(
-                    <span className={styles.name_file} id={styles.name_file}>{anexo1Nome}</span>
-                  )}
-                  <input 
-                    className={styles.input_anexo} 
-                    type='file' 
-                    accept='application/pdf' 
-                    id='anexo1' 
-                    name='anexo1' 
-                    disabled={anexos === ""} 
-                    onChange={(e) => handleFileChange(e, 'anexo1')}>
-                  </input>
-                </div>
-
-                <div className={`${styles.div_input} ${anexos === "" || anexos === "1" ? styles.disabled : ""}`} id={styles.anexo}>
-                  <label for="anexo2">Anexo 2:</label>
-                  {anexo2Nome &&(
-                    <span className={styles.name_file} id={styles.name_file}>{anexo2Nome}</span>
-                  )}
-                  <input 
-                    className={styles.input_anexo} 
-                    type='file' 
-                    accept='application/pdf' 
-                    id='anexo2' 
-                    name='anexo2' 
-                    disabled={anexos === "" || anexos === "1"} 
-                    onChange={(e) => handleFileChange(e, 'anexo2')}>
-                  </input>
-                </div>
-              </div>
-
-              <div className={styles.form_group}>
-                <div className={`${styles.div_input} ${anexos === "" || anexos === "1" || anexos === "2" ? styles.disabled : ""}`} id={styles.anexo}>
-                  <label for="anexo3">Anexo 3:</label>
-                  {anexo3Nome &&(
-                    <span className={styles.name_file} id={styles.name_file}>{anexo3Nome}</span>
-                  )}
-                  <input 
-                    className={styles.input_anexo} 
-                    type='file' 
-                    accept='application/pdf' 
-                    id='anexo3' 
-                    name='anexo3' 
-                    disabled={anexos === "" || anexos === "1" || anexos === "2"} 
-                    onChange={(e) => handleFileChange(e, 'anexo3')}>
-                  </input>
-                </div>
-
-                <div className={`${styles.div_input} ${anexos === "" || anexos === "1" || anexos === "2" || anexos === "3" ? styles.disabled : ""}`} id={styles.anexo}>
-                  <label for="anexo4">Anexo 4:</label>
-                  {anexo4Nome &&(
-                    <span className={styles.name_file} id={styles.name_file}>{anexo4Nome}</span>
-                  )}
-                  <input 
-                    className={styles.input_anexo} 
-                    type='file' 
-                    accept='application/pdf' 
-                    id='anexo4' 
-                    name='anexo4' 
-                    disabled={anexos === "" || anexos === "1" || anexos === "2" || anexos === "3"} 
-                    onChange={(e) => handleFileChange(e, 'anexo4')}>
-                  </input>
-                </div>
-              </div>
-
-              <div className={styles.form_group}>
-                <div className={styles.div_input}>
+                <div className={styles.div_input} id={styles.data_docs}>
                   <label for="dataEntregaDocs">Data de entrega dos documentos:</label>
                   <input 
                     type='date' 
@@ -1300,29 +1452,54 @@ function Registro() {
                 </div>
               </div>
 
-              <div className={styles.form_group} id={styles.anotacoes}>
-                <div className={styles.div_input} id={styles.anexo}>
-                  <label for="anotacoes">Anotações:</label>
-                  <textarea 
-                    className={styles.input_anotacoes} 
-                    type='text' 
-                    id='anotacoes' 
-                    name='anotacoes' 
-                    value={anotacoes} 
-                    onChange={(e) => {setAnotacoes(e.target.value)}}>
-                  </textarea>
+              <div className={styles.form_group}>
+                  <div className={styles.div_input} id={styles.anexoss}>
+                    <label for="nome_anexos">Anexos:</label>
+                    <input
+                     name='pdfs'
+                     id={styles.input_files}
+                     type='file'
+                     accept='application/pdf'
+                     multiple
+                     onChange={handleFileChange}
+                     >
+                    </input>
+
+                    {files.length > 0 &&(
+                    <div className={styles.name_file2}>
+                      <ul>
+                        {files.map((file, index) =>(
+                          <li key={index}>{file.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  </div>
+
+                  <div className={styles.div_input} id={styles.anotacoes}>
+                    <label for="anotacoes">Anotações:</label>
+                    <textarea 
+                      className={styles.input_anotacoes} 
+                      type='text' 
+                      id='anotacoes' 
+                      name='anotacoes' 
+                      value={anotacoes} 
+                      onChange={(e) => {setAnotacoes(e.target.value)}}>
+                    </textarea>
                 </div>
+              </div>
+
+              <div className={styles.form_group} id={styles.anotacoes}>
               </div>
             </form>
           </div>
         </div>
-
-        <button onClick={validateForm} className={styles.button_send}>Salvar</button>
+        <button onClick={submitForm} className={styles.button_send}>Salvar</button>
       </div>
 
       {/***TODO: MODALS***/}
       <Modal isOpen={openModal} setIsOpen={setOpenModal} message={modalMessage} />
-      <ModalError isOpen={openModalError} setIsOpen={setOpenModalError} message={modalMessageError} />
+      <ModalError isOpen={openModalError} setIsOpen={setOpenModalError} message={modalMessageError}/>
     </div>
   )
 }

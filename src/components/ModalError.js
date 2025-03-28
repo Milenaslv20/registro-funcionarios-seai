@@ -8,8 +8,8 @@ export default function ModalError({isOpen, setIsOpen, message}) {
     return (
       <div className={styles.modal_overlay_error}>
         <div className={styles.modal_content_error}>
+          <button onClick={() => setIsOpen(false)} className={styles.close_button_error}><span>X</span></button>
           <h1>{message}</h1>
-          <button onClick={() => setIsOpen(false)} className={styles.close_button_error}>X</button>
         </div>
       </div>
     )
