@@ -1,10 +1,47 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from './styles.module.css'
-import { Link } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { isAuth } from '../isAuth';
 
 import logoSeai from '../svg/logoSeai.svg'
 
-function Login() {
+import ModalError from '../components/ModalError';
+
+function Login({ onLogin }) {
+  const[nomeUsuario, setNomeUsuario] = useState('')
+  const[senhaUsuario, setSenhaUsuario] = useState('')
+  const[openModalError, setOpenModalError] = useState(false)
+  const[modalMessageError, setModalMessageError] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const from = location.state?.from || '/registro'
+
+  function enterPress(e){
+    if(e.key === 'Enter'){
+        handleLogin(e)
+    }
+  }
+
+  const handleLogin = async (e) =>{
+    e.preventDefault();
+      const res = await isAuth(nomeUsuario, senhaUsuario)
+      if (res.sucess){
+        localStorage.setItem('token', res.token)
+        localStorage.setItem('nomeUsuario', nomeUsuario)
+        onLogin(res.token)
+        navigate(from);
+        //navigate("/registro", { state: { usuario: usuario } });
+      }
+      else{
+        setModalMessageError("Usuário ou senha incorretos")
+        setOpenModalError(true)
+        setNomeUsuario("")
+        setSenhaUsuario("")
+        document.getElementById("usuario").focus()
+      }
+    }
+
   return (
     <div>
       <div className={styles.container_left}>
@@ -17,12 +54,12 @@ function Login() {
         <div className={styles.container_login}>
           <h1>Login</h1>
 
-          <input id={styles.input_user} type='text' placeholder='Usuário' maxLength={20}></input>
-          <input id={styles.input_password} type='password' placeholder='Senha' maxLength={8}></input>
-
-          <Link to={"/registro"} className={styles.button_login}>Entrar</Link>
+          <input id='usuario' type='text' placeholder='Usuário' maxLength={20} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
+          <input id={styles.input_password} type='password' placeholder='Senha' maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyPress={enterPress}></input>
+          <button className={styles.button_login} onClick={handleLogin}>Entrar</button>
         </div>
       </div>
+      <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError}/>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { FuncionárioProvider } from './pages/FuncionarioContext';
 
 import Login from './pages/Login';
@@ -8,16 +9,49 @@ import Historico from './pages/Historico';
 import Editar from './pages/Editar';
 import Visualizar from './pages/Visualizar';
 
+const PrivateRoute = ({ element, isAuth, onLogin }) => {
+  const location = useLocation();
+
+  if (isAuth){
+    return React.cloneElement(element, { onLogin })
+  }
+  else{
+    return <Navigate to="/" state={{ from: location.pathname }} />;
+  }
+}
+
 function App() {
+  const [isAuth, setIsAuth] = useState(false)
+  
+  const handleLogin = (token) =>{
+    sessionStorage.setItem('token', token);
+    setIsAuth(true)
+  }
+
+  const logout = () =>{
+    sessionStorage.removeItem('token')
+    setIsAuth(false)
+  }
+
+  useEffect(() =>{
+    const token = sessionStorage.getItem('token')
+    if (!token || token.length < 5){
+      logout()
+    }
+    else{
+      setIsAuth(true)
+    }
+  }, [])
+
   return (
     <FuncionárioProvider>
       <Router>
         <Routes>
-          <Route path='/' element={<Login/>} />
-          <Route path='/registro' element={<Registro/>} />
-          <Route path='/historico' element={<Historico/>} />
-          <Route path='/editar' element={<Editar/>} />
-          <Route path='/visualizar' element={<Visualizar/>} />
+          <Route exact path='/' element={<Login onLogin={handleLogin} /> }/>
+          <Route path='/registro' element={<PrivateRoute element={<Registro/>} isAuth={isAuth} />} />
+          <Route path='/historico' element={<PrivateRoute element={<Historico/>} isAuth={isAuth} />} />
+          <Route path='/editar' element={<PrivateRoute element={<Editar/>} isAuth={isAuth} />} />
+          <Route path='/visualizar' element={<PrivateRoute element={<Visualizar/>} isAuth={isAuth} />} />
         </Routes>
       </Router>  
     </FuncionárioProvider>

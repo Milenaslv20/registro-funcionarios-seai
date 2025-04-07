@@ -14,8 +14,10 @@ function Registro() {
   const [modalMessage, setModalMessage] = useState('');
   const [openModalError, setOpenModalError] = useState(false);
   const [modalMessageError, setModalMessageError] = useState('');
+  const [reload, setReload] = useState(false);
 
   //TODO: INPUT VALUES
+  const [idFuncionario, setIdFuncionario] = useState(null)
   const [imagem, setImagem] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null);
   const inputRef = useRef(null);
@@ -150,6 +152,7 @@ function Registro() {
   const [orgaoOrigem, setOrgaoOrigem] = useState('')
   const [matriculaSeai, setMatriculaSeai] = useState('')
   const [files, setFiles] = useState([])
+  const fileInputRhef = useRef(null)
   const [dataEntregaDocs, setDataEntregaDocs] = useState('')
   const [anotacoes, setAnotacoes] = useState('')
 
@@ -184,12 +187,16 @@ function Registro() {
     }
   };
 
-
   //TODO: INPUT FILES
   const handleFileChange = (e) =>{
     const selectedFiles = Array.from(e.target.files);
     setFiles(selectedFiles);
   };
+
+  function clearFiles(){
+    setFiles([])
+    fileInputRhef.current.value = ""
+  }
 
   //TODO: VALIDATION INPUTS AND SEND TO BACKEND
   const regex = /[0-9!#$%&'"()*+,-./:;?@[\\\]_`{|}~]/
@@ -569,25 +576,40 @@ function Registro() {
           "Content-Type": 'multipart/form-data', 
         }
       })
+
+      const idFuncionario = response.data.idFuncionario
+      console.log("ID do funcionário recebido do cadastro:", idFuncionario);
+      setIdFuncionario(idFuncionario)
  
       const formDatas = new FormData();
+      formDatas.append('idFuncionario', idFuncionario)
       formDatas.append('nome', nome)
-      formDatas.append('imagem', imagem);
+
+      if(imagem) {
+        formDatas.append('imagem', imagem)
+      } else{
+        formDatas.append('imagem', null)
+      }
+
       if(files.length > 0){
-      files.forEach(file =>{
-        formDatas.append('pdfs', file)
-      })
-    }
+        files.forEach(file =>{
+          formDatas.append('pdfs', file)
+        })
+      } else{
+        formDatas.append('pdfs', null)
+      }
 
-    const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+      const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-    setOpenModal(true);
-    setModalMessage("Funcionário cadastrado com sucesso");
-
+      if(uploadRes.status && response.status === 200){
+        setOpenModal(true);
+        setModalMessage("Funcionário cadastrado com sucesso");
+        //setReload(true)
+      }
     } catch(err){
       setModalMessageError("Ocorreu um erro, tente novamente");
       console.error("Erro:", err);
@@ -1453,53 +1475,56 @@ function Registro() {
               </div>
 
               <div className={styles.form_group}>
-                  <div className={styles.div_input} id={styles.anexoss}>
-                    <label for="nome_anexos">Anexos:</label>
-                    <input
-                     name='pdfs'
-                     id={styles.input_files}
-                     type='file'
-                     accept='application/pdf'
-                     multiple
-                     onChange={handleFileChange}
-                     >
-                    </input>
+                <div className={styles.div_input} id={styles.anexoss}>
+                  <label for="nome_anexos">Anexos:</label>
+                  <input
+                    name='pdfs'
+                    id={styles.input_files}
+                    type='file'
+                    accept='application/pdf'
+                    multiple
+                    onChange={handleFileChange}
+                    ref={fileInputRhef}
+                    >
+                  </input>
 
-                    {files.length > 0 &&(
-                    <div className={styles.name_file2}>
-                      <ul>
-                        {files.map((file, index) =>(
-                          <li key={index}>{file.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {files.length > 0 &&(
+                  <div className={styles.name_file2}>
+                    <ul>
+                      {files.map((file, index) =>(
+                        <li key={index}>{file.name}</li>
+                      ))}
+                    </ul>
                   </div>
+                  )}
+                </div>
 
-                  <div className={styles.div_input} id={styles.anotacoes}>
-                    <label for="anotacoes">Anotações:</label>
-                    <textarea 
-                      className={styles.input_anotacoes} 
-                      type='text' 
-                      id='anotacoes' 
-                      name='anotacoes' 
-                      value={anotacoes} 
-                      onChange={(e) => {setAnotacoes(e.target.value)}}>
-                    </textarea>
+                <div className={styles.div_input} id={styles.anotacoes}>
+                  <label for="anotacoes">Anotações:</label>
+                  <textarea 
+                    className={styles.input_anotacoes} 
+                    type='text' 
+                    id='anotacoes' 
+                    name='anotacoes' 
+                    value={anotacoes} 
+                    onChange={(e) => {setAnotacoes(e.target.value)}}>
+                  </textarea>
                 </div>
               </div>
 
               <div className={styles.form_group} id={styles.anotacoes}>
               </div>
             </form>
+
+            <button className={styles.clear_files} onClick={clearFiles}>Limpar</button>
           </div>
         </div>
         <button onClick={submitForm} className={styles.button_send}>Salvar</button>
       </div>
 
       {/***TODO: MODALS***/}
-      <Modal isOpen={openModal} setIsOpen={setOpenModal} message={modalMessage} />
-      <ModalError isOpen={openModalError} setIsOpen={setOpenModalError} message={modalMessageError}/>
+      <Modal openModal={openModal} setOpenModal={setOpenModal} message={modalMessage} reload={reload} />
+      <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError} reload={reload}/>
     </div>
   )
 }

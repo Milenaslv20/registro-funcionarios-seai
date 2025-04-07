@@ -9,16 +9,20 @@ import ModalError from '../components/ModalError'
 
 import { FilterX } from 'lucide-react'
 
-function Historico (){
+function Historico ({ funcionarios }){
   const [dataSeaiFuncionarios, setDataSeaiFuncionarios] = useState([])
   const [totalFunc, setTotalFunc] = useState(0)
 
   const [data, setData] = useState('')
 
+  const [deleteFuncionario, setDeleteFuncionario] = useState(null)
+  const [filtros, setFiltros] = useState(funcionarios || [])
+
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [openModalError, setOpenModalError] = useState(false);
   const [modalMessageError, setModalMessageError] = useState('');
+  const [reload, setReload] = useState(false);
 
   const[filtroNome, setFiltroNome] = useState('')
   const[filtroSexo, setFiltroSexo] = useState('')
@@ -30,44 +34,56 @@ function Historico (){
     const dataSeaiFuncionarios = async() =>{
       const reqData = await fetch("http://localhost:5000/getRegisters")
       const resData = await reqData.json()
-
       setDataSeaiFuncionarios(resData)
+      setFiltros(resData || [])
+
+      const reqTotal = await fetch("http://localhost:5000/getRegisterstot");
+      const resTotal = await reqTotal.json();
+      setTotalFunc(resTotal.totalFunc);
     }
     dataSeaiFuncionarios()
   }, [])
 
-  useEffect(() =>{
-    const totalFunc = async() =>{
-      const reqDatatot = await fetch("http://localhost:5000/getRegisterstot")
-      const resDatatot = await reqDatatot.json()
-      setTotalFunc(resDatatot.totalFunc)
-    }
-    totalFunc()
-  }, [])
-
   //TODO: DELETE FUNC
-  const deleteFunc = async (id, funcionario) =>{
+  const handleOpenDeleteModal = (funcionario) =>{
+    setDeleteFuncionario(funcionario)
+    setOpenModalError(true)
+    setModalMessageError(`O registro ${funcionario.nomeFuncionario} será excluido`)
+  }
+
+
+  const confirmedDeleteFunc = async () =>{
     try{
-      setOpenModalError(true)
-      setModalMessageError(`O registro ${funcionario.nomeFuncionario} será excluido`)
-      const res = await fetch(`http://localhost:5000/deleteRegister/${id}`, {
-        method: 'DELETE',
-      })
-    
-      if (res == 200) {
-        setDataSeaiFuncionarios((prevData) => 
-          prevData.filter((funcionario) => funcionario.idFuncionario !== id)
-        );
-        setOpenModal(true);
-        setModalMessage("Funcionário excluido com sucesso");
-      } 
+
+      if(deleteFuncionario){
+        const res = await fetch(`http://localhost:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            nome: deleteFuncionario.nomeFuncionario
+          }),
+        })
+      
+        if (res.status === 200) {
+            setOpenModalError(false)
+            setOpenModal(true)
+            setModalMessage(`O registro ${deleteFuncionario.nomeFuncionario} foi excluido com sucesso`)
+            setFiltros(prevFiltros => prevFiltros.filter(func => func.idFuncionario !== deleteFuncionario.idFuncionario));
+            setTotalFunc(prevTotal => prevTotal -1)
+        } else{
+          setOpenModalError(true)
+          setModalMessageError("falha ao excluir")
+        }
+      }
     } catch (error) {
       console.error('Erro ao tentar excluir funcionário:', error);
     }
   }
 
   //TODO: FILTERS
-  const filtro = dataSeaiFuncionarios.filter(funcionario =>{
+  const filtro = filtros.filter(funcionario =>{
     const nomeFunc = filtroNome ? funcionario.nomeFuncionario.toLowerCase().startsWith(filtroNome.toLocaleLowerCase()) : true
     const sexoFunc = filtroSexo ? funcionario.sexo.toLowerCase().startsWith(filtroSexo.toLocaleLowerCase()) : true
     const setorFunc = filtroSetorDepartamento ? funcionario.setorDepartamento.toLowerCase().startsWith(filtroSetorDepartamento.toLocaleLowerCase()) : true
@@ -83,16 +99,14 @@ function Historico (){
     setFiltroVinculo('')
   }
 
-  function modal(){
+  function rasc(){
     setOpenModalError(true)
-    setModalMessageError("O registro sera excluido ")
+    setModalMessageError("o registro sera excluido")
   }
-
 
   return (
     <div>
       <div className={styles.nav_register2}>
-        <button onClick={modal}>modal</button>
         <div className={styles.navigation_bar2}>
           <div className={styles.nav_history}>
             <Link to={"/registro"} className={styles.link_register2}>Registrar Funcionário</Link>
@@ -162,7 +176,7 @@ function Historico (){
         <div className={styles.container_people}>
           {filtro.length > 0 ?(
             filtro.map((funcionario) =>(
-              <Person key={funcionario.id} funcionario={funcionario} deleteFunc={deleteFunc} parenttochild={data}/>
+              <Person key={funcionario.id} funcionario={funcionario} handleOpenDeleteModal={handleOpenDeleteModal} parenttochild={data}/>
             ))
           ) : (
             <p className={styles.error_msg}>Nenhum funcionário encontrado</p>
@@ -170,8 +184,8 @@ function Historico (){
         </div>
       </div>
       
-      <Modal isOpen={openModal} setIsOpen={setOpenModal} message={modalMessage} />
-      <ModalError isOpen={openModalError} setIsOpen={setOpenModalError} message={modalMessageError}/>
+      <Modal openModal={openModal} setOpenModal={setOpenModal} message={modalMessage} />
+      <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError} reload={reload} onConfirm={confirmedDeleteFunc}/>
     </div>
   )
 }
