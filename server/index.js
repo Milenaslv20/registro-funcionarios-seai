@@ -275,7 +275,7 @@ app.get("/getRegisters", (req, res) =>{
         dv.matriculaSeai,
         dv.dataEntregaDocs,
         dv.anotacoes
-        
+
       FROM funcionario f
       JOIN funcionario fun ON f.idFuncionario = fun.idFuncionario
       JOIN dadospessoais dp ON f.idFuncionario = dp.idFuncionario
@@ -292,6 +292,18 @@ app.get("/getRegisters", (req, res) =>{
             return res.status(500).json({ error: 'Erro ao consultar banco' });
         }
         return res.json(data)
+    })
+})
+
+app.get('/getFiles/:idFuncionario', (req, res) =>{
+    const idFuncionario = req.params.idFuncionario
+
+    const query = 'SELECT filePath FROM documentos WHERE idFuncionario = ?'
+    db.query(query, [idFuncionario], (err, result) =>{
+        if(err){
+            return res.status(500).json({ message: 'Erro ao recuperar arquivos', error: err })
+        }
+        res.json(result)
     })
 })
 

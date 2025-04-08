@@ -829,6 +829,8 @@
             height: 5vh;
         }
 
+        
+
 
     /* TODO: NAVBAR HISTORY */
 
@@ -851,4 +853,20 @@
     }
 
 
+    .name_file3{
+        color: #000;
+        width: 100%;
+        height: 10vh;
+    }
+    .form_dados_vinculo ul{
+        position: relative;
+        color: #000;
+        top: 40%;
+        left: -15%;
+    }
+    .form_dados_vinculo p{
+        color: #000;
+        position: relative;
+        top: 1%;
+    }
 

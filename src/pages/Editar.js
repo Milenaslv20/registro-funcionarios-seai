@@ -13,7 +13,7 @@ import ModalError from '../components/ModalError'
 const Editar = () =>{
   const { funcionario } = useFuncionario();
   const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
-  
+
   const handleImageError = () =>{
     setImageUrl(defaultImage)
   }
@@ -676,17 +676,21 @@ const Editar = () =>{
             <input
               name='imagem'
               ref={inputRef} 
-              className={styles.img}
-              src={imageUrl}
               alt=''
               onError={handleImageError}
               multiple
               type='file' 
               accept='image/*' 
-              onChange={handleImageChange}>
+              onChange={handleImageChange}
+              style={{ display: 'none' }}>
             </input>
+            
+            <img 
+              src={selectedImage || imageUrl} 
+              alt='Imagem do Funcionário' 
+              onError={handleImageError} // Caso ocorra erro no carregamento da imagem
+            />
             <button type='button' onClick={() => inputRef.current?.click()}><Paperclip size={25}/></button>
-            {selectedImage && <img src={selectedImage} alt='img selecionada'></img>}
           </form>
 
           <div className={styles.inputs}>
