@@ -12,7 +12,7 @@ import ModalError from '../components/ModalError'
 
 const Editar = () =>{
   const { funcionario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
 
   const handleImageError = () =>{
     setImageUrl(defaultImage)
@@ -34,12 +34,12 @@ const Editar = () =>{
   const formatedrgDataExped = formateDataInput(funcionario.rgDataExped)
 
   const [visData, setVisData] = useState({
-    nomeFuncionario: funcionario.nomeFuncionario,
     idFuncionario: funcionario.idFuncionario,
+    nomeFuncionario: funcionario.nomeFuncionario,
 
     sexo: funcionario.sexo,
     dataNasc: formatedDataNasc,
-    estado: funcionario.estado,
+    estadoAtual: funcionario.estadoAtual,
     nacionalidade: funcionario.nacionalidade,
     naturalidade: funcionario.naturalidade,
     raca: funcionario.raca,
@@ -53,7 +53,7 @@ const Editar = () =>{
     cpfMae: funcionario.cpfMae,
     dataNascMae: funcionario.dataNascMae,
     estadoCivil: funcionario.estadoCivil,
-    nomeEsposoa: funcionario.nomeEsposoA,
+    nomeEsposoa: funcionario.nomeEsposoa,
     filhos: funcionario.filhos,
     nomeFilhos: funcionario.nomeFilhos,
 
@@ -75,8 +75,8 @@ const Editar = () =>{
     numCasa: funcionario.numCasa,
     cep: funcionario.cep,
     logadouro: funcionario.logadouro,
-    estado: funcionario.estado,
-    cidade: funcionario.cidade,
+    estadoSelecionado: funcionario.estado,
+    cidadeSelecionada: funcionario.cidade,
 
     banco: funcionario.banco,
     bancoAgencia: funcionario.bancoAgencia,
@@ -98,19 +98,43 @@ const Editar = () =>{
     orgaoOrigem: funcionario.orgaoOrigem,
     matriculaSeai: funcionario.matriculaSeai,
     dataEntregaDocs: funcionario.dataEntregaDocs,
-    anotacoes: funcionario.anotacoes
-  })
+    anotacoes: funcionario.anotacoes,
 
+    filePath: funcionario.filePath,
+    image: funcionario.imageUrl
+  })
+  console.log(visData)
+
+  useEffect(() => {
+    if (funcionario?.idFuncionario) {
+      Axios.get(`http://172.20.43.250:5000/getFiles/${funcionario.idFuncionario}`)
+        .then(response => {
+          const data = response.data[0];
+          const paths = data?.filePath ? JSON.parse(data.filePath) : [];
+          const names = data?.originalFileNames ? JSON.parse(data.originalFileNames) : [];
+
+          const filesData = paths.map((path, i) => ({
+            name: names[i] || `Arquivo ${i + 1}`,
+            path: path
+          }));
+
+          setFiles(filesData);
+          })
+        .catch(error => {
+          console.error("Erro ao buscar arquivos:", error);
+        });
+    }
+  }, [funcionario]);
   
   useEffect(() => {
     if (funcionario) {
       setVisData({
-        nomeFuncionario: funcionario.nomeFuncionario,
         idFuncionario: funcionario.idFuncionario,
+        nomeFuncionario: funcionario.nomeFuncionario,
 
         sexo: funcionario.sexo,
         dataNasc: formatedDataNasc,
-        estado: funcionario.estado,
+        estadoAtual: funcionario.estadoAtual,
         nacionalidade: funcionario.nacionalidade,
         naturalidade: funcionario.naturalidade,
         raca: funcionario.raca,
@@ -124,7 +148,7 @@ const Editar = () =>{
         cpfMae: funcionario.cpfMae,
         dataNascMae: formatedDataNascMae,
         estadoCivil: funcionario.estadoCivil,
-        nomeEsposoa: funcionario.nomeEsposoA,
+        nomeEsposoa: funcionario.nomeEsposoa,
         filhos: funcionario.filhos,
         nomeFilhos: funcionario.nomeFilhos,
 
@@ -146,8 +170,8 @@ const Editar = () =>{
         numCasa: funcionario.numCasa,
         cep: funcionario.cep,
         logadouro: funcionario.logadouro,
-        estado: funcionario.estado,
-        cidade: funcionario.cidade,
+        estadoSelecionado: funcionario.estado,
+        cidadeSelecionada: funcionario.cidade,
 
         banco: funcionario.banco,
         bancoAgencia: funcionario.bancoAgencia,
@@ -171,19 +195,20 @@ const Editar = () =>{
         dataEntregaDocs: formatedDataEntregaDocs,
         anotacoes: funcionario.anotacoes
       });  // Atualiza os dados caso o funcionario mude
+      if (funcionario.estado && estadosCidades[funcionario.estado]) {
+        setCidades(estadosCidades[funcionario.estado]);
+      }
     }
   }, [funcionario]);
 
   const handleEditValue = (event) =>{
     const { name, value } = event.target
 
-    setVisData(prevState => ({
-      ...prevState,
-      [name]: value
-    }))
+    setVisData({
+      ...visData,
+      [name]: value,
+    })
   }
-
-
 
   //TODO: DECLARATION MODAL
   const [openModal, setOpenModal] = useState(false);
@@ -265,26 +290,35 @@ const Editar = () =>{
     "Tocantins" : ["Palmas", "Araguaína", "Gurupi", "Porto Nacional", "Paraíso do Tocantins", "Guaraí", "Colinas do Tocantins", "Dianópolis",
       "Tocantinópolis", "Augustinópolis"]  
   }
-  const [estadoSelecionado, setEstadoSelecionado] = useState('')
-  const [cidadeSelecionada, setCidadeSelecionada] = useState('')
 
   const [files, setFiles] = useState([])
 
   //TODO: INPUT CIDADES
   const handleEstados = (e) =>{
-    const estadoSelecionado = e.target.value;
-    setEstadoSelecionado(estadoSelecionado);
+    const estado = e.target.value;
 
-    if(estadoSelecionado && estadosCidades[estadoSelecionado]){
-      setCidades(estadosCidades[estadoSelecionado]);
-    } else{
-      setCidades([])
+    // Atualiza as cidades
+    if (estado && estadosCidades[estado]) {
+      setCidades(estadosCidades[estado]);
+    } else {
+      setCidades([]);
     }
-  }
+  
+    // Atualiza o visData
+    setVisData((prevData) => ({
+      ...prevData,
+      estadoSelecionado: estado,
+      cidadeSelecionada: '' // limpa cidade ao trocar estado
+    }));
+  };
 
-  const handleCidade = (e) =>{
-    setCidadeSelecionada(e.target.value)
-  }
+  const handleCidade = (e) => {
+    const cidade = e.target.value;
+    setVisData((prevData) => ({
+      ...prevData,
+      cidadeSelecionada: cidade
+    }));
+  };
 
   //TODO: INPUT IMAGE
   const handleImageChange = (e) =>{
@@ -337,7 +371,7 @@ const Editar = () =>{
       return
     }
 
-    if(visData.estado === ''){
+    if(visData.estadoAtual === ''){
       setModalMessageError("Preencha o estado")
       setOpenModalError(true)
       return
@@ -612,50 +646,133 @@ const Editar = () =>{
       return;
     }
 
+    const emptyInputs = (value) =>{
+      return value === '' ? 'Não Possui' : value;
+    }
+
+    console.log(visData.idFuncionario)
+
     const formData = new FormData();
-    Object.keys(visData).forEach(key =>{
-      formData.append(key, visData[key])
-    })
+    formData.append('idFuncionario', visData.idFuncionario);
+    formData.append('nomeFuncionario', visData.nomeFuncionario);
+
+    formData.append('sexo', visData.sexo)
+    formData.append('dataNasc', visData.dataNasc)
+    formData.append('estadoAtual', visData.estadoAtual)
+    formData.append('nacionalidade', visData.nacionalidade)
+    formData.append('naturalidade', visData.naturalidade)
+    formData.append('raca', visData.raca)
+    formData.append('telefone', visData.telefone)
+    formData.append('email', visData.email)
+
+    formData.append('nomePai', visData.nomePai)
+    formData.append('cpfPai', visData.cpfPai)
+    formData.append('dataNascPai', visData.dataNascPai)
+    formData.append('nomeMae', visData.nomeMae)
+    formData.append('cpfMae', visData.cpfMae)
+    formData.append('dataNascMae', visData.dataNascMae)
+    formData.append('estadoCivil', visData.estadoCivil)
+    formData.append('nomeEsposoa', emptyInputs(visData.nomeEsposoa))
+    formData.append('filhos', visData.filhos)
+    formData.append('nomeFilhos', emptyInputs(visData.nomeFilhos))
+
+    formData.append('cpf', visData.cpf)
+    formData.append('pisPasep', visData.pisPasep)
+    formData.append('cnh', emptyInputs(visData.cnh))
+    formData.append('rg', visData.rg)
+    formData.append('rgDataExped', visData.rgDataExped)
+    formData.append('rgOrgaoExped', visData.rgOrgaoExped)
+    formData.append('rgUf', visData.rgUf)
+    formData.append('titulo', visData.titulo)
+    formData.append('tituloZona', visData.tituloZona)
+    formData.append('tituloSecao', visData.tituloSecao)
+    formData.append('tituloUf', visData.tituloUf)
+    formData.append('docMilitar', emptyInputs(visData.docMilitar))
+    formData.append('docMilitarSerie', emptyInputs(visData.docMilitarSerie))
+
+    formData.append('bairro', visData.bairro)
+    formData.append('numCasa', visData.numCasa)
+    formData.append('cep', visData.cep)
+    formData.append('logadouro', visData.logadouro)
+    formData.append('estadoSelecionado', visData.estadoSelecionado)
+    formData.append('cidadeSelecionada', visData.cidadeSelecionada)
+
+    formData.append('banco', visData.banco)
+    formData.append('bancoAgencia', visData.bancoAgencia)
+    formData.append('bancoConta', visData.bancoConta)
+
+    formData.append('escolaridade', visData.escolaridade)
+    formData.append('cursos', visData.cursos)
+    formData.append('curso1', emptyInputs(visData.curso1))
+    formData.append('curso2', emptyInputs(visData.curso2))
+    formData.append('curso3', emptyInputs(visData.curso3))
+    formData.append('curso4', emptyInputs(visData.curso4))
+
+    formData.append('vinculo', visData.vinculo)
+    formData.append('setorDepartamento', visData.setorDepartamento)
+    formData.append('cargoFuncao', visData.cargoFuncao)
+    formData.append('cargoEfetivo', emptyInputs(visData.cargoEfetivo))
+    formData.append('statusServidor', visData.statusServidor)
+    formData.append('matriculaOrigem', visData.matriculaOrigem)
+    formData.append('orgaoOrigem', visData.orgaoOrigem)
+    formData.append('matriculaSeai', visData.matriculaSeai)
+    formData.append('dataEntregaDocs', visData.dataEntregaDocs)
+    formData.append('anotacoes', visData.anotacoes)
+
+    console.log(formData)
 
 
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://localhost:5000/editRegister', formData, {
+      const response = await Axios.post('http://172.20.43.250:5000/editRegister', formData, {
         headers: { 
           "Content-Type": 'multipart/form-data', 
         }
       });
 
-      setOpenModal(true);
-      setModalMessage("Funcionário cadastrado com sucesso");
-     //window.location.reload() /* **NADA FUNCIONA DPS DO TRY, SERVIDOR NÃO CONECTANDO** */
+      console.log(response.data)
 
-    const formDatas = new FormData();
-    formDatas.append('nome', visData.nomeFuncionario)
-    formDatas.append('imagem', imagem);
-    if(files.length > 0){
-      files.forEach(file =>{
-        formDatas.append('pdfs', file)
-      })
-    }
+      const formDatas = new FormData();
+      formDatas.append('idFuncionario', visData.idFuncionario)
+      formDatas.append('nomeFuncionario', visData.nomeFuncionario);
+      formDatas.append('nomeAntigo', funcionario.nomeFuncionario)
 
-    const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+      if(imagem) {
+        formDatas.append('imagem', imagem)
+      } else{
+        formDatas.append('imagem', null)
+      }
 
-    console.log("Resposta do upload:", uploadRes.data);
+      if(files.length > 0){
+        files.forEach(file =>{
+          formDatas.append('pdfs', file)
+        })
+      } else{
+        formDatas.append('pdfs', null)
+      }
+      const uploadRes = await Axios.post('http://172.20.43.250:5000/uploadsEdit', formDatas, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log("Resposta do upload:", uploadRes.data);
 
+      if(uploadRes.status && response.status === 200){
+        setOpenModal(true);
+        setModalMessage("Funcionário editado com sucesso");
+        //setReload(true)
+      }
     } catch(err){
-      setModalMessageError("Ocorreu um erro, tente novamente");
+      setModalMessageError("Ocorreu um erro ao editar, tente novamente");
       console.error("Erro:", err);
     }
   }
 
   function editado(){
     console.log(visData)
+    console.log(`nome antigo ${funcionario.nomeFuncionario}`)
+    console.log(`nome novo ${visData.nomeFuncionario}`)
   }
 
 
@@ -687,7 +804,7 @@ const Editar = () =>{
             
             <img 
               src={selectedImage || imageUrl} 
-              alt='Imagem do Funcionário' 
+              alt='' 
               onError={handleImageError} // Caso ocorra erro no carregamento da imagem
             />
             <button type='button' onClick={() => inputRef.current?.click()}><Paperclip size={25}/></button>
@@ -736,8 +853,8 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="estado">Estado:</label>
-                  <select id='estado' name='estado' value={visData.estado} onChange={handleEditValue}>
+                  <label for="estadoAtual">Estado:</label>
+                  <select id='estadoAtual' name='estadoAtual' value={visData.estadoAtual} onChange={handleEditValue}>
                     <option disabled={true} value="">Selecione</option>
                     <option value="AM">AM</option>
                     <option value="Outros">Outros</option>
@@ -1256,7 +1373,7 @@ const Editar = () =>{
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
                   <label for='estadoSelecionado'>Estado:</label>
-                  <select id="estadoSelecionado" value={visData.estado} onChange={handleEstados}>
+                  <select id="estadoSelecionado" name='estadoSelecionado' value={visData.estadoSelecionado} onChange={handleEstados}>
                     <option value="" disabled>Selecione</option>
                     {Object.keys(estadosCidades).map(estado =>(
                       <option key={estado} value={estado}>{estado}</option>
@@ -1266,7 +1383,7 @@ const Editar = () =>{
 
                 <div className={styles.div_input}>
                   <label for="cidadeSelecionada">Cidade</label>
-                  <select id="cidadeSelecionada" value={visData.cidade} onChange={handleCidade}>
+                  <select id="cidadeSelecionada" name='cidadeSelecionada' value={visData.cidadeSelecionada} onChange={handleCidade}>
                     <option value="" disabled>Selecione</option>
                     {cidades.map((cidade, index) =>(
                       <option key={index} value={cidade}>{cidade}</option>
@@ -1562,18 +1679,18 @@ const Editar = () =>{
                      >
                     </input>
 
-                    {files.length > 0 &&(
-                    <div className={styles.name_file2}>
-                      <ul>
-                        {files.map((file, index) =>(
-                          <li key={index}>{file.name}</li>
-                        ))}
-                      </ul>
+                    <div className={styles.name_file2} id={styles.name_edit}>
+                      {files.map((file, index) => (
+                        <div key={index}>
+                          <a href={`http://172.20.43.250:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                            📄 {file.name} {index + 1}
+                          </a>
+                        </div>
+                      ))}
                     </div>
-                  )}
                   </div>
 
-                  <div className={styles.div_input} id={styles.anotacoes}>
+                  <div className={styles.div_input} id={styles.anotacoes_vis}>
                     <label for="anotacoes">Anotações:</label>
                     <textarea 
                       className={styles.input_anotacoes} 

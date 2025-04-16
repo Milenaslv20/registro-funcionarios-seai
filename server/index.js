@@ -10,6 +10,7 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: '700mb' }));
 app.use(express.urlencoded({ extended: true, limit: "700mb" }));
+app.use(bodyParser.json());
 
 const uploadDirectory = path.join(__dirname, 'uploads')
 
@@ -19,28 +20,46 @@ if (!fs.existsSync(uploadDirectory)){
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-       const dirPath = path.join(uploadDirectory, req.body.nome)
-
-        fs.mkdir(dirPath, { recursive: true }, (err) => {
-        if (err) {
-            return cb(err, null); // Passa o erro para o callback se houver
+      const nome = req.body.nomeFuncionario || req.body.nome;
+      const nomeAntigo = req.body.nomeAntigo;
+  
+      if (!nome) {
+        return cb(new Error("Nome do funcionário não fornecido."), null);
+      }
+  
+      const oldPath = nomeAntigo ? path.join(uploadDirectory, nomeAntigo) : null;
+      const newPath = path.join(uploadDirectory, nome);
+  
+    // Renomeia a pasta se necessário
+    if (nomeAntigo && nomeAntigo !== nome && fs.existsSync(oldPath)) {
+        try {
+          fs.renameSync(oldPath, newPath);  // Renomeia a pasta antiga para a nova
+        } catch (error) {
+          return cb(error, null);
         }
-        cb(null, dirPath); // Chamando o callback com o caminho do diretório
-        });
+      } 
+  
+      fs.mkdir(newPath, { recursive: true }, (err) => {
+        if (err) return cb(err, null);
+        cb(null, newPath);
+      });
     },
-    filename: (req, file, cb) =>{
-        const fileExtension = path.extname(file.originalname)
-        let fileName
-
-        if(fileExtension === '.pdf'){
-            fileName = `doc_${req.body.nome}_${file.originalname}${fileExtension}`
-        } else{
-            fileName = `foto_${req.body.nome}.avif`
-        }
-
-        cb(null, fileName)
+  
+    filename: (req, file, cb) => {
+      const nome = req.body.nomeFuncionario || req.body.nome;
+      const fileExtension = path.extname(file.originalname).toLowerCase();
+  
+      let fileName;
+      if (file.mimetype === "application/pdf") {
+        fileName = `doc_${nome}_${file.originalname}${fileExtension}`
+      } else {
+        fileName = `foto_${nome}.avif`; // 
+      }
+  
+      cb(null, fileName);
     }
-});
+  });
+
 
 const upload = multer({ storage: storage, limits: { fileSize: 500 * 1024 * 1024 } });
 
@@ -49,7 +68,7 @@ app.use('/uploads', express.static(uploadDirectory))
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "4908246miM@!@#",
+    password: "DKSD2@#&AaZCvb524!*(4/?",
     database: "seaifuncionarios",
 });
 db.connect((err) => {
@@ -62,7 +81,7 @@ db.connect((err) => {
 
 
 //TODO: CREATE
-app.post("/cadastrar", upload.none(), (req, res) =>{
+app.post("/cadastrar", (req, res) =>{
     console.log("Body recebido:", req.body);
     const { nome, sexo, data_nasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
         nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
@@ -192,18 +211,36 @@ app.post("/cadastrar", upload.none(), (req, res) =>{
 
 app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) =>{
     const { idFuncionario } = req.body
+    const nome = req.body.nomeFuncionario || req.body.nome;
 
-    const imagemPath = req.files['imagem'] ? path.join('uploads', req.files['imagem'][0].filename) : null;
-    const pdfsPath = req.files['pdfs'] ? req.files['pdfs'].map(file => path.join('uploads', req.body.nome, file.filename)) : ['null'];
+    const pasta = path.join('uploads', nome);
 
-    const query = "INSERT INTO documentos (filePath, idFuncionario, imagePath) VALUES (?, ?, ?)";
-    db.query(query, [JSON.stringify(pdfsPath), idFuncionario, imagemPath], (err, result) => {
-        if (err) {
-          return res.status(500).json({ message: 'Erro ao salvar no banco de dados', error: err });
-        }
-        res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
+    const imagemPath = req.files['imagem'] && req.files['imagem'][0]
+      ? path.join(pasta, req.files['imagem'][0].filename)
+      : null;
+  
+    const pdfsPath = req.files['pdfs']
+      ? req.files['pdfs'].map(file => path.join(pasta, file.filename))
+      : [];
+  
+    const originalNames = req.files['pdfs']
+      ? req.files['pdfs'].map(file => file.originalname)
+      : [];
+  
+    const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
+    db.query(query, [
+      idFuncionario,
+      JSON.stringify(originalNames),
+      JSON.stringify(pdfsPath),
+      imagemPath
+    ], (err, result) => {
+      if (err) {
+        console.error("Erro ao salvar documentos:", err);
+        return res.status(500).json({ message: 'Erro ao salvar no banco de dados', error: err });
+      }
+      res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
     });
-})
+});
 
 
 //TODO: READ
@@ -298,7 +335,7 @@ app.get("/getRegisters", (req, res) =>{
 app.get('/getFiles/:idFuncionario', (req, res) =>{
     const idFuncionario = req.params.idFuncionario
 
-    const query = 'SELECT filePath FROM documentos WHERE idFuncionario = ?'
+    const query = 'SELECT filePath, originalFileNames FROM documentos WHERE idFuncionario = ?'
     db.query(query, [idFuncionario], (err, result) =>{
         if(err){
             return res.status(500).json({ message: 'Erro ao recuperar arquivos', error: err })
@@ -327,390 +364,229 @@ app.get("/getRegisterstot", (req, res) =>{
 
 
 //TODO: UPDATE
-app.put("/editRegister", (req, res) =>{
-    const { idFuncionario, ...dadosAtualizados} = req.body
+app.post("/editRegister", upload.none(), (req, res) =>{
+    console.log("Body recebido:", req.body);
+    const { idFuncionario, nomeFuncionario, sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
+        nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
+        cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie,
+        bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada,
+        banco, bancoAgencia, bancoConta,
+        escolaridade, cursos, curso1, curso2, curso3, curso4,
+        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes
+    } = req.body;
 
-    if(!idFuncionario){
-        console.log("ID obrigatório")
-        return res.status(400).json({ message: "ID obrigatório" })
+    
+    if (!idFuncionario) {
+        console.log("ID do funcionário obrigatório");
+        return res.status(400).json({ message: "ID do funcionário obrigatório" });
     }
 
-    db.beginTransaction(async (err) =>{
-        if (err) throw err;
-
-        try{
-            if (dadosAtualizados.nomeFuncionario){
-                await db.promisse().query("UPDATE funcionario SET nomeFuncionario = ? WHERE idFuncionario  = ?", [dadosAtualizados.nomeFuncionario, idFuncionario])
-            }
-
-            if(dadosAtualizados.sexo || dadosAtualizados.dataNasc || dadosAtualizados.estado || dadosAtualizados.nacionalidade || dadosAtualizados.naturalidade || dadosAtualizados.raca || dadosAtualizados.telefone || dadosAtualizados.email){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.sexo){
-                    fields.push("sexo = ?")
-                    values.push(dadosAtualizados.sexo)
-                }
-
-                if(dadosAtualizados.dataNasc){
-                    fields.push("dataNasc = ?")
-                    values.push(dadosAtualizados.dataNasc)
-                }
-
-                if(dadosAtualizados.estado){
-                    fields.push("estado = ?")
-                    values.push(dadosAtualizados.estado)
-                }
-
-                if(dadosAtualizados.nacionalidade){
-                    fields.push("nacionalidade = ?")
-                    values.push(dadosAtualizados.nacionalidade)
-                }
-
-                if(dadosAtualizados.naturalidade){
-                    fields.push("naturalidade = ?")
-                    values.push(dadosAtualizados.naturalidade)
-                }
-
-                if(dadosAtualizados.raca){
-                    fields.push("raca = ?")
-                    values.push(dadosAtualizados.raca)
-                }
-
-                if(dadosAtualizados.telefone){
-                    fields.push("telefone = ?")
-                    values.push(dadosAtualizados.telefone)
-                }
-
-                if(dadosAtualizados.email){
-                    fields.push("email = ?")
-                    values.push(dadosAtualizados.email)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }
-
-            if(dadosAtualizados.nomePai || dadosAtualizados.cpfPai || dadosAtualizados.dataNascPai || dadosAtualizados.nomeMae || dadosAtualizados.cpfMae || dadosAtualizados.dataNascMae || dadosAtualizados.estadoCivil || dadosAtualizados.nomeEsposoA || dadosAtualizados.filhos || dadosAtualizados.nomeFilhos){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.nomePai){
-                    fields.push("nomePai = ?")
-                    values.push(dadosAtualizados.nomePai)
-                }
-
-                if(dadosAtualizados.cpfPai){
-                    fields.push("cpfPai = ?")
-                    values.push(dadosAtualizados.cpfPai)
-                }
-
-                if(dadosAtualizados.dataNascPai){
-                    fields.push("dataNascPai = ?")
-                    values.push(dadosAtualizados.dataNascPai)
-                }
-
-                if(dadosAtualizados.nomeMae){
-                    fields.push("nomeMae = ?")
-                    values.push(dadosAtualizados.nomeMae)
-                }
-
-                if(dadosAtualizados.cpfMae){
-                    fields.push("cpfMae = ?")
-                    values.push(dadosAtualizados.cpfMae)
-                }
-
-                if(dadosAtualizados.dataNascMae){
-                    fields.push("dataNascMae = ?")
-                    values.push(dadosAtualizados.dataNascMae)
-                }
-
-                if(dadosAtualizados.estadoCivil){
-                    fields.push("estadoCivil = ?")
-                    values.push(dadosAtualizados.estadoCivil)
-                }
-
-                if(dadosAtualizados.nomeEsposoA){
-                    fields.push("nomeEsposoA = ?")
-                    values.push(dadosAtualizados.nomeEsposoA)
-                }
-
-                if(dadosAtualizados.filhos){
-                    fields.push("filhos = ?")
-                    values.push(dadosAtualizados.filhos)
-                }
-
-                if(dadosAtualizados.nomeFilhos){
-                    fields.push("nomeFilhos = ?")
-                    values.push(dadosAtualizados.nomeFilhos)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }
-
-            if(dadosAtualizados.cpf || dadosAtualizados.pisPasep || dadosAtualizados.cnh || dadosAtualizados.rg || dadosAtualizados.rgDataExped || dadosAtualizados.rgOrgaoExped || dadosAtualizados.rgUf || dadosAtualizados.titulo || dadosAtualizados.tituloZona || dadosAtualizados.tituloSecao || dadosAtualizados.tituloUf || dadosAtualizados.docMilitar || dadosAtualizados.docMilitarSerie){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.pisPasep){
-                    fields.push("pisPasep = ?")
-                    values.push(dadosAtualizados.pisPasep)
-                }
-
-                if(dadosAtualizados.cnh){
-                    fields.push("cnh = ?")
-                    values.push(dadosAtualizados.cnh)
-                }
-
-                if(dadosAtualizados.rg){
-                    fields.push("rg = ?")
-                    values.push(dadosAtualizados.rg)
-                }
-
-                if(dadosAtualizados.rgDataExped){
-                    fields.push("rgDataExped = ?")
-                    values.push(dadosAtualizados.rgDataExped)
-                }
-
-                if(dadosAtualizados.rgOrgaoExped){
-                    fields.push("rgOrgaoExped = ?")
-                    values.push(dadosAtualizados.rgOrgaoExped)
-                }
-
-                if(dadosAtualizados.rgUf){
-                    fields.push("rgUf = ?")
-                    values.push(dadosAtualizados.rgUf)
-                }
-
-                if(dadosAtualizados.titulo){
-                    fields.push("titulo = ?")
-                    values.push(dadosAtualizados.titulo)
-                }
-
-                if(dadosAtualizados.tituloZona){
-                    fields.push("tituloZona = ?")
-                    values.push(dadosAtualizados.tituloZona)
-                }
-
-                if(dadosAtualizados.tituloSecao){
-                    fields.push("tituloSecao = ?")
-                    values.push(dadosAtualizados.tituloSecao)
-                }
-
-                if(dadosAtualizados.tituloUf){
-                    fields.push("tituloUf = ?")
-                    values.push(dadosAtualizados.tituloUf)
-                }
-
-                if(dadosAtualizados.docMilitar){
-                    fields.push("docMilitar = ?")
-                    values.push(dadosAtualizados.docMilitar)
-                }
-
-                if(dadosAtualizados.docMilitarSerie){
-                    fields.push("docMilitarSerie = ?")
-                    values.push(dadosAtualizados.docMilitarSerie)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }
-
-            if(dadosAtualizados.bairro || dadosAtualizados.numCasa || dadosAtualizados.cep || dadosAtualizados.logadouro || dadosAtualizados.cidadeSelecionada || dadosAtualizados.estadoAtual){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.bairro){
-                    fields.push("bairro = ?")
-                    values.push(dadosAtualizados.bairro)
-                }
-
-                if(dadosAtualizados.numCasa){
-                    fields.push("numCasa = ?")
-                    values.push(dadosAtualizados.numCasa)
-                }
-
-                if(dadosAtualizados.cep){
-                    fields.push("cep = ?")
-                    values.push(dadosAtualizados.cep)
-                }
-
-                if(dadosAtualizados.logadouro){
-                    fields.push("logadouro = ?")
-                    values.push(dadosAtualizados.logadouro)
-                }
-
-                if(dadosAtualizados.cidadeSelecionada){
-                    fields.push("cidadeSelecionada = ?")
-                    values.push(dadosAtualizados.cidadeSelecionada)
-                }
-
-                if(dadosAtualizados.estadoAtual){
-                    fields.push("estadoAtual = ?")
-                    values.push(dadosAtualizados.estadoAtual)
-                }
-
-                if(dadosAtualizados.titulo){
-                    fields.push("titulo = ?")
-                    values.push(dadosAtualizados.titulo)
-                }
-
-                if(dadosAtualizados.tituloZona){
-                    fields.push("tituloZona = ?")
-                    values.push(dadosAtualizados.tituloZona)
-                }
-
-                if(dadosAtualizados.tituloSecao){
-                    fields.push("tituloSecao = ?")
-                    values.push(dadosAtualizados.tituloSecao)
-                }
-
-                if(dadosAtualizados.tituloUf){
-                    fields.push("tituloUf = ?")
-                    values.push(dadosAtualizados.tituloUf)
-                }
-
-                if(dadosAtualizados.docMilitar){
-                    fields.push("docMilitar = ?")
-                    values.push(dadosAtualizados.docMilitar)
-                }
-
-                if(dadosAtualizados.docMilitarSerie){
-                    fields.push("docMilitarSerie = ?")
-                    values.push(dadosAtualizados.docMilitarSerie)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }
-
-            if(dadosAtualizados.banco || dadosAtualizados.bancoAgencia || dadosAtualizados.bancoConta){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.banco){
-                    fields.push("banco = ?")
-                    values.push(dadosAtualizados.banco)
-                }
-
-                if(dadosAtualizados.bancoAgencia){
-                    fields.push("bancoAgencia = ?")
-                    values.push(dadosAtualizados.bancoAgencia)
-                }
-
-                if(dadosAtualizados.bancoConta){
-                    fields.push("bancoConta = ?")
-                    values.push(dadosAtualizados.bancoConta)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }
-
-            if(dadosAtualizados.escolaridade || dadosAtualizados.cursos || dadosAtualizados.curso1 || dadosAtualizados.curso2 || dadosAtualizados.curso3 || dadosAtualizados.curso4){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.escolaridade){
-                    fields.push("escolaridade = ?")
-                    values.push(dadosAtualizados.escolaridade)
-                }
-
-                if(dadosAtualizados.cursos){
-                    fields.push("cursos = ?")
-                    values.push(dadosAtualizados.cursos)
-                }
-
-                if(dadosAtualizados.curso1){
-                    fields.push("curso1 = ?")
-                    values.push(dadosAtualizados.curso1)
-                }
-
-                if(dadosAtualizados.curso2){
-                    fields.push("curso2 = ?")
-                    values.push(dadosAtualizados.curso2)
-                }
-
-                if(dadosAtualizados.curso3){
-                    fields.push("curso3 = ?")
-                    values.push(dadosAtualizados.curso3)
-                }
-
-                if(dadosAtualizados.curso4){
-                    fields.push("curso4 = ?")
-                    values.push(dadosAtualizados.curso4)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            } 
-            
-            if(dadosAtualizados.vinculo || dadosAtualizados.setorDepartamento || dadosAtualizados.cargoFuncao || dadosAtualizados.cargoEfetivo || dadosAtualizados.statusServidor || dadosAtualizados.matriculaOrigem || dadosAtualizados.orgaoOrigem || dadosAtualizados.matriculaSeai || dadosAtualizados.dataEntregaDocs || dadosAtualizados.anotacoes){
-                const fields = []
-                const values = []
-
-                if(dadosAtualizados.vinculo){
-                    fields.push("vinculo = ?")
-                    values.push(dadosAtualizados.vinculo)
-                }
-
-                if(dadosAtualizados.setorDepartamento){
-                    fields.push("setorDepartamento = ?")
-                    values.push(dadosAtualizados.setorDepartamento)
-                }
-
-                if(dadosAtualizados.cargoFuncao){
-                    fields.push("cargoFuncao = ?")
-                    values.push(dadosAtualizados.cargoFuncao)
-                }
-
-                if(dadosAtualizados.cargoEfetivo){
-                    fields.push("cargoEfetivo = ?")
-                    values.push(dadosAtualizados.cargoEfetivo)
-                }
-
-                if(dadosAtualizados.statusServidor){
-                    fields.push("statusServidor = ?")
-                    values.push(dadosAtualizados.statusServidor)
-                }
-
-                if(dadosAtualizados.matriculaOrigem){
-                    fields.push("matriculaOrigem = ?")
-                    values.push(dadosAtualizados.matriculaOrigem)
-                }
-
-                if(dadosAtualizados.matriculaSeai){
-                    fields.push("matriculaSeai = ?")
-                    values.push(dadosAtualizados.matriculaSeai)
-                }
-
-                if(dadosAtualizados.orgaoOrigem){
-                    fields.push("orgaoOrigem = ?")
-                    values.push(dadosAtualizados.orgaoOrigem)
-                }
-
-                if(dadosAtualizados.matriculaSeai){
-                    fields.push("matriculaSeai = ?")
-                    values.push(dadosAtualizados.matriculaSeai)
-                }
-
-                if(dadosAtualizados.dataEntregaDocs){
-                    fields.push("dataEntregaDocs = ?")
-                    values.push(dadosAtualizados.dataEntregaDocs)
-                }
-
-                if(dadosAtualizados.anotações){
-                    fields.push("anotações = ?")
-                    values.push(dadosAtualizados.anotações)
-                }
-                values.push(idFuncionario)
-                await db.promisse().query(`UPDATE dadospessoais SET ${fields.join(", ")} WHERE idFuncionario = ?`, values)
-            }  
-            db.commit()
-            res.status(200).json({ message: "Dados atualizados com sucesso" })
-            console.log("Dados atualizados com sucesso")
-        } catch (err){
-            db.rollback()
-            res.status(500).json({ message: "Erro ao atualizar dados", error: err })
+    db.beginTransaction((err) =>{
+        if(err){
+            console.log("erro ao iniciar transação")
         }
     })
-})
 
+    let sqlFuncionario = "UPDATE funcionario SET nomeFuncionario = ? WHERE idFuncionario = ?";
+    db.query(sqlFuncionario, [nomeFuncionario, idFuncionario], (err, result) =>{
+        if (err) {
+            return db.rollback(() =>{
+                console.log("Erro ao atualizar funcionario:", err);
+                res.status(500).send("Erro ao atualizar funcionário");
+            })
+        }
+
+        let sqlPessoais = "UPDATE dadospessoais SET sexo = ?, dataNasc = ?, estadoAtual = ?, nacionalidade = ?, naturalidade = ?, raca = ?, telefone = ?, email = ? WHERE idFuncionario = ?";
+        db.query(sqlPessoais, [sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, idFuncionario], (err, result) =>{
+            if (err) {
+                return db.rollback(() =>{
+                    console.log("Erro ao atualizar dados pessoais:", err);
+                    result.status(500).send("Erro ao atualizar dados pessoais");
+                })
+            } else{
+                console.log("-Dados pessoais editados com sucesso");
+            }
+
+            let sqlFamiliares = "UPDATE dadosfamiliares SET nomePai = ?, cpfPai = ?, dataNascPai = ?, nomeMae = ?, cpfMae = ?, dataNascMae = ?, estadoCivil = ?, nomeEsposoA = ?, filhos = ?, nomeFilhos = ? WHERE idFuncionario = ?";
+            db.query(sqlFamiliares, [nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos, idFuncionario], (err, result) =>{
+                if (err) {
+                    return db.rollback(() =>{
+                        console.log("Erro ao atualizar dados familiares:", err);
+                        result.status(500).send("Erro ao atualizar dados familiares");
+                    })
+                } else{
+                    console.log("-Dados familiares editados com sucesso");
+                }
+
+                let sqlDocumentos = "UPDATE dadosdocumentos SET cpf = ?, pisPasep = ?, cnh = ?, rg = ?, rgDataExped = ?, rgOrgaoExped = ?, rgUf = ?, titulo = ?, tituloZona = ?, tituloSecao = ?, tituloUf = ?, docMilitar = ?, docMilitarSerie = ? WHERE idFuncionario = ?";
+                db.query(sqlDocumentos, [cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie, idFuncionario], (err, result) =>{
+                    if (err) {
+                        return db.rollback(() =>{
+                            console.log("Erro ao atualizar dados documentos:", err);
+                            result.status(500).send("Erro ao atualizar dados documentos");
+                        })
+                    } else{
+                        console.log("-Dados documentos editados com sucesso");
+                    }
+
+                    let sqlEndereco = "UPDATE dadosendereco SET bairro = ?, numCasa = ?, cep = ?, logadouro = ?, estado = ?, cidade = ? WHERE idFuncionario = ?";
+                    db.query(sqlEndereco, [bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada, idFuncionario], (err, result) =>{
+                        if (err) {
+                            return db.rollback(() =>{
+                                console.log("Erro ao atualizar dados endereço:", err);
+                                result.status(500).send("Erro ao atualizar dados endereço");
+                            })
+                        } else{
+                            console.log("-Dados endereço editados com sucesso");
+                        }
+
+                        let sqlDadosBancarios = "UPDATE dadosbancarios SET banco = ?, bancoAgencia = ?, bancoConta = ? WHERE idFuncionario = ?";
+                        db.query(sqlDadosBancarios, [banco, bancoAgencia, bancoConta, idFuncionario], (err, result) =>{
+                            if (err) {
+                                return db.rollback(() =>{
+                                    console.log("Erro ao atualizar dados bancários:", err);
+                                    result.status(500).send("Erro ao atualizar dados bancários");
+                                })
+                            } else{
+                                console.log("-Dados bancários editados com sucesso");
+                            }
+
+                            let sqlformacaoEscolar = "UPDATE dadosescolaridade SET escolaridade = ?, cursos = ?, curso1 = ?, curso2 = ?, curso3 = ?, curso4 = ? WHERE idFuncionario = ?";
+                            db.query(sqlformacaoEscolar, [escolaridade, cursos, curso1, curso2, curso3, curso4, idFuncionario], (err, result) =>{
+                                if (err) {
+                                    return db.rollback(() =>{
+                                        console.log("Erro ao atualizar dados escolares:", err);
+                                        result.status(500).send("Erro ao atualizar dados escolares");
+                                    })
+                                } else{
+                                    console.log("-Dados escolares editados com sucesso");
+                                }
+
+                                let sqlVinculo = "UPDATE dadosvinculo SET vinculo = ?, setorDepartamento = ?, cargoFuncao = ?, cargoEfetivo = ?, statusServidor = ?, matriculaOrigem = ?, orgaoOrigem = ?, matriculaSeai = ?, dataEntregaDocs = ?, anotacoes = ? WHERE idFuncionario = ?";
+                                db.query(sqlVinculo, [vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes, idFuncionario], (err, result) =>{
+                                    if (err) {
+                                        return db.rollback(() =>{
+                                            console.log("Erro ao atualizar dados vínculo:", err);
+                                            result.status(500).send("Erro ao atualizar dados vínculo");
+                                        })
+                                    } else{
+                                        console.log("-Dados vínculo editados com sucesso\n");
+                                    }
+                                })
+
+                                db.commit((err) => {
+                                    if (err) {
+                                        return db.rollback(() => {
+                                            console.error("Erro ao finalizar a transação:", err);
+                                            res.status(500).send("Erro ao finalizar a transação.");
+                                        });
+                                    }
+                                    console.log("✔ Cadastro realizado com sucesso ✔\n");
+                                    //res.status(200).send("Cadastro realizado com sucesso");
+                                    res.status(200).json({ idFuncionario: idFuncionario })
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.post("/uploadsEdit", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) => {
+    const { idFuncionario } = req.body;
+    const nomeNovo = req.body.nomeFuncionario || req.body.nome;
+
+    const pastaNova = path.join('uploads', nomeNovo);
+
+    const queryBusca = "SELECT filePath, imagePath, originalFileNames FROM documentos WHERE idFuncionario = ?";
+    db.query(queryBusca, [idFuncionario], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: 'Erro ao buscar dados antigos', error: err });
+        }
+
+        const arquivosAntigos = results[0];
+        const caminhoAntigo = arquivosAntigos.filePath ? JSON.parse(arquivosAntigos.filePath)[0] : null;
+        const nomeAntigo = caminhoAntigo ? caminhoAntigo.split(path.sep)[1] : null;
+        const pastaAntiga = nomeAntigo ? path.join('uploads', nomeAntigo) : null;
+
+        // Se nome mudou e pasta antiga existe, renomeia
+        if (pastaAntiga && pastaAntiga !== pastaNova && fs.existsSync(pastaAntiga)) {
+            fs.renameSync(pastaAntiga, pastaNova);
+        }
+
+        // Cria a nova pasta se não existir
+        if (!fs.existsSync(pastaNova)) {
+            fs.mkdirSync(pastaNova, { recursive: true });
+        }
+
+        // Variáveis padrão (mantêm os dados antigos)
+        let imagemPath = arquivosAntigos.imagePath;
+        let pdfsPath = arquivosAntigos.filePath ? JSON.parse(arquivosAntigos.filePath) : [];
+        let originalNamesAntigos = arquivosAntigos.originalFileNames ? JSON.parse(arquivosAntigos.originalFileNames) : [];
+        let originalNamesNovos = [];
+
+        console.log(imagemPath)
+        console.log(pdfsPath)
+        console.log(originalNamesAntigos)
+        console.log(originalNamesNovos)
+
+        // Se novos arquivos forem enviados:
+        if (req.files['imagem'] || req.files['pdfs']) {
+
+            // Nomes dos novos PDFs
+            originalNamesNovos = req.files['pdfs']
+                ? req.files['pdfs'].map(file => file.originalname)
+                : [];
+
+            // Compara nomes antigos x novos
+            const nomesIguais = JSON.stringify(originalNamesAntigos.sort()) === JSON.stringify(originalNamesNovos.sort());
+
+            // Apaga PDFs antigos se os nomes forem diferentes
+            if (!nomesIguais && fs.existsSync(pastaNova)) {
+                fs.readdirSync(pastaNova).forEach(file => {
+                    if (file.endsWith('.pdf')) {
+                        fs.unlinkSync(path.join(pastaNova, file));
+                    }
+                });
+            }
+
+            // Atualiza paths da imagem
+            imagemPath = req.files['imagem'] && req.files['imagem'][0]
+                ? path.join(pastaNova, req.files['imagem'][0].filename)
+                : imagemPath;
+
+            // Atualiza paths dos PDFs
+            pdfsPath = req.files['pdfs']
+                ? req.files['pdfs'].map(file => path.join(pastaNova, file.filename))
+                : pdfsPath;
+        } else {
+            // Se nenhum novo PDF foi enviado, mantém os nomes antigos
+            originalNamesNovos = originalNamesAntigos;
+        }
+
+        const queryAtualiza = `
+            UPDATE documentos 
+            SET idFuncionario = ?, originalFileNames = ?, filePath = ?, imagePath = ?
+            WHERE idFuncionario = ?
+        `;
+
+        db.query(queryAtualiza, [
+            idFuncionario,
+            JSON.stringify(originalNamesNovos),
+            JSON.stringify(pdfsPath),
+            imagemPath,
+            idFuncionario
+        ], (err2, result) => {
+            if (err2) {
+                return res.status(500).json({ message: 'Erro ao atualizar documentos', error: err2 });
+            }
+
+            res.status(200).json({ message: 'Documentos atualizados com sucesso', result });
+        });
+    });
+});
 
 //TODO: DELETE
 app.delete("/deleteRegister/:id", (req, res) =>{
@@ -806,8 +682,8 @@ app.post("/login", (req, res) =>{
 })
 
 
-app.listen(5000, () => {
-    console.log("↺ Serv rodando ↺")
+app.listen(5000, '0.0.0.0', () => {
+    console.log("↺ Serv rodando, porta 5000 ↺")
 });
 
 

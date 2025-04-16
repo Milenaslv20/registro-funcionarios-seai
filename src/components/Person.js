@@ -13,7 +13,7 @@ import { useFuncionario } from '../pages/FuncionarioContext'
 
 const Person = ({ funcionario, handleOpenDeleteModal }) => {
   const { setFuncionario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
 
   const handleVis = () =>{
     setFuncionario(funcionario)
@@ -144,7 +144,7 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.setFontSize(11)
         doc.text(`NOME: ${funcionario.nomeFuncionario}`, 60, 77)
         doc.text(`DATA NASC.: ${formatedDataNasc}`, 60, 82.5)
-        doc.text(`ESTADO: ${funcionario.estado}`, 60, 88.5)
+        doc.text(`ESTADO: ${funcionario.estadoAtual}`, 60, 88.5)
         doc.text(`NACIONALIDADE: ${funcionario.nacionalidade}`, 60, 94.5)
         doc.text(`NATURALIDADE: ${funcionario.naturalidade}`, 60, 100.8)
         doc.text(`RAÇA: ${funcionario.raca}`, 60, 106.5)

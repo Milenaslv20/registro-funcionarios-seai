@@ -32,12 +32,12 @@ function Historico ({ funcionarios }){
   //TODO: GET TOTALFUNC AND TOTAL DATA
   useEffect(() =>{
     const dataSeaiFuncionarios = async() =>{
-      const reqData = await fetch("http://localhost:5000/getRegisters")
+      const reqData = await fetch("http://172.20.43.250:5000/getRegisters")
       const resData = await reqData.json()
       setDataSeaiFuncionarios(resData)
       setFiltros(resData || [])
 
-      const reqTotal = await fetch("http://localhost:5000/getRegisterstot");
+      const reqTotal = await fetch("http://172.20.43.250:5000/getRegisterstot");
       const resTotal = await reqTotal.json();
       setTotalFunc(resTotal.totalFunc);
     }
@@ -56,7 +56,7 @@ function Historico ({ funcionarios }){
     try{
 
       if(deleteFuncionario){
-        const res = await fetch(`http://localhost:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
+        const res = await fetch(`http://172.20.43.250:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
           method: 'DELETE',
           headers: {
             'Content-type': 'application/json',

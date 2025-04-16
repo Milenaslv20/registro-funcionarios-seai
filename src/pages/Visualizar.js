@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react'
 import styles from './styles.module.css'
 import { jsPDF } from 'jspdf'
 import { useFuncionario } from './FuncionarioContext'
+import Axios from 'axios'
 
 import { FolderDown } from 'lucide-react'
+import defaultImage from '../svg/icon-person.jpg'
 
 function Visualizar() {
   const { funcionario } = useFuncionario();
   const idFuncionario = funcionario.idFuncionario;
 
-  const [documentos, setDocumentos] = useState([]);
-
+  const [files, setFiles] = useState([])
+  
   const dataNasc = new Date(funcionario.dataNasc)
   const formatedDataNasc = dataNasc.toLocaleDateString('pt-BR')
 
@@ -26,29 +28,29 @@ function Visualizar() {
   const dataExped = new Date(funcionario.rgDataExped)
   const formatedDataExped = dataExped.toLocaleDateString('pt-BR')
 
-  const imageUrl = `http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`;
+  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    // Verifica se temos o ID do usuário
-    if (idFuncionario) {
-      // Faz a requisição para o backend com o ID do usuário
-      fetch(`http://localhost:5000/getFiles/${idFuncionario}`)
-        .then(response => response.json())
-        .then(data => {
-          const documentosString = data.map((documento) =>{
-            const nomeArquivo = documento.filePath
-            return{
-              ...documento,
-              nomeArquivo,
-            }
+    if (funcionario?.idFuncionario) {
+      Axios.get(`http://172.20.43.250:5000/getFiles/${funcionario.idFuncionario}`)
+        .then(response => {
+          const data = response.data[0];
+          const paths = data?.filePath ? JSON.parse(data.filePath) : [];
+          const names = data?.originalFileNames ? JSON.parse(data.originalFileNames) : [];
+
+          const filesData = paths.map((path, i) => ({
+            name: names[i] || `Arquivo ${i + 1}`,
+            path: path
+          }));
+
+          setFiles(filesData);
           })
-          setDocumentos(documentosString)
-        })
         .catch(error => {
-          console.error('Erro ao buscar documentos:', error);
+          console.error("Erro ao buscar arquivos:", error);
         });
     }
-  }, [idFuncionario]);
+  }, [funcionario]);
 
   const convertBase64 = async (imageUrl) =>{
     try{
@@ -81,6 +83,10 @@ function Visualizar() {
       console.error(error)
       throw error
     }
+  }
+
+  const handleImageError = () =>{
+    setImageUrl(defaultImage)
   }
 
 
@@ -143,7 +149,7 @@ function Visualizar() {
         doc.setFontSize(11)
         doc.text(`NOME: ${funcionario.nomeFuncionario}`, 60, 77)
         doc.text(`DATA NASC.: ${formatedDataNasc}`, 60, 82.5)
-        doc.text(`ESTADO: ${funcionario.estado}`, 60, 88.5)
+        doc.text(`ESTADO: ${funcionario.estadoAtual}`, 60, 88.5)
         doc.text(`NACIONALIDADE: ${funcionario.nacionalidade}`, 60, 94.5)
         doc.text(`NATURALIDADE: ${funcionario.naturalidade}`, 60, 100.8)
         doc.text(`RAÇA: ${funcionario.raca}`, 60, 106.5)
@@ -277,9 +283,10 @@ function Visualizar() {
         <div className={styles.record}>
         <FolderDown onClick={getPdf} className={styles.button_download} size={55} strokeWidth={1.5}/>
           <img
-            className={styles.img_vis}
-            src={imageUrl}
-            alt=''
+              className={styles.img_vis}
+              src={selectedImage || imageUrl} 
+              alt='Imagem do Funcionário' 
+              onError={handleImageError}
           />
 
           <div className={styles.inputs}>
@@ -305,7 +312,7 @@ function Visualizar() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="estado">Estado:</label>
-                  <span className={styles.span}>{funcionario.estado}</span>
+                  <span className={styles.span}>{funcionario.estadoAtual}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
@@ -665,28 +672,20 @@ function Visualizar() {
                   <div className={styles.div_input} id={styles.anexoss}>
                     <label for="nome_anexos">Anexos:</label>
 
-                    {documentos.length > 0 ? (
-                    <div className={styles.name_file3}>
-                      <ul>
-                        {documentos.map((documento, index) => {
-                          // Extrai o nome do arquivo do caminho
-                          //const nomeArquivo = documento.filePath.split('\\').pop();
-                          return (
-                            <li key={index}>
-                              {documento.nomeArquivo}
-                            </li>
-                          );
-                        })}
-                      </ul>
+                    <div className={styles.name_file2_vis} id={styles.name_edit_vis}>
+                      {files.map((file, index) => (
+                        <div key={index} className={styles.name_edits_pdf}>
+                          <a href={`http://172.20.43.250:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                            📄 {file.name} {index + 1}
+                          </a>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <p>Nenhum documento encontrado.</p>
-                  )}
                   </div>
 
-                  <div className={styles.div_input} >
+                  <div className={styles.div_input}>
                     <label for="anotacoes">Anotações:</label>
-                    <p className={styles.span} id={styles.anotacoes_vis}>{funcionario.anotacoes}</p>
+                    <p className={styles.span}>{funcionario.anotacoes}</p>
                   </div>
               </div>
 

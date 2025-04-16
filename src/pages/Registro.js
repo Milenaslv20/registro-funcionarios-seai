@@ -571,9 +571,9 @@ function Registro() {
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://localhost:5000/cadastrar', formData, {
+      const response = await Axios.post('http://172.20.43.250:5000/cadastrar', formData, {
         headers: { 
-          "Content-Type": 'multipart/form-data', 
+          "Content-Type": 'application/json', 
         }
       })
 
@@ -599,7 +599,7 @@ function Registro() {
         formDatas.append('pdfs', null)
       }
 
-      const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
+      const uploadRes = await Axios.post('http://172.20.43.250:5000/uploads', formDatas, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -609,6 +609,9 @@ function Registro() {
         setOpenModal(true);
         setModalMessage("Funcionário cadastrado com sucesso");
         //setReload(true)
+      } else {
+        setOpenModalError(true)
+        setModalMessageError("erro ao enviar dados")
       }
     } catch(err){
       setModalMessageError("Ocorreu um erro, tente novamente");
@@ -691,8 +694,8 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="estado">Estado:</label>
-                  <select id='estado' name='estado' value={estadoAtual} onChange={(e) => {setEstadoAtual(e.target.value)}}>
+                  <label for="estadoAtual">Estado:</label>
+                  <select id='estadoAtual' name='estadoAtual' value={estadoAtual} onChange={(e) => {setEstadoAtual(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
                     <option value="AM">AM</option>
                     <option value="Outros">Outros</option>
@@ -1194,7 +1197,7 @@ function Registro() {
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
                   <label for='estadoSelecionado'>Estado:</label>
-                  <select id="estadoSelecionado" value={estadoSelecionado} onChange={handleEstados}>
+                  <select id="estadoSelecionado" name='estadoSelecionado' value={estadoSelecionado} onChange={handleEstados}>
                     <option value="" disabled>Selecione</option>
                     {Object.keys(estadosCidades).map(estado =>(
                       <option key={estado} value={estado}>{estado}</option>
@@ -1204,7 +1207,7 @@ function Registro() {
 
                 <div className={styles.div_input}>
                   <label for="cidadeSelecionada">Cidade</label>
-                  <select id="cidadeSelecionada" value={cidadeSelecionada} onChange={handleCidade}>
+                  <select id="cidadeSelecionada" name='cidadeSelecionada' value={cidadeSelecionada} onChange={handleCidade}>
                     <option value="" disabled>Selecione</option>
                     {cidades.map((cidade, index) =>(
                       <option key={index} value={cidade}>{cidade}</option>
@@ -1488,15 +1491,16 @@ function Registro() {
                     >
                   </input>
 
-                  {files.length > 0 &&(
                   <div className={styles.name_file2}>
-                    <ul>
-                      {files.map((file, index) =>(
-                        <li key={index}>{file.name}</li>
-                      ))}
-                    </ul>
+                    {files.length > 0 &&(
+                      <ul>
+                        {files.map((file, index) =>(
+                          <li key={index}>{file.name}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  )}
+
                 </div>
 
                 <div className={styles.div_input} id={styles.anotacoes}>
