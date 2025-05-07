@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import styles from './styles.module.css'
 import { Link } from 'react-router-dom'
 import Axios from 'axios'
+import { useFuncionario } from './FuncionarioContext'
 
 import { Paperclip } from 'lucide-react'
 
@@ -15,6 +16,8 @@ function Registro() {
   const [openModalError, setOpenModalError] = useState(false);
   const [modalMessageError, setModalMessageError] = useState('');
   const [reload, setReload] = useState(false);
+
+  const { usuario } = useFuncionario();
 
   //TODO: INPUT VALUES
   const [idFuncionario, setIdFuncionario] = useState(null)
@@ -571,7 +574,7 @@ function Registro() {
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://172.20.43.250:5000/cadastrar', formData, {
+      const response = await Axios.post('http://localhost:5000/cadastrar', formData, {
         headers: { 
           "Content-Type": 'application/json', 
         }
@@ -588,7 +591,7 @@ function Registro() {
       if(imagem) {
         formDatas.append('imagem', imagem)
       } else{
-        formDatas.append('imagem', null)
+        formDatas.append('imagem', null)  
       }
 
       if(files.length > 0){
@@ -605,24 +608,96 @@ function Registro() {
         },
       });
 
-      if(uploadRes.status && response.status === 200){
+      const cadastro = `Cadastrou registro ${nome}`
+      const resLogEdit = await Axios.post('http://172.20.43.250:5000/logEdicao', {
+        nomeUsuario: usuario,
+        nomeFuncionario: cadastro
+      });
+
+      if(uploadRes.status && response.status && resLogEdit.status === 200){
+        console.log(formData)
+        
         setOpenModal(true);
         setModalMessage("Funcionário cadastrado com sucesso");
-        //setReload(true)
+
+        setSelectedImage(null);
+        setNome("");
+        setSexo("");
+        setDataNasc("");
+        setEstadoAtual("");
+        setNacionalidade("");
+        setNaturalidade("");
+        setRaca("");
+        setTelefone("(92)");
+        setEmail("");
+
+        setNomePai("");
+        setCpfPai("");
+        setDataNascPai("");
+        setNomeMae("");
+        setCpfMae("");
+        setDataNascMae("");
+
+        setEstadoCivil("");
+        setNomeEsposoa("");
+        setFilhos("");
+        setNomeFilhos("");
+
+        setCpf("");
+        setPisPasep("");
+        setSelectCnh("");
+        setCnh("");
+        setRg("");
+        setRgDataExped("");
+        setRgOrgaoExped("");
+        setRgUf("");
+        setTitulo("");
+        setTituloZona("");
+        setTituloSecao('');
+        setTituloUf("");
+        setSelectDocMilitar("");
+        setDocMilitar("");
+        setDocMilitarSerie("");
+
+        setLogadouro("");
+        setNumCasa("");
+        setCep("");
+        setBairro("");
+        setEstadoSelecionado("");
+        setCidadeSelecionada("");
+
+        setBanco("");
+        setBancoAgencia("");
+        setBancoConta("");
+
+        setEscolaridade("");
+        setCursos("");
+        setCurso1("");
+        setCurso2("");
+        setCurso3("");
+        setCurso4("");
+
+        setVinculo("");
+        setSetorDepartamento("");
+        setCargoFuncao("");
+        setCargoEfetivo("");
+        setStatusServidor("");
+        setMatriculaOrigem("");
+        setOrgaoOrigem("");
+        setMatriculaSeai("");
+        setFiles([]);
+        fileInputRhef.current.value = ""
+        setDataEntregaDocs("");
+        setAnotacoes("");
       } else {
         setOpenModalError(true)
-        setModalMessageError("erro ao enviar dados")
+        setModalMessageError("Erro ao enviar dados")
       }
     } catch(err){
       setModalMessageError("Ocorreu um erro, tente novamente");
       console.error("Erro:", err);
     }
   }
-
-  function name(){
-    setOpenModal(true)
-  }
-
 
   return (
     <div className={styles.container_register}>
@@ -632,8 +707,6 @@ function Registro() {
           <Link to={"/historico"} className={styles.link_history}>Histórico de Funcionários</Link>
         </div>
       </div>
-
-      <button onClick={name}>modal</button>
 
       <div className={styles.container_record}>
         <div className={styles.record}>
@@ -649,7 +722,7 @@ function Registro() {
               onChange={handleImageChange}>
             </input>
             <button type='button' onClick={() => inputRef.current?.click()}><Paperclip size={25}/></button>
-            {selectedImage && <img src={selectedImage} alt='img selecionada'></img>}
+            {selectedImage && <img src={selectedImage} alt=""></img>}
           </form>
 
           <div className={styles.inputs}>

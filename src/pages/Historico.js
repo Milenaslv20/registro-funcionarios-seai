@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import styles from './styles.module.css'
 import { Link } from 'react-router-dom'
+import Axios from 'axios'
+import { useFuncionario } from './FuncionarioContext'
 
 import Person from '../components/Person'
 
@@ -12,6 +14,8 @@ import { FilterX } from 'lucide-react'
 function Historico ({ funcionarios }){
   const [dataSeaiFuncionarios, setDataSeaiFuncionarios] = useState([])
   const [totalFunc, setTotalFunc] = useState(0)
+
+  const { usuario } = useFuncionario();
 
   const [data, setData] = useState('')
 
@@ -32,12 +36,12 @@ function Historico ({ funcionarios }){
   //TODO: GET TOTALFUNC AND TOTAL DATA
   useEffect(() =>{
     const dataSeaiFuncionarios = async() =>{
-      const reqData = await fetch("http://172.20.43.250:5000/getRegisters")
+      const reqData = await fetch("http://localhost:5000/getRegisters")
       const resData = await reqData.json()
       setDataSeaiFuncionarios(resData)
       setFiltros(resData || [])
 
-      const reqTotal = await fetch("http://172.20.43.250:5000/getRegisterstot");
+      const reqTotal = await fetch("http://localhost:5000/getRegisterstot");
       const resTotal = await reqTotal.json();
       setTotalFunc(resTotal.totalFunc);
     }
@@ -56,7 +60,7 @@ function Historico ({ funcionarios }){
     try{
 
       if(deleteFuncionario){
-        const res = await fetch(`http://172.20.43.250:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
+        const res = await fetch(`http://localhost:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
           method: 'DELETE',
           headers: {
             'Content-type': 'application/json',
@@ -65,8 +69,14 @@ function Historico ({ funcionarios }){
             nome: deleteFuncionario.nomeFuncionario
           }),
         })
+
+        const exclusao = `Excluiu registro ${deleteFuncionario.nomeFuncionario}`
+        const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
+          nomeUsuario: usuario,
+          nomeFuncionario: exclusao
+        });
       
-        if (res.status === 200) {
+        if (res.status && resLogEdit.status === 200) {
             setOpenModalError(false)
             setOpenModal(true)
             setModalMessage(`O registro ${deleteFuncionario.nomeFuncionario} foi excluido com sucesso`)
@@ -99,10 +109,6 @@ function Historico ({ funcionarios }){
     setFiltroVinculo('')
   }
 
-  function rasc(){
-    setOpenModalError(true)
-    setModalMessageError("o registro sera excluido")
-  }
 
   return (
     <div>

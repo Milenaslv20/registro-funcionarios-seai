@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from '../pages/styles.module.css'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
@@ -13,7 +13,12 @@ import { useFuncionario } from '../pages/FuncionarioContext'
 
 const Person = ({ funcionario, handleOpenDeleteModal }) => {
   const { setFuncionario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState('');
+
+  useEffect(() => {
+    const url = `http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`;
+    setImageUrl(url);
+  }, [funcionario]);
 
   const handleVis = () =>{
     setFuncionario(funcionario)
@@ -22,7 +27,7 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
   const handleDelete = () =>{
     handleOpenDeleteModal(funcionario);
   }
-
+ 
   const handleImageError = () =>{
     setImageUrl(defaultImage)
   }

@@ -2,7 +2,7 @@ import Axios from 'axios';
 
 export const isAuth = async (nomeUsuario, senhaUsuario) => {
     try{
-        const res = await Axios.post("http://172.20.43.250:5000/login", { nomeUsuario, senhaUsuario })
+        const res = await Axios.post("http://localhost:5000/login", { nomeUsuario, senhaUsuario })
         if(res.data.sucess){
             return { sucess:true }
         }

@@ -28,12 +28,12 @@ function Visualizar() {
   const dataExped = new Date(funcionario.rgDataExped)
   const formatedDataExped = dataExped.toLocaleDateString('pt-BR')
 
-  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     if (funcionario?.idFuncionario) {
-      Axios.get(`http://172.20.43.250:5000/getFiles/${funcionario.idFuncionario}`)
+      Axios.get(`http://localhost:5000/getFiles/${funcionario.idFuncionario}`)
         .then(response => {
           const data = response.data[0];
           const paths = data?.filePath ? JSON.parse(data.filePath) : [];
@@ -673,13 +673,17 @@ function Visualizar() {
                     <label for="nome_anexos">Anexos:</label>
 
                     <div className={styles.name_file2_vis} id={styles.name_edit_vis}>
-                      {files.map((file, index) => (
-                        <div key={index} className={styles.name_edits_pdf}>
-                          <a href={`http://172.20.43.250:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
-                            📄 {file.name} {index + 1}
-                          </a>
-                        </div>
-                      ))}
+                      {files.length === 0 ? (
+                        <p>Não Possui</p>
+                      ) : (
+                        files.map((file, index) => (
+                          <div key={index} className={styles.name_edits_pdf}>
+                            <a href={`http://localhost:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                              📄 {file.name} {index + 1}
+                            </a>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
 

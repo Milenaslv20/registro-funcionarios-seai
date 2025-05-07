@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styles from './styles.module.css'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isAuth } from '../isAuth';
+import { useFuncionario } from './FuncionarioContext'
 
 import logoSeai from '../svg/logoSeai.svg'
 
@@ -15,6 +16,8 @@ function Login({ onLogin }) {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const { setUsuario } = useFuncionario();
+
   const from = location.state?.from || '/registro'
 
   function enterPress(e){
@@ -27,9 +30,10 @@ function Login({ onLogin }) {
     e.preventDefault();
       const res = await isAuth(nomeUsuario, senhaUsuario)
       if (res.sucess){
-        localStorage.setItem('token', res.token)
+        localStorage.setItem('token', res.token, nomeUsuario)
         localStorage.setItem('nomeUsuario', nomeUsuario)
         onLogin(res.token)
+        setUsuario(nomeUsuario);
         navigate(from);
         //navigate("/registro", { state: { usuario: usuario } });
       }

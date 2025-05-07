@@ -1,15 +1,16 @@
 import React, { createContext, useState, useContext } from 'react'
 
-const FuncionárioContext = createContext();
+const FuncionarioContext = createContext();
 
-export const FuncionárioProvider = ({ children }) =>{
+export const FuncionarioProvider = ({ children }) =>{
     const [funcionario, setFuncionario] = useState(null);
+    const [usuario, setUsuario] = useState(null);
 
     return(
-        <FuncionárioContext.Provider value={{ funcionario, setFuncionario }}>
+        <FuncionarioContext.Provider value={{ funcionario, setFuncionario, usuario, setUsuario }}>
             {children}    
-        </FuncionárioContext.Provider>
+        </FuncionarioContext.Provider>
     );
 };
 
-export const useFuncionario = () => useContext(FuncionárioContext);
+export const useFuncionario = () => useContext(FuncionarioContext);

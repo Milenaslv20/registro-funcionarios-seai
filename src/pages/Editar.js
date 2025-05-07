@@ -12,7 +12,8 @@ import ModalError from '../components/ModalError'
 
 const Editar = () =>{
   const { funcionario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`http://172.20.43.250:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const { usuario } = useFuncionario();
+  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
 
   const handleImageError = () =>{
     setImageUrl(defaultImage)
@@ -107,7 +108,7 @@ const Editar = () =>{
 
   useEffect(() => {
     if (funcionario?.idFuncionario) {
-      Axios.get(`http://172.20.43.250:5000/getFiles/${funcionario.idFuncionario}`)
+      Axios.get(`http://localhost:5000/getFiles/${funcionario.idFuncionario}`)
         .then(response => {
           const data = response.data[0];
           const paths = data?.filePath ? JSON.parse(data.filePath) : [];
@@ -725,14 +726,13 @@ const Editar = () =>{
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://172.20.43.250:5000/editRegister', formData, {
+      const response = await Axios.post('http://localhost:5000/editRegister', formData, {
         headers: { 
           "Content-Type": 'multipart/form-data', 
         }
       });
 
       console.log(response.data)
-
       const formDatas = new FormData();
       formDatas.append('idFuncionario', visData.idFuncionario)
       formDatas.append('nomeFuncionario', visData.nomeFuncionario);
@@ -740,39 +740,38 @@ const Editar = () =>{
 
       if(imagem) {
         formDatas.append('imagem', imagem)
-      } else{
-        formDatas.append('imagem', null)
       }
 
       if(files.length > 0){
         files.forEach(file =>{
-          formDatas.append('pdfs', file)
-        })
-      } else{
-        formDatas.append('pdfs', null)
-      }
-      const uploadRes = await Axios.post('http://172.20.43.250:5000/uploadsEdit', formDatas, {
+          formDatas.append('pdfs', file);
+        });
+      } 
+      
+      console.log("📝 PDFs enviados:", files);
+      files.forEach(f => console.log(f.name));
+      const uploadRes = await Axios.post('http://localhost:5000/uploadsEdit', formDatas, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       console.log("Resposta do upload:", uploadRes.data);
 
-      if(uploadRes.status && response.status === 200){
+      const edicao = `Editou registro ${visData.nomeFuncionario}`
+      const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
+        nomeUsuario: usuario,
+        nomeFuncionario: edicao
+      });
+
+
+      if(uploadRes.status && response.status && resLogEdit.status === 200){
         setOpenModal(true);
         setModalMessage("Funcionário editado com sucesso");
-        //setReload(true)
       }
     } catch(err){
       setModalMessageError("Ocorreu um erro ao editar, tente novamente");
       console.error("Erro:", err);
     }
-  }
-
-  function editado(){
-    console.log(visData)
-    console.log(`nome antigo ${funcionario.nomeFuncionario}`)
-    console.log(`nome novo ${visData.nomeFuncionario}`)
   }
 
 
@@ -783,8 +782,6 @@ const Editar = () =>{
           <h1 className={styles.nav_history_edit}>Editar Dados</h1>
         </div>
       </div>
-
-      <button onClick={editado}>editar</button>
 
       <div className={styles.container_record}>
         <div className={styles.record}>
@@ -1682,7 +1679,7 @@ const Editar = () =>{
                     <div className={styles.name_file2} id={styles.name_edit}>
                       {files.map((file, index) => (
                         <div key={index}>
-                          <a href={`http://172.20.43.250:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`http://localhost:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
                             📄 {file.name} {index + 1}
                           </a>
                         </div>
@@ -1714,8 +1711,8 @@ const Editar = () =>{
       </div>
 
       {/***TODO: MODALS***/}
-      <Modal isOpen={openModal} setIsOpen={setOpenModal} message={modalMessage} />
-      <ModalError isOpen={openModalError} setIsOpen={setOpenModalError} message={modalMessageError}/>
+      <Modal openModal={openModal} setOpenModal={setOpenModal} message={modalMessage} />
+      <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError} />
     </div>
   )
 }
