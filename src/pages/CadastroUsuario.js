@@ -32,16 +32,9 @@ function CadastroUsuario() {
       if(response.data.success){
         setOpenModalError(false); // <-- FECHA o modal de erro
         cadastrarUsuario();  
-      } else{
-        setModalMessageError("Usuário não autorizado");
-        setOpenModalError(true);
-        // Fecha modal após alguns segundos
-        setTimeout(() => {
-          setOpenModalError(false);
-        }, 2000);
-      }
+      } 
     } catch (err){
-      setModalMessageError("Erro ao validar Administrador");
+      setModalMessageError("Usuário não autorizado");
       setOpenModalError(true);
     }
   }

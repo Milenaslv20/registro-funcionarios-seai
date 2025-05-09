@@ -566,14 +566,15 @@ function Registro() {
     formData.append("matriculaOrigem", matriculaOrigem);
     formData.append("orgaoOrigem", orgaoOrigem);
     formData.append("matriculaSeai", matriculaSeai);
-    formData.append("arquivosNome", files)
+    formData.append("arquivosNome", files);
     formData.append("dataEntregaDocs", dataEntregaDocs);
     formData.append("anotacoes", anotacoes);
-
 
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
+
+      // 1. Cadastro
       const response = await Axios.post('http://localhost:5000/cadastrar', formData, {
         headers: { 
           "Content-Type": 'application/json', 
@@ -602,19 +603,21 @@ function Registro() {
         formDatas.append('pdfs', null)
       }
 
-      const uploadRes = await Axios.post('http://172.20.43.250:5000/uploads', formDatas, {
+      // 2. Upload
+      const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       const cadastro = `Cadastrou registro ${nome}`
-      const resLogEdit = await Axios.post('http://172.20.43.250:5000/logEdicao', {
+      const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
         nomeUsuario: usuario,
         nomeFuncionario: cadastro
       });
 
-      if(uploadRes.status && response.status && resLogEdit.status === 200){
+
+      if (uploadRes.status && response.status && resLogEdit.status === 200){
         console.log(formData)
         
         setOpenModal(true);
@@ -689,11 +692,9 @@ function Registro() {
         fileInputRhef.current.value = ""
         setDataEntregaDocs("");
         setAnotacoes("");
-      } else {
-        setOpenModalError(true)
-        setModalMessageError("Erro ao enviar dados")
       }
     } catch(err){
+      setOpenModalError(true)
       setModalMessageError("Ocorreu um erro, tente novamente");
       console.error("Erro:", err);
     }

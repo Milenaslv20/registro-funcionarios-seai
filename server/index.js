@@ -216,23 +216,16 @@ app.post("/cadastrar", (req, res) =>{
     });
 });
 
+/*
 app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) =>{
     const { idFuncionario } = req.body
     const nome = req.body.nomeFuncionario || req.body.nome;
 
     const pasta = path.join('uploads', nome);
 
-    const imagemPath = req.files['imagem'] && req.files['imagem'][0]
-      ? path.join(pasta, req.files['imagem'][0].filename)
-      : null;
-  
-    const pdfsPath = req.files['pdfs']
-      ? req.files['pdfs'].map(file => path.join(pasta, file.filename))
-      : [];
-  
-    const originalNames = req.files['pdfs']
-      ? req.files['pdfs'].map(file => file.originalname)
-      : [];
+    const imagemPath = path.join(pasta, req.files['imagem'][0].filename);
+    const pdfsPath = req.files['pdfs'].map(file => path.join(pasta, file.filename));
+    const originalNames = req.files['pdfs'].map(file => file.originalname);
   
     const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
     db.query(query, [
@@ -248,6 +241,26 @@ app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount
       res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
     });
 });
+*/
+
+app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) =>{
+    const { idFuncionario } = req.body
+    const nome = req.body.nomeFuncionario || req.body.nome;
+
+    const pasta = path.join('uploads', nome);
+
+    const imagemPath = path.join(pasta, req.files['imagem'][0].filename);
+    const pdfsPath = req.files['pdfs'].map(file => path.join(pasta, file.filename));
+    const originalNames = req.files['pdfs'].map(file => file.originalname);
+
+    const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
+    db.query(query, [idFuncionario, JSON.stringify(originalNames), JSON.stringify(pdfsPath), imagemPath], (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: 'Erro ao salvar no banco de dados', error: err });
+        }
+        res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
+    });
+})
 
 app.post("/cadastrarUsuario", (req, res) =>{
     console.log("Body recebido:", req.body);
@@ -441,10 +454,8 @@ app.get("/getLogsEdit", (req, res) =>{
     })
 })
 
-app.get("/validateUser", (req, res) =>{
+app.post("/validateUser", (req, res) =>{
     const { usuario, senha } = req.body
-
-    console.log(usuario, senha)
 
     const validateUser = `
         SELECT * FROM usuarios 
@@ -453,10 +464,6 @@ app.get("/validateUser", (req, res) =>{
     `;
 
     db.query(validateUser, [usuario, senha], (err, result) =>{
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao validar ADM' });
-        }
-
         if (result.length > 0) {
             return res.status(200).json({ success: true, message: 'Usuário ADM validado' });
         } else {
@@ -600,6 +607,7 @@ app.post("/editRegister", upload.none(), (req, res) =>{
 app.post("/uploadsEdit", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) => {
     console.log('👀 req.files front:', req.files);
     console.log('🧾 req.body front:', req.body);
+  
     const { idFuncionario, nomeFuncionario, nomeAntigo } = req.body;
     const nomeNovo = nomeFuncionario || req.body.nome;
   
@@ -608,132 +616,154 @@ app.post("/uploadsEdit", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxC
     }
   
     const pastaBase = path.join(__dirname, 'uploads');
-    const pastaNova = path.join(pastaBase, nomeNovo);
     const pastaAntiga = nomeAntigo ? path.join(pastaBase, nomeAntigo) : null;
+    const pastaNova = path.join(pastaBase, nomeNovo);
   
     try {
-        if (pastaAntiga && pastaAntiga !== pastaNova && fs.existsSync(pastaAntiga)) {
-            fs.renameSync(pastaAntiga, pastaNova);
-        }
+      // Renomeia a pasta se o nome foi alterado
+      if (pastaAntiga && pastaAntiga !== pastaNova && fs.existsSync(pastaAntiga)) {
+        fs.renameSync(pastaAntiga, pastaNova);
   
-        if (!fs.existsSync(pastaNova)) {
-            fs.mkdirSync(pastaNova, { recursive: true });
-        }
+        // Renomeia os arquivos dentro da nova pasta
+        const arquivos = fs.readdirSync(pastaNova);
   
-        const queryBusca = "SELECT filePath, imagePath, originalFileNames FROM documentos WHERE idFuncionario = ?";
-        db.query(queryBusca, [idFuncionario], (err, results) => {
-            if (err || results.length === 0) {
-            return res.status(500).json({ message: 'Erro ao buscar documentos antigos', error: err });
+        arquivos.forEach((nomeArquivo) => {
+          const ext = path.extname(nomeArquivo);
+          const caminhoAntigo = path.join(pastaNova, nomeArquivo);
+  
+          // Renomear imagem antiga
+          if (nomeArquivo.startsWith("foto_") && ext === ".avif") {
+            const novoNome = `foto_${nomeNovo}.avif`;
+            const caminhoNovo = path.join(pastaNova, novoNome);
+            fs.renameSync(caminhoAntigo, caminhoNovo);
+          }
+  
+          // Renomear PDFs antigos
+          if (nomeArquivo.startsWith("doc_") && ext === ".pdf") {
+            const partes = nomeArquivo.split('_');
+            if (partes.length >= 4) {
+              const timestamp = partes[2];
+              const base = partes.slice(3).join('_');
+              const novoNome = `doc_${nomeNovo}_${timestamp}_${base}`;
+              const caminhoNovo = path.join(pastaNova, novoNome);
+              fs.renameSync(caminhoAntigo, caminhoNovo);
+            }
+          }
+        });
+      }
+  
+      // Cria a nova pasta caso não exista
+      if (!fs.existsSync(pastaNova)) {
+        fs.mkdirSync(pastaNova, { recursive: true });
+      }
+  
+      // Busca dados antigos do banco
+      const queryBusca = "SELECT filePath, imagePath, originalFileNames FROM documentos WHERE idFuncionario = ?";
+      db.query(queryBusca, [idFuncionario], (err, results) => {
+        if (err || results.length === 0) {
+          return res.status(500).json({ message: 'Erro ao buscar documentos antigos', error: err });
         }
   
         const antigos = results[0];
-        let imagemPath = req.files['imagem'] && req.files['imagem'][0] ? path.join(pastaNova, req.files['imagem'][0].filename) : antigos.imagePath;
+        let imagemPath = antigos.imagePath;
         let pdfsPath = antigos.filePath ? JSON.parse(antigos.filePath) : [];
-        let originalNamesAntigos = antigos.originalFileNames ? JSON.parse(antigos.originalFileNames) : [];
-        let novosPdfsPath = [];
-        let originalNamesNovos = [];
-
-        if (nomeAntigo && nomeAntigo !== nomeNovo) {
-            if (antigos.imagePath) {
-            const nomeImagemAntiga = path.basename(antigos.imagePath);
-            antigos.imagePath = path.join('uploads', nomeNovo, nomeImagemAntiga);
-            }
-
-            if (pdfsPath.length > 0) {
-                pdfsPath = pdfsPath.map(file => {
-                const nomeArquivo = path.basename(file);
-                return path.join('uploads', nomeNovo, nomeArquivo);
-                });
-            }
+        let originalNames = antigos.originalFileNames ? JSON.parse(antigos.originalFileNames) : [];
+  
+        // === ATUALIZAÇÃO DE IMAGEM ===
+  
+        if (req.files['imagem'] && req.files['imagem'][0]) {
+          const imgFile = req.files['imagem'][0];
+          const newImageName = `foto_${nomeNovo}.avif`;
+          const newImagePath = path.join(pastaNova, newImageName);
+          fs.renameSync(imgFile.path, newImagePath);
+          imagemPath = path.join('uploads', nomeNovo, newImageName);
+        } else if (nomeAntigo && nomeAntigo !== nomeNovo && antigos.imagePath) {
+          const caminhoAntigo = path.join(__dirname, antigos.imagePath);
+          const novoNomeImagem = `foto_${nomeNovo}.avif`;
+          const caminhoNovo = path.join(pastaNova, novoNomeImagem);
+  
+          if (fs.existsSync(caminhoAntigo)) {
+            fs.renameSync(caminhoAntigo, caminhoNovo);
+            imagemPath = path.join('uploads', nomeNovo, novoNomeImagem);
+          }
+          imagemPath = `uploads\\${nomeNovo}\\${novoNomeImagem}`
         }
   
-        // Verifica se há novos PDFs
+        // === ATUALIZAÇÃO DE PDFs ===
+  
         if (req.files['pdfs'] && req.files['pdfs'].length > 0) {
-            console.log("PDFs novos recebidos:", req.files['pdfs']);
+          const novosPdfsPath = [];
+          const novosOriginalNames = [];
   
-            req.files['pdfs'].forEach((file, index) => {
-                const extensao = path.extname(file.originalname);
-                const baseName = path.basename(file.originalname, extensao);
-                const novoNomePdf = `doc_${nomeNovo}_${Date.now()}_${baseName}${extensao}`;
-                const caminhoAntigo = file.path; // caminho atual com nome aleatório
-                console.log("caminho novo pdf", file.path)
-                const caminhoNovo = path.join(pastaNova, novoNomePdf);
-            
-                // Move e renomeia o arquivo
-                fs.renameSync(caminhoAntigo, caminhoNovo);
-            
-                novosPdfsPath.push(path.join('uploads', nomeNovo, novoNomePdf));
-                originalNamesNovos.push(file.originalname);
-            });
+          req.files['pdfs'].forEach((file) => {
+            const ext = path.extname(file.originalname);
+            const baseName = path.basename(file.originalname, ext);
+            const newPdfName = `doc_${nomeNovo}_${Date.now()}_${baseName}${ext}`;
+            const newPdfPath = path.join(pastaNova, newPdfName);
   
-            // Apaga os antigos somente depois de garantir os novos
-            pdfsPath.forEach(file => {
-                const fullPath = path.join(__dirname, file);
-                if (fs.existsSync(fullPath)) {
-                    fs.unlinkSync(fullPath);
-                }
-            });
-
-        } else if(nomeAntigo && nomeAntigo !== nomeNovo && (!req.files['imagem']) && (!req.files['pdfs'] || req.files['pdfs'].length === 0)) {
-            // Nenhum novo PDF, mas mudou o nome da pasta — manter os antigos com novo caminho
-            novosPdfsPath = pdfsPath;
-        	originalNamesNovos = originalNamesAntigos;
-
-            console.log(novosPdfsPath)
-            console.log(originalNamesNovos)
-            // Renomear PDFs
-            if (pdfsPath.length > 0)  {
-                novosPdfsPath = [];
-                originalNamesNovos = [];
-
-                pdfsPath.forEach((filePathAntigo, index) => {
-                    const nomeArquivoAntigo = path.basename(filePathAntigo);
-                    const extensao = path.extname(nomeArquivoAntigo);
-                    const nomeOriginal = originalNamesAntigos[index] || `doc_${nomeNovo}_${Date.now()}_${baseName}${extensao}`;
-                    const baseName = path.basename(nomeOriginal, extensao);
-                    const novoNomePdf = `doc_${nomeNovo}_${Date.now()}_${baseName}${extensao}`;
-                    const caminhoAntigo = path.join(__dirname, filePathAntigo);
-                    const caminhoNovo = path.join(pastaNova, novoNomePdf);
-
-                    if (fs.existsSync(caminhoAntigo)) {
-                        fs.renameSync(caminhoAntigo, caminhoNovo);
-                        novosPdfsPath.push(path.join('uploads', nomeNovo, novoNomePdf));
-                        originalNamesNovos.push(nomeOriginal);
-                    }
-                });
+            fs.renameSync(file.path, newPdfPath);
+            novosPdfsPath.push(path.join('uploads', nomeNovo, newPdfName));
+            novosOriginalNames.push(file.originalname);
+          });
+  
+          // Remove arquivos antigos do disco
+          pdfsPath.forEach(file => {
+            const fullPath = path.join(__dirname, file);
+            if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+          });
+  
+          pdfsPath = novosPdfsPath;
+          originalNames = novosOriginalNames;
+        } else if (nomeAntigo && nomeAntigo !== nomeNovo && pdfsPath.length > 0) {
+          // Renomeia os PDFs antigos se apenas o nome foi alterado
+          const arquivosNaNovaPasta = fs.readdirSync(pastaNova);
+          const novosPdfsPath = [];
+          const novosOriginalNames = [];
+  
+          arquivosNaNovaPasta.forEach((arquivo) => {
+            const ext = path.extname(arquivo);
+            if (arquivo.startsWith("doc_") && ext === ".pdf") {
+              const caminhoAntigo = path.join(pastaNova, arquivo);
+        
+              // Gera novo nome com base no nome novo
+              const base = path.basename(arquivo, ext).split('_').slice(3).join('_'); // pega o nome original
+              const novoNome = `doc_${nomeNovo}_${Date.now()}_${base}${ext}`;
+              const caminhoNovo = path.join(pastaNova, novoNome);
+        
+              fs.renameSync(caminhoAntigo, caminhoNovo);
+        
+              novosPdfsPath.push(path.join('uploads', nomeNovo, novoNome));
+              novosOriginalNames.push(base + ext);
             }
-     	}
-
-
-  	    // Renomear imagem
-	    if (antigos.imagePath) {
-            const caminhoAntigo = path.join(__dirname, antigos.imagePath);
-            const nomeImagemAntiga = path.basename(antigos.imagePath);
-            const extensaoImagem = path.extname(nomeImagemAntiga);
-            const novoNomeImagem = `foto_${nomeNovo}${extensaoImagem}`;
-            const caminhoNovo = path.join(pastaNova, novoNomeImagem);
-
-            if (fs.existsSync(caminhoAntigo)) {
-                fs.renameSync(caminhoAntigo, caminhoNovo);
-                imagemPath = path.join('uploads', nomeNovo, novoNomeImagem);
-            }
+          });
+  
+          pdfsPath = novosPdfsPath;
+          originalNames = novosOriginalNames;
         }
-	
-
+  
+        // === ATUALIZAÇÃO NO BANCO DE DADOS ===
+        console.log(originalNames)
+        console.log(pdfsPath)
         const queryUpdate = `UPDATE documentos SET originalFileNames = ?, filePath = ?, imagePath = ? WHERE idFuncionario = ?`;
-        db.query(queryUpdate, [JSON.stringify(originalNamesNovos), JSON.stringify(novosPdfsPath), imagemPath, idFuncionario], (err, result) => {
-            if (err) {
-                console.error("Erro ao atualizar documentos:", err);
-                return res.status(500).json({ message: 'Erro ao atualizar documentos', error: err });
-            }
-            res.status(200).json({ message: 'Arquivos atualizados com sucesso' });
+        db.query(queryUpdate, [
+          JSON.stringify(originalNames),
+          JSON.stringify(pdfsPath),
+          imagemPath,
+          idFuncionario
+        ], (err, result) => {
+          if (err) {
+            console.error("Erro ao atualizar documentos:", err);
+            return res.status(500).json({ message: 'Erro ao atualizar documentos', error: err });
+          }
+          return res.status(200).json({ message: 'Arquivos atualizados com sucesso' });
         });
-    });
+      });
+  
     } catch (err) {
       console.error("Erro geral no upload edit:", err);
       return res.status(500).json({ message: 'Erro no servidor', error: err });
     }
-});
+  });
 
 
 

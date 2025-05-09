@@ -767,6 +767,9 @@ const Editar = () =>{
       if(uploadRes.status && response.status && resLogEdit.status === 200){
         setOpenModal(true);
         setModalMessage("Funcionário editado com sucesso");
+      } else if (uploadRes.status || response.status || resLogEdit.status !== 200){
+        setOpenModalError(true)
+        setModalMessageError("Ocorreu um erro ao editar, tente novamente");
       }
     } catch(err){
       setModalMessageError("Ocorreu um erro ao editar, tente novamente");
