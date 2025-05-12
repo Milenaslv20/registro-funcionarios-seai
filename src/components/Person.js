@@ -12,11 +12,13 @@ import defaultImage from '../svg/icon-person.jpg'
 import { useFuncionario } from '../pages/FuncionarioContext'
 
 const Person = ({ funcionario, handleOpenDeleteModal }) => {
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   const { setFuncionario } = useFuncionario();
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
-    const url = `http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`;
+    const url = `${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`;
     setImageUrl(url);
   }, [funcionario]);
 

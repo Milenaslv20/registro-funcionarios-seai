@@ -8,6 +8,8 @@ import { FolderDown } from 'lucide-react'
 import defaultImage from '../svg/icon-person.jpg'
 
 function Visualizar() {
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   const { funcionario } = useFuncionario();
   const idFuncionario = funcionario.idFuncionario;
 
@@ -28,12 +30,12 @@ function Visualizar() {
   const dataExped = new Date(funcionario.rgDataExped)
   const formatedDataExped = dataExped.toLocaleDateString('pt-BR')
 
-  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(`${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     if (funcionario?.idFuncionario) {
-      Axios.get(`http://localhost:5000/getFiles/${funcionario.idFuncionario}`)
+      Axios.get(`${endpoint}/getFiles/${funcionario.idFuncionario}`)
         .then(response => {
           const data = response.data[0];
           const paths = data?.filePath ? JSON.parse(data.filePath) : [];
@@ -678,7 +680,7 @@ function Visualizar() {
                       ) : (
                         files.map((file, index) => (
                           <div key={index} className={styles.name_edits_pdf}>
-                            <a href={`http://localhost:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                            <a href={`${endpoint}/${file.path}`} target="_blank" rel="noopener noreferrer">
                               📄 {file.name} {index + 1}
                             </a>
                           </div>

@@ -6,6 +6,8 @@ import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 
 function CadastroUsuario() {
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [openModalError, setOpenModalError] = useState(false);
@@ -22,7 +24,7 @@ function CadastroUsuario() {
 
   const validateUser = async (usuario, senha) =>{
     try{
-      const response = await Axios.post('http://localhost:5000/validateUser', { usuario, senha }, {
+      const response = await Axios.post(`${endpoint}/validateUser`, { usuario, senha }, {
         method: 'POST',
         headers: { 
           "Content-Type": 'application/json', 
@@ -47,7 +49,7 @@ function CadastroUsuario() {
 
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://localhost:5000/cadastrarUsuario', formData, {
+      const response = await Axios.post(`${endpoint}/cadastrarUsuario`, formData, {
         method: 'POST',
         headers: { 
           "Content-Type": 'application/json', 

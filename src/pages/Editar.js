@@ -11,9 +11,11 @@ import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 
 const Editar = () =>{
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   const { funcionario } = useFuncionario();
   const { usuario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`http://localhost:5000/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(`${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
 
   const handleImageError = () =>{
     setImageUrl(defaultImage)
@@ -108,7 +110,7 @@ const Editar = () =>{
 
   useEffect(() => {
     if (funcionario?.idFuncionario) {
-      Axios.get(`http://localhost:5000/getFiles/${funcionario.idFuncionario}`)
+      Axios.get(`${endpoint}/getFiles/${funcionario.idFuncionario}`)
         .then(response => {
           const data = response.data[0];
           const paths = data?.filePath ? JSON.parse(data.filePath) : [];
@@ -726,7 +728,7 @@ const Editar = () =>{
     //TODO: SEND TO BACKEND
     try{
       console.log("Enviando requisição...");
-      const response = await Axios.post('http://localhost:5000/editRegister', formData, {
+      const response = await Axios.post(`${endpoint}/editRegister`, formData, {
         headers: { 
           "Content-Type": 'multipart/form-data', 
         }
@@ -750,7 +752,7 @@ const Editar = () =>{
       
       console.log("📝 PDFs enviados:", files);
       files.forEach(f => console.log(f.name));
-      const uploadRes = await Axios.post('http://localhost:5000/uploadsEdit', formDatas, {
+      const uploadRes = await Axios.post(`${endpoint}/uploadsEdit`, formDatas, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -758,7 +760,7 @@ const Editar = () =>{
       console.log("Resposta do upload:", uploadRes.data);
 
       const edicao = `Editou registro ${visData.nomeFuncionario}`
-      const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
+      const resLogEdit = await Axios.post(`${endpoint}/logEdicao`, {
         nomeUsuario: usuario,
         nomeFuncionario: edicao
       });
@@ -1682,7 +1684,7 @@ const Editar = () =>{
                     <div className={styles.name_file2} id={styles.name_edit}>
                       {files.map((file, index) => (
                         <div key={index}>
-                          <a href={`http://localhost:5000/${file.path}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`${endpoint}/${file.path}`} target="_blank" rel="noopener noreferrer">
                             📄 {file.name} {index + 1}
                           </a>
                         </div>

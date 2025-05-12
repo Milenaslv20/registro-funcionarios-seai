@@ -10,6 +10,8 @@ import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 
 function Registro() {
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   //TODO: DECLARATION MODAL
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -575,7 +577,7 @@ function Registro() {
       console.log("Enviando requisição...");
 
       // 1. Cadastro
-      const response = await Axios.post('http://localhost:5000/cadastrar', formData, {
+      const response = await Axios.post(`${endpoint}/cadastrar`, formData, {
         headers: { 
           "Content-Type": 'application/json', 
         }
@@ -591,8 +593,6 @@ function Registro() {
 
       if(imagem) {
         formDatas.append('imagem', imagem)
-      } else{
-        formDatas.append('imagem', null)  
       }
 
       if(files.length > 0){
@@ -604,14 +604,14 @@ function Registro() {
       }
 
       // 2. Upload
-      const uploadRes = await Axios.post('http://localhost:5000/uploads', formDatas, {
+      const uploadRes = await Axios.post(`${endpoint}/uploads`, formDatas, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       const cadastro = `Cadastrou registro ${nome}`
-      const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
+      const resLogEdit = await Axios.post(`${endpoint}/logEdicao`, {
         nomeUsuario: usuario,
         nomeFuncionario: cadastro
       });

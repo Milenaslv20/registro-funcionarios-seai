@@ -12,6 +12,8 @@ import ModalError from '../components/ModalError'
 import { FilterX } from 'lucide-react'
 
 function Historico ({ funcionarios }){
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
   const [dataSeaiFuncionarios, setDataSeaiFuncionarios] = useState([])
   const [totalFunc, setTotalFunc] = useState(0)
 
@@ -36,12 +38,12 @@ function Historico ({ funcionarios }){
   //TODO: GET TOTALFUNC AND TOTAL DATA
   useEffect(() =>{
     const dataSeaiFuncionarios = async() =>{
-      const reqData = await fetch("http://localhost:5000/getRegisters")
+      const reqData = await fetch(`${endpoint}/getRegisters`)
       const resData = await reqData.json()
       setDataSeaiFuncionarios(resData)
       setFiltros(resData || [])
 
-      const reqTotal = await fetch("http://localhost:5000/getRegisterstot");
+      const reqTotal = await fetch(`${endpoint}/getRegisterstot`);
       const resTotal = await reqTotal.json();
       setTotalFunc(resTotal.totalFunc);
     }
@@ -60,7 +62,7 @@ function Historico ({ funcionarios }){
     try{
 
       if(deleteFuncionario){
-        const res = await fetch(`http://localhost:5000/deleteRegister/${deleteFuncionario.idFuncionario}`, {
+        const res = await fetch(`${endpoint}/deleteRegister/${deleteFuncionario.idFuncionario}`, {
           method: 'DELETE',
           headers: {
             'Content-type': 'application/json',
@@ -71,7 +73,7 @@ function Historico ({ funcionarios }){
         })
 
         const exclusao = `Excluiu registro ${deleteFuncionario.nomeFuncionario}`
-        const resLogEdit = await Axios.post('http://localhost:5000/logEdicao', {
+        const resLogEdit = await Axios.post(`${endpoint}/logEdicao`, {
           nomeUsuario: usuario,
           nomeFuncionario: exclusao
         });

@@ -247,9 +247,12 @@ app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount
     const { idFuncionario } = req.body
     const nome = req.body.nomeFuncionario || req.body.nome;
 
+    let imagemPath = null;
     const pasta = path.join('uploads', nome);
-
-    const imagemPath = path.join(pasta, req.files['imagem'][0].filename);
+    
+    if (req.files && req.files['imagem'] && req.files['imagem'][0]) {
+      imagemPath = path.join(pasta, req.files['imagem'][0].filename);
+    }
     const pdfsPath = req.files['pdfs'].map(file => path.join(pasta, file.filename));
     const originalNames = req.files['pdfs'].map(file => file.originalname);
 

@@ -9,6 +9,7 @@ import logoSeai from '../svg/logoSeai.svg'
 import ModalError from '../components/ModalError';
 
 function Login({ onLogin }) {
+
   const[nomeUsuario, setNomeUsuario] = useState('')
   const[senhaUsuario, setSenhaUsuario] = useState('')
   const[openModalError, setOpenModalError] = useState(false)

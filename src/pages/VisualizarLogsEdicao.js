@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom'
 import { FilterX } from 'lucide-react'
 
 function VisualizarLogsEdicao() {
+  const endpoint = process.env.REACT_APP_API_BASE_URL;
+
     const [dataLogsEdit, setdataLogsEdit] = useState([])
 
     const [filtroNomeUsuario, setFiltroNomeUsuario] = useState('');
@@ -18,7 +20,7 @@ function VisualizarLogsEdicao() {
     
     useEffect(() =>{
         const dataLogsEdit = async() =>{
-        const reqData = await fetch("http://localhost:5000/getLogsEdit")
+        const reqData = await fetch(`${endpoint}/getLogsEdit`)
         const resData = await reqData.json()
         setdataLogsEdit(resData)
         }
