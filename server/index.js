@@ -253,8 +253,10 @@ app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount
     if (req.files && req.files['imagem'] && req.files['imagem'][0]) {
       imagemPath = path.join(pasta, req.files['imagem'][0].filename);
     }
-    const pdfsPath = req.files['pdfs'].map(file => path.join(pasta, file.filename));
-    const originalNames = req.files['pdfs'].map(file => file.originalname);
+    const pdfs = req.files && req.files['pdfs'] ? req.files['pdfs'] : [];
+    const pdfsPath = pdfs.map(file => path.join(pasta, file.filename));
+    const originalNames = pdfs.map(file => file.originalname);
+
 
     const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
     db.query(query, [idFuncionario, JSON.stringify(originalNames), JSON.stringify(pdfsPath), imagemPath], (err, result) => {
