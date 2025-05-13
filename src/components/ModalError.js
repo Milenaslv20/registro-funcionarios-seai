@@ -5,6 +5,7 @@ export default function ModalError({openModalError, setOpenModalError, message, 
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
 
+
   useEffect(() => {
     if (openModalError) {
       setUsuario('');

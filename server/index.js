@@ -75,7 +75,7 @@ const db = mysql.createConnection({
     host: "localhost",
     user: "dev",
     password: "123456",
-    database: "seaifuncionariosdev",
+    database: "seaifuncionarios",
     port: "3307"
 });
 db.connect((err) => {
@@ -428,6 +428,21 @@ app.get("/getRegisterstot", (req, res) =>{
         }
 
         return res.json(restot)
+    })
+})
+
+app.post("/existenciaUsuario", (req, res) =>{
+    const { cpf } = req.body
+
+    const existenciaUsuario = `
+        SELECT * FROM dadosdocumentos 
+        WHERE cpf = ? LIMIT 1;
+    `;
+
+    db.query(existenciaUsuario, [cpf], (err, result) =>{    
+        if (result.length > 0) {
+            return res.status(200).json({ success: true, message: 'Usuário Existe' });
+        }
     })
 })
 

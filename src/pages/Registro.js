@@ -3,6 +3,7 @@ import styles from './styles.module.css'
 import { Link } from 'react-router-dom'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
+import { IMaskInput } from 'react-imask';
 
 import { Paperclip } from 'lucide-react'
 
@@ -203,10 +204,26 @@ function Registro() {
     fileInputRhef.current.value = ""
   }
 
+  //TODO: VERIFICATION USER
+    const verificarUsuario = async (cpf) =>{
+      try{
+        const response = await Axios.post(`${endpoint}/existenciaUsuario`, { cpf }, {
+          method: 'POST',
+          headers: { 
+            "Content-Type": 'application/json', 
+          }
+        })
+  
+        if(response.data.success){
+          setOpenModalError(true);
+          setModalMessageError("O Funcionário já está cadastrado")
+        } 
+      } catch (err){
+      }
+    }
+
   //TODO: VALIDATION INPUTS AND SEND TO BACKEND
   const regex = /[0-9!#$%&'"()*+,-./:;?@[\\\]_`{|}~]/
-  const regex_num = /^[0-9()-]*$/
-  const regex_cpf = /^[-.]*$/
 
   const validateForm = () =>{
     if(nome === ''){
@@ -271,11 +288,6 @@ function Registro() {
       setOpenModalError(true)
       return
     }
-    if(!regex_num.test(telefone)){
-      setModalMessageError("Preencha o telefone apenas com números, parênteses e hífem")
-      setOpenModalError(true)
-      return
-    }
 
     if(email.trim() === ''){
       setModalMessageError("Preencha o email")
@@ -296,10 +308,6 @@ function Registro() {
 
     if(cpfPai.trim() === ''){
       setModalMessageError("Preencha o cpf do pai")
-      setOpenModalError(true)
-    }
-    if(regex_cpf.test(cpfPai) === true){
-      setModalMessageError("Preencha o cpf do pai corretamente")
       setOpenModalError(true)
     }
 
@@ -323,10 +331,6 @@ function Registro() {
       setModalMessageError("Preencha o cpf da mãe")
       setOpenModalError(true)
     }
-    if(regex_cpf.test(cpfMae) === true){
-      setModalMessageError("Preencha o cpf da mãe corretamente")
-      setOpenModalError(true)
-    }
 
     if(dataNascMae.trim() === ''){
       setModalMessageError("Preencha a data de nascimento da mãe")
@@ -347,10 +351,6 @@ function Registro() {
 
     if(cpf.trim() === ''){
       setModalMessageError("Preencha o CPF")
-      setOpenModalError(true)
-    }
-    if(regex_cpf.test(cpf) === true){
-      setModalMessageError("Preencha o CPF corretamente")
       setOpenModalError(true)
     }
 
@@ -700,6 +700,7 @@ function Registro() {
     }
   }
 
+
   return (
     <div className={styles.container_register}>
       <div className={styles.nav_register}>
@@ -814,14 +815,13 @@ function Registro() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="telefone">Telefone:</label>
-                  <input 
-                    type='text' 
+                  <IMaskInput
+                    mask="(00) 00000-0000"
                     id='telefone' 
                     name='telefone' 
-                    value={telefone} 
-                    maxLength={14}
-                    onChange={(e) => {setTelefone(e.target.value)}}>
-                  </input>
+                    value={telefone}
+                    onAccept={(value) => setTelefone(value)}
+                  />
                 </div>
               </div>
 
@@ -864,14 +864,13 @@ function Registro() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf_pai">CPF:</label>
-                  <input 
-                    type='text' 
-                    id='cpf_pai' 
-                    name='cpf_pai' 
-                    value={cpfPai} 
-                    maxLength={14}
-                    onChange={(e) => {setCpfPai(e.target.value)}}>
-                  </input>
+                    <IMaskInput
+                      id='cpf_pai' 
+                      name='cpf_pai' 
+                      mask="000.000.000-00"
+                      value={cpfPai}
+                      onAccept={(value) => setCpfPai(value)}
+                  />
                 </div>
 
                 <div className={styles.div_input}>
@@ -902,14 +901,13 @@ function Registro() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf_mae">CPF:</label>
-                  <input 
-                    type='text' 
-                    id='cpf_mae' 
-                    name='cpf_mae' 
-                    value={cpfMae} 
-                    maxLength={14}
-                    onChange={(e) => {setCpfMae(e.target.value)}}>
-                  </input>
+                    <IMaskInput
+                      id='cpf_mae' 
+                      name='cpf_mae' 
+                      mask="000.000.000-00"
+                      value={cpfMae}
+                      onAccept={(value) => setCpfMae(value)}
+                  />
                 </div>
 
                 <div className={styles.div_input}>
@@ -932,6 +930,7 @@ function Registro() {
                       <option disabled={true} value="">Selecione</option>
                       <option value="Solteiro">Solteiro</option>
                       <option value="Casado">Casado</option>
+                      <option value="União Estável">União Estável</option>
                       <option value="Separado">Separado</option>
                       <option value="Divorciado">Divorciado</option>
                       <option value="Viúvo">Viúvo</option>
@@ -961,6 +960,7 @@ function Registro() {
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
+                    <option value="Mais de 3">Mais de 3</option>
                   </select>
                 </div>
 
@@ -987,16 +987,20 @@ function Registro() {
               </div>
 
               <div className={styles.form_group}>
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf">CPF:</label>
-                  <input 
-                    type='text'
+                <div className={styles.div_input}>
+                  <label>CPF:</label>
+                  <IMaskInput
                     id='cpf' 
                     name='cpf' 
-                    value={cpf} 
-                    maxLength={14}
-                    onChange={(e) => {setCpf(e.target.value)}}>
-                  </input>
+                    mask="000.000.000-00"
+                    value={cpf}
+                    onAccept={(value) => {
+                      setCpf(value)
+                      if (value.length === 14) {
+                        verificarUsuario(value);
+                      }
+                    }}
+                  />
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
@@ -1060,10 +1064,10 @@ function Registro() {
                   <label for="rg_orgao_exped">Orgão Exped:</label>
                   <select id='rg_orgao_exped' name='rg_orgao_exped' value={rgOrgaoExped} onChange={(e) => {setRgOrgaoExped(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
-                    <option value="SSP">SSP</option>
-                    <option value="PC">PC</option>
-                    <option value="PM">PM</option>
-                    <option value="Detran">Detran</option>
+                    <option value="SSP/AM">SSP/AM</option>
+                    <option value="PC/AM">PC/AM</option>
+                    <option value="PM/AM">PM/AM</option>
+                    <option value="Detran/AM">Detran/AM</option>
                     <option value="Outros">Outros</option>
                   </select>
                 </div>
@@ -1351,10 +1355,13 @@ function Registro() {
                     <option disabled={true} value="">Selecione</option>
                     <option value="Ensino Fundamental">Ensino Fundamental</option>
                     <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="EJA">EJA</option>
                     <option value="Ensino Superior">Ensino Superior</option>
+                    <option value="Pós Graduação">Pós Graduação</option>
+                    <option value="Mestrado">Mestrado</option>
+                    <option value="Doutorado">Doutorado</option>
                     <option value="Tecnólogo">Tecnólogo</option>
+                    <option value="EJA">EJA</option>
+                    <option value="Outros">Outros</option>
                   </select>
                 </div>
 
@@ -1367,6 +1374,7 @@ function Registro() {
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
+                    <option value="Mais de 4">Mais de 4</option>
                   </select>
                 </div>
 
