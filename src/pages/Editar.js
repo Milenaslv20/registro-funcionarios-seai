@@ -353,273 +353,307 @@ const Editar = () =>{
     if(visData.nomeFuncionario === ''){
       setModalMessageError("Preencha o nome")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(visData.nomeFuncionario) === true){
       setModalMessageError("Preencha o nome apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.sexo === ''){
       setModalMessageError("Preencha o sexo")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.dataNasc === ''){
       setModalMessageError("Peencha a data de nascimento")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.estadoAtual === ''){
       setModalMessageError("Preencha o estado")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.nacionalidade.trim() === ''){
       setModalMessageError("Preencha a nacionalidade")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(visData.nacionalidade) === true){
       setModalMessageError("Preencha a nacionalidade apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.naturalidade.trim() === ''){
       setModalMessageError("Preencha a naturalidade")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(visData.naturalidade) === true){
       setModalMessageError("Preencha a naturalidade apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.raca === ''){
       setModalMessageError("Preencha a raça")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.telefone.trim() === ''){
       setModalMessageError("Digite o telefone")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.email.trim() === ''){
       setModalMessageError("Preencha o email")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.nomePai.trim() === ''){
       setModalMessageError("Preencha o nome do pai")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(visData.nomePai) === true){
       setModalMessageError("Preencha o nome do pai apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.cpfPai.trim() === ''){
       setModalMessageError("Preencha o cpf do pai")
       setOpenModalError(true)
+      return false;
     }
 
     if(formatedDataNascPai.trim() === ''){
       setModalMessageError("Preencha a data de nascimento do pai")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.nomeMae.trim() === ''){
       setModalMessageError("Preencha o nome da mãe")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(visData.nomeMae) === true){
       setModalMessageError("Preencha o nome da mãe apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.cpfMae.trim() === ''){
       setModalMessageError("Preencha o cpf da mãe")
       setOpenModalError(true)
+      return false;
     }
 
     if(formatedDataNascMae.trim() === ''){
       setModalMessageError("Preencha a data de nascimento da mãe")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.estadoCivil === ''){
       setModalMessageError("Preencha o Estado Civil")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.filhos === ''){
       setModalMessageError("Preencha a quantidade de filhos")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(visData.cpf.trim() === ''){
       setModalMessageError("Preencha o CPF")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.pisPasep.trim() === ''){
       setModalMessageError("Preencha o PIS/PASEP")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.rg.trim() === ''){
       setModalMessageError("Preencha o RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.rgDataExped.trim() === ''){
       setModalMessageError("Preencha a data de expedição do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.rgOrgaoExped.trim() === ''){
       setModalMessageError("Preencha o orgão de expedição do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.rgUf.trim() === ''){
       setModalMessageError("Preencha a UF do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.titulo.trim() === ''){
       setModalMessageError("Preencha o Título")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.tituloZona.trim() === ''){
       setModalMessageError("Preencha a zona do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.tituloSecao.trim() === ''){
       setModalMessageError("Preencha a seção do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.tituloUf.trim() === ''){
       setModalMessageError("Preencha a UF do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.bairro.trim() === ''){
       setModalMessageError("Preencha o Bairro")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.numCasa.trim() === ''){
       setModalMessageError("Preencha o número da casa")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.cep.trim() === ''){
       setModalMessageError("Preencha o CEP")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.logadouro.trim() === ''){
       setModalMessageError("Preencha o Logadouro")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.banco.trim() === ''){
       setModalMessageError("Preencha o nome do banco")
       setOpenModalError(true)
+      return false;
     }
     if(regex.test(visData.banco) === true){
       setModalMessageError("Preencha o nome do banco apenas com letras")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.bancoAgencia.trim() === ''){
       setModalMessageError("Preencha a agência do banco")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.bancoConta.trim() === ''){
       setModalMessageError("Preencha a conta do banco")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.escolaridade.trim() === ''){
       setModalMessageError("Preencha a Escolaridade")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.cursos.trim() === ''){
       setModalMessageError("Preencha a quantidade de cursos")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.vinculo.trim() === ''){
       setModalMessageError("Preencha o Vínculo")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.setorDepartamento.trim() === ''){
       setModalMessageError("Preencha o Setor/Departamento")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.cargoFuncao.trim() === ''){
       setModalMessageError("Preencha o Cargo/Função")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.cargoEfetivo.trim() === ''){
       setModalMessageError("Preencha o Cargo Efetivo")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.statusServidor.trim() === ''){
       setModalMessageError("Preencha o Status do servidor")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.matriculaOrigem.trim() === ''){
       setModalMessageError("Preencha a Matrícula de Origem")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.orgaoOrigem.trim() === ''){
       setModalMessageError("Preencha o Orgão de origem")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.matriculaSeai.trim() === ''){
       setModalMessageError("Preencha a Matrícula SEAI")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.cursos.trim() === ''){
       setModalMessageError("Preencha a quantidade de cursos")
       setOpenModalError(true)
+      return false;
     }
 
     if(visData.dataEntregaDocs.trim() === ''){
       setModalMessageError("Preencha a Data de entrega dos documentos")
       setOpenModalError(true)
+      return false;
     }
     return true
   }
