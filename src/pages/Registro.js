@@ -229,174 +229,188 @@ function Registro() {
     if(nome === ''){
       setModalMessageError("Preencha o nome")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(nome) === true){
       setModalMessageError("Preencha o nome apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(sexo === ''){
       setModalMessageError("Preencha o sexo")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(data_nasc === ''){
       setModalMessageError("Peencha a data de nascimento")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(estadoAtual === ''){
       setModalMessageError("Preencha o estado")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(nacionalidade.trim() === ''){
       setModalMessageError("Preencha a nacionalidade")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(nacionalidade) === true){
       setModalMessageError("Preencha a nacionalidade apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(naturalidade.trim() === ''){
       setModalMessageError("Preencha a naturalidade")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(naturalidade) === true){
       setModalMessageError("Preencha a naturalidade apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(raca === ''){
       setModalMessageError("Preencha a raça")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(telefone.trim() === ''){
       setModalMessageError("Digite o telefone")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(email.trim() === ''){
       setModalMessageError("Preencha o email")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(nomePai.trim() === ''){
       setModalMessageError("Preencha o nome do pai")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(nomePai) === true){
       setModalMessageError("Preencha o nome do pai apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(cpfPai.trim() === ''){
       setModalMessageError("Preencha o cpf do pai")
       setOpenModalError(true)
+      return false;
     }
 
     if(dataNascPai.trim() === ''){
       setModalMessageError("Preencha a data de nascimento do pai")
       setOpenModalError(true)
+      return false;
     }
 
     if(nomeMae.trim() === ''){
       setModalMessageError("Preencha o nome da mãe")
       setOpenModalError(true)
-      return
+      return false;
     }
     if(regex.test(nomeMae) === true){
       setModalMessageError("Preencha o nome da mãe apenas com letras")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(cpfMae.trim() === ''){
       setModalMessageError("Preencha o cpf da mãe")
       setOpenModalError(true)
+      return false;
     }
 
     if(dataNascMae.trim() === ''){
       setModalMessageError("Preencha a data de nascimento da mãe")
       setOpenModalError(true)
+      return false;
     }
 
     if(estadoCivil === ''){
       setModalMessageError("Preencha o Estado Civil")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(filhos === ''){
       setModalMessageError("Preencha a quantidade de filhos")
       setOpenModalError(true)
-      return
+      return false;
     }
 
     if(cpf.trim() === ''){
       setModalMessageError("Preencha o CPF")
       setOpenModalError(true)
+      return false;
     }
 
     if(pisPasep.trim() === ''){
       setModalMessageError("Preencha o PIS/PASEP")
       setOpenModalError(true)
+      return false;
     }
 
     if(rg.trim() === ''){
       setModalMessageError("Preencha o RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(rgDataExped.trim() === ''){
       setModalMessageError("Preencha a data de expedição do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(rgOrgaoExped.trim() === ''){
       setModalMessageError("Preencha o orgão de expedição do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(rgUf.trim() === ''){
       setModalMessageError("Preencha a UF do RG")
       setOpenModalError(true)
+      return false;
     }
 
     if(titulo.trim() === ''){
       setModalMessageError("Preencha o Título")
       setOpenModalError(true)
+      return false;
     }
 
     if(tituloZona.trim() === ''){
       setModalMessageError("Preencha a zona do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(tituloSecao.trim() === ''){
       setModalMessageError("Preencha a seção do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(tituloUf.trim() === ''){
       setModalMessageError("Preencha a UF do título")
       setOpenModalError(true)
+      return false;
     }
 
     if(bairro.trim() === ''){
@@ -407,90 +421,108 @@ function Registro() {
     if(numCasa.trim() === ''){
       setModalMessageError("Preencha o número da casa")
       setOpenModalError(true)
+      return false;
     }
 
     if(cep.trim() === ''){
       setModalMessageError("Preencha o CEP")
       setOpenModalError(true)
+      return false;
     }
 
     if(logadouro.trim() === ''){
       setModalMessageError("Preencha o Logadouro")
       setOpenModalError(true)
+      return false;
     }
 
     if(banco.trim() === ''){
       setModalMessageError("Preencha o nome do banco")
       setOpenModalError(true)
+      return false;
     }
     if(regex.test(banco) === true){
       setModalMessageError("Preencha o nome do banco apenas com letras")
       setOpenModalError(true)
+      return false;
     }
 
     if(bancoAgencia.trim() === ''){
       setModalMessageError("Preencha a agência do banco")
       setOpenModalError(true)
+      return false;
     }
 
     if(bancoConta.trim() === ''){
       setModalMessageError("Preencha a conta do banco")
       setOpenModalError(true)
+      return false;
     }
 
     if(escolaridade.trim() === ''){
       setModalMessageError("Preencha a Escolaridade")
       setOpenModalError(true)
+      return false;
     }
 
     if(cursos.trim() === ''){
       setModalMessageError("Preencha a quantidade de cursos")
       setOpenModalError(true)
+      return false;
     }
 
     if(vinculo.trim() === ''){
       setModalMessageError("Preencha o Vínculo")
       setOpenModalError(true)
+      return false;
     }
 
     if(setorDepartamento.trim() === ''){
       setModalMessageError("Preencha o Setor/Departamento")
       setOpenModalError(true)
+      return false;
     }
 
     if(cargoFuncao.trim() === ''){
       setModalMessageError("Preencha o Cargo/Função")
       setOpenModalError(true)
+      return false;
     }
 
     if(statusServidor.trim() === ''){
       setModalMessageError("Preencha o Status do servidor")
       setOpenModalError(true)
+      return false;
     }
 
     if(matriculaOrigem.trim() === ''){
       setModalMessageError("Preencha a Matrícula de Origem")
       setOpenModalError(true)
+      return false;
     }
 
     if(orgaoOrigem.trim() === ''){
       setModalMessageError("Preencha o Orgão de origem")
       setOpenModalError(true)
+      return false;
     }
 
     if(matriculaSeai.trim() === ''){
       setModalMessageError("Preencha a Matrícula SEAI")
       setOpenModalError(true)
+      return false;
     }
 
     if(cursos.trim() === ''){
       setModalMessageError("Preencha a quantidade de cursos")
       setOpenModalError(true)
+      return false;
     }
 
     if(dataEntregaDocs.trim() === ''){
       setModalMessageError("Preencha a Data de entrega dos documentos")
       setOpenModalError(true)
+      return false;
     }
     return true
   }
@@ -1115,7 +1147,7 @@ function Registro() {
                     id='titulo' 
                     name='titulo' 
                     value={titulo} 
-                    maxLength={10}
+                    maxLength={15}
                     onChange={(e) => {setTitulo(e.target.value)}}>
                   </input>
                 </div>
