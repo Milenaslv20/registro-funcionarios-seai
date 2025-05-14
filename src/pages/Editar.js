@@ -3,6 +3,7 @@ import styles from './styles.module.css'
 import { Link } from 'react-router-dom'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
+import { IMaskInput } from 'react-imask';
 
 import { Paperclip } from 'lucide-react'
 import defaultImage from '../svg/icon-person.jpg'
@@ -347,8 +348,6 @@ const Editar = () =>{
 
   //TODO: VALIDATION INPUTS AND SEND TO BACKEND
   const regex = /[0-9!#$%&'"()*+,-./:;?@[\\\]_`{|}~]/
-  const regex_num = /^[0-9()-]*$/
-  const regex_cpf = /^[-.]*$/
 
   const validateForm = () =>{
     if(visData.nomeFuncionario === ''){
@@ -413,11 +412,6 @@ const Editar = () =>{
       setOpenModalError(true)
       return
     }
-    if(!regex_num.test(visData.telefone)){
-      setModalMessageError("Preencha o telefone apenas com números, parênteses e hífem")
-      setOpenModalError(true)
-      return
-    }
 
     if(visData.email.trim() === ''){
       setModalMessageError("Preencha o email")
@@ -438,10 +432,6 @@ const Editar = () =>{
 
     if(visData.cpfPai.trim() === ''){
       setModalMessageError("Preencha o cpf do pai")
-      setOpenModalError(true)
-    }
-    if(regex_cpf.test(visData.cpfPai) === true){
-      setModalMessageError("Preencha o cpf do pai corretamente")
       setOpenModalError(true)
     }
 
@@ -465,10 +455,6 @@ const Editar = () =>{
       setModalMessageError("Preencha o cpf da mãe")
       setOpenModalError(true)
     }
-    if(regex_cpf.test(visData.cpfMae) === true){
-      setModalMessageError("Preencha o cpf da mãe corretamente")
-      setOpenModalError(true)
-    }
 
     if(formatedDataNascMae.trim() === ''){
       setModalMessageError("Preencha a data de nascimento da mãe")
@@ -489,10 +475,6 @@ const Editar = () =>{
 
     if(visData.cpf.trim() === ''){
       setModalMessageError("Preencha o CPF")
-      setOpenModalError(true)
-    }
-    if(regex_cpf.test(visData.cpf) === true){
-      setModalMessageError("Preencha o CPF corretamente")
       setOpenModalError(true)
     }
 
@@ -903,14 +885,20 @@ const Editar = () =>{
 
                 <div className={styles.div_input}>
                   <label for="telefone">Telefone:</label>
-                  <input 
-                    type='text' 
+                  <IMaskInput
+                    mask="(00) 00000-0000"
                     id='telefone' 
                     name='telefone' 
-                    value={visData.telefone} 
-                    maxLength={14}
-                    onChange={handleEditValue}>
-                  </input>
+                    value={visData.telefone}
+                    onAccept={(value) => {
+                      handleEditValue({
+                        target: {
+                          name: 'telefone',
+                          value: value,
+                        },
+                      })
+                    }}
+                  />                
                 </div>
               </div>
 
@@ -955,15 +943,20 @@ const Editar = () =>{
 
                 <div className={styles.div_input}>
                   <label for="cpf_pai">CPF:</label>
-                  <input 
-                    className={styles.input_cpf_pai} 
-                    type='text' 
+                  <IMaskInput
                     id='cpf_pai' 
-                    name='cpfPai' 
-                    value={visData.cpfPai} 
-                    maxLength={14}
-                    onChange={handleEditValue}>
-                  </input>
+                    name='cpf_pai' 
+                    mask="000.000.000-00"
+                    value={visData.cpfPai}
+                    onAccept={(value) => {
+                      handleEditValue({
+                        target: {
+                          name: 'cpfPai',
+                          value: value,
+                        },
+                      })
+                    }}
+                  /> 
                 </div>
 
                 <div className={styles.div_input}>
@@ -995,15 +988,20 @@ const Editar = () =>{
 
                 <div className={styles.div_input}>
                   <label for="cpf_mae">CPF:</label>
-                  <input 
-                    className={styles.input_cpf_mae} 
-                    type='text' 
+                  <IMaskInput
                     id='cpf_mae' 
-                    name='cpfMae' 
-                    value={visData.cpfMae} 
-                    maxLength={14}
-                    onChange={handleEditValue}>
-                  </input>
+                    name='cpf_mae' 
+                    mask="000.000.000-00"
+                    value={visData.cpfMae}
+                    onAccept={(value) => {
+                      handleEditValue({
+                        target: {
+                          name: 'cpfMae',
+                          value: value,
+                        },
+                      })
+                    }}
+                  />
                 </div>
 
                 <div className={styles.div_input}>
@@ -1083,15 +1081,20 @@ const Editar = () =>{
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
                   <label for="cpf">CPF:</label>
-                  <input 
-                    className={styles.input_cpf} 
-                    type='text'
+                  <IMaskInput
                     id='cpf' 
                     name='cpf' 
-                    value={visData.cpf} 
-                    maxLength={14}
-                    onChange={handleEditValue}>
-                  </input>
+                    mask="000.000.000-00"
+                    value={visData.cpf}
+                    onAccept={(value) => {
+                      handleEditValue({
+                        target: {
+                          name: 'cpf',
+                          value: value,
+                        },
+                      })
+                    }}
+                  />
                 </div>
 
                 <div className={styles.div_input}>
@@ -1348,15 +1351,20 @@ const Editar = () =>{
 
                 <div className={styles.div_input}>
                   <label for="cep">CEP:</label>
-                  <input 
-                    className={styles.input_cep} 
-                    type='text' 
+                  <IMaskInput
                     id='cep' 
                     name='cep' 
-                    value={visData.cep} 
-                    maxLength={9}
-                    onChange={handleEditValue}>
-                  </input>
+                    mask="00000-000"
+                    value={visData.cep}
+                    onAccept={(value) => {
+                      handleEditValue({
+                        target: {
+                          name: 'cep',
+                          value: value,
+                        },
+                      })
+                    }}
+                  />
                 </div>
 
                 <div className={styles.div_input}>

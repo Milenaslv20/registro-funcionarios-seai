@@ -864,12 +864,12 @@ function Registro() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cpf_pai">CPF:</label>
-                    <IMaskInput
-                      id='cpf_pai' 
-                      name='cpf_pai' 
-                      mask="000.000.000-00"
-                      value={cpfPai}
-                      onAccept={(value) => setCpfPai(value)}
+                  <IMaskInput
+                    id='cpf_pai' 
+                    name='cpf_pai' 
+                    mask="000.000.000-00"
+                    value={cpfPai}
+                    onAccept={(value) => setCpfPai(value)}
                   />
                 </div>
 
@@ -1249,14 +1249,13 @@ function Registro() {
 
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="cep">CEP:</label>
-                  <input 
-                    type='text' 
+                  <IMaskInput
+                    mask="00000-000"
                     id='cep' 
                     name='cep' 
-                    value={cep} 
-                    maxLength={9}
-                    onChange={(e) => {setCep(e.target.value)}}>
-                  </input>
+                    value={cep}
+                    onAccept={(value) => setCep(value)}
+                  />
                 </div>
 
                 <div className={styles.div_input}>
