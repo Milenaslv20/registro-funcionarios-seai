@@ -93,7 +93,7 @@ app.post("/cadastrar", (req, res) =>{
     const { nome, sexo, data_nasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
         nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
         cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie,
-        bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada,
+        bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
         banco, bancoAgencia, bancoConta,
         escolaridade, cursos, curso1, curso2, curso3, curso4,
         vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes
@@ -151,8 +151,8 @@ app.post("/cadastrar", (req, res) =>{
                         console.log("-Dados documentos cadastrados com sucesso");
                     }
 
-                    let sqlEndereco = "INSERT INTO dadosendereco(idFuncionario, bairro, numCasa, cep, logadouro, estado, cidade) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    db.query(sqlEndereco, [idFuncionario, bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada], (err, result) =>{
+                    let sqlEndereco = "INSERT INTO dadosendereco(idFuncionario, bairro, numCasa, cep, rua, logadouro, estado, cidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    db.query(sqlEndereco, [idFuncionario, bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada], (err, result) =>{
                         if (err) {
                             return db.rollback(() =>{
                                 console.log("Erro ao cadastrar dados endereço:", err);
@@ -344,6 +344,7 @@ app.get("/getRegisters", (req, res) =>{
         de.bairro,
         de.numCasa,
         de.cep,
+        de.rua,
         de.logadouro,
         de.estado,
         de.cidade,
@@ -499,7 +500,7 @@ app.post("/editRegister", upload.none(), (req, res) =>{
     const { idFuncionario, nomeFuncionario, sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
         nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
         cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie,
-        bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada,
+        bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
         banco, bancoAgencia, bancoConta,
         escolaridade, cursos, curso1, curso2, curso3, curso4,
         vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes
@@ -559,8 +560,8 @@ app.post("/editRegister", upload.none(), (req, res) =>{
                         console.log("-Dados documentos editados com sucesso");
                     }
 
-                    let sqlEndereco = "UPDATE dadosendereco SET bairro = ?, numCasa = ?, cep = ?, logadouro = ?, estado = ?, cidade = ? WHERE idFuncionario = ?";
-                    db.query(sqlEndereco, [bairro, numCasa, cep, logadouro, estadoSelecionado, cidadeSelecionada, idFuncionario], (err, result) =>{
+                    let sqlEndereco = "UPDATE dadosendereco SET bairro = ?, numCasa = ?, cep = ?, rua = ?, logadouro = ?, estado = ?, cidade = ? WHERE idFuncionario = ?";
+                    db.query(sqlEndereco, [bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada, idFuncionario], (err, result) =>{
                         if (err) {
                             return db.rollback(() =>{
                                 console.log("Erro ao atualizar dados endereço:", err);

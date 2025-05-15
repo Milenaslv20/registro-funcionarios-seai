@@ -68,6 +68,7 @@ function Registro() {
   const [logadouro, setLogadouro] = useState('')
   const [numCasa, setNumCasa] = useState('')
   const [cep, setCep] = useState('')
+  const [rua, setRua] = useState('')
   const [bairro, setBairro] = useState('')
   const [cidades, setCidades] = useState([])
   const estadosCidades = {
@@ -289,12 +290,6 @@ function Registro() {
       return false;
     }
 
-    if(email.trim() === ''){
-      setModalMessageError("Preencha o email")
-      setOpenModalError(true)
-      return false;
-    }
-
     if(nomePai.trim() === ''){
       setModalMessageError("Preencha o nome do pai")
       setOpenModalError(true)
@@ -306,18 +301,6 @@ function Registro() {
       return false;
     }
 
-    if(cpfPai.trim() === ''){
-      setModalMessageError("Preencha o cpf do pai")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(dataNascPai.trim() === ''){
-      setModalMessageError("Preencha a data de nascimento do pai")
-      setOpenModalError(true)
-      return false;
-    }
-
     if(nomeMae.trim() === ''){
       setModalMessageError("Preencha o nome da mãe")
       setOpenModalError(true)
@@ -325,18 +308,6 @@ function Registro() {
     }
     if(regex.test(nomeMae) === true){
       setModalMessageError("Preencha o nome da mãe apenas com letras")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(cpfMae.trim() === ''){
-      setModalMessageError("Preencha o cpf da mãe")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(dataNascMae.trim() === ''){
-      setModalMessageError("Preencha a data de nascimento da mãe")
       setOpenModalError(true)
       return false;
     }
@@ -355,12 +326,6 @@ function Registro() {
 
     if(cpf.trim() === ''){
       setModalMessageError("Preencha o CPF")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(pisPasep.trim() === ''){
-      setModalMessageError("Preencha o PIS/PASEP")
       setOpenModalError(true)
       return false;
     }
@@ -424,8 +389,8 @@ function Registro() {
       return false;
     }
 
-    if(cep.trim() === ''){
-      setModalMessageError("Preencha o CEP")
+    if(rua.trim() === ''){
+      setModalMessageError("Preencha a Rua")
       setOpenModalError(true)
       return false;
     }
@@ -495,24 +460,6 @@ function Registro() {
       return false;
     }
 
-    if(matriculaOrigem.trim() === ''){
-      setModalMessageError("Preencha a Matrícula de Origem")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(orgaoOrigem.trim() === ''){
-      setModalMessageError("Preencha o Orgão de origem")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(matriculaSeai.trim() === ''){
-      setModalMessageError("Preencha a Matrícula SEAI")
-      setOpenModalError(true)
-      return false;
-    }
-
     if(cursos.trim() === ''){
       setModalMessageError("Preencha a quantidade de cursos")
       setOpenModalError(true)
@@ -547,13 +494,13 @@ function Registro() {
     formData.append("naturalidade", naturalidade);
     formData.append("raca", raca);
     formData.append("telefone", telefone);
-    formData.append("email", email);
+    formData.append("email", emptyInputs(email));
       
     formData.append("nomePai", nomePai);
-    formData.append("cpfPai", cpfPai);
+    formData.append("cpfPai", emptyInputs(cpfPai));
     formData.append("dataNascPai", dataNascPai);
     formData.append("nomeMae", nomeMae);
-    formData.append("cpfMae", cpfMae);
+    formData.append("cpfMae", emptyInputs(cpfMae));
     formData.append("dataNascMae", dataNascMae);
     formData.append("estadoCivil", estadoCivil);
     formData.append("nomeEsposoa", emptyInputs(nomeEsposoa));
@@ -561,7 +508,7 @@ function Registro() {
     formData.append("nomeFilhos", emptyInputs(nomeFilhos));
       
     formData.append("cpf", cpf);
-    formData.append("pisPasep", pisPasep);
+    formData.append("pisPasep", emptyInputs(pisPasep));
     formData.append("cnh", emptyInputs(cnh));
     formData.append("rg", rg);
     formData.append("rgDataExped", rgDataExped);
@@ -576,7 +523,8 @@ function Registro() {
       
     formData.append("bairro", bairro);
     formData.append("numCasa", numCasa);
-    formData.append("cep", cep);
+    formData.append("cep", emptyInputs(cep));
+    formData.append("rua", rua);
     formData.append("logadouro", logadouro);
     formData.append("cidadeSelecionada", cidadeSelecionada);
     formData.append("estadoSelecionado", estadoSelecionado)
@@ -597,12 +545,12 @@ function Registro() {
     formData.append("cargoFuncao", cargoFuncao);
     formData.append("cargoEfetivo", emptyInputs(cargoEfetivo));
     formData.append("statusServidor", statusServidor);
-    formData.append("matriculaOrigem", matriculaOrigem);
-    formData.append("orgaoOrigem", orgaoOrigem);
-    formData.append("matriculaSeai", matriculaSeai);
+    formData.append("matriculaOrigem", emptyInputs(matriculaOrigem));
+    formData.append("orgaoOrigem", emptyInputs(orgaoOrigem));
+    formData.append("matriculaSeai", emptyInputs(matriculaSeai));
     formData.append("arquivosNome", files);
     formData.append("dataEntregaDocs", dataEntregaDocs);
-    formData.append("anotacoes", anotacoes);
+    formData.append("anotacoes", emptyInputs(anotacoes));
 
     //TODO: SEND TO BACKEND
     try{
@@ -697,6 +645,7 @@ function Registro() {
         setLogadouro("");
         setNumCasa("");
         setCep("");
+        setRua("");
         setBairro("");
         setEstadoSelecionado("");
         setCidadeSelecionada("");
@@ -1288,6 +1237,18 @@ function Registro() {
                     value={cep}
                     onAccept={(value) => setCep(value)}
                   />
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="rua">Rua:</label>
+                  <input 
+                    type='text' 
+                    id='rua' 
+                    name='rua' 
+                    value={rua} 
+                    maxLength={100}
+                    onChange={(e) => {setRua(e.target.value)}}>
+                  </input>
                 </div>
 
                 <div className={styles.div_input}>

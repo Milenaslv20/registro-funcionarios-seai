@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './styles.module.css'
-import { Link } from 'react-router-dom'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
 import { IMaskInput } from 'react-imask';
@@ -78,6 +77,7 @@ const Editar = () =>{
     bairro: funcionario.bairro,
     numCasa: funcionario.numCasa,
     cep: funcionario.cep,
+    rua: funcionario.rua,
     logadouro: funcionario.logadouro,
     estadoSelecionado: funcionario.estado,
     cidadeSelecionada: funcionario.cidade,
@@ -152,7 +152,7 @@ const Editar = () =>{
         cpfMae: funcionario.cpfMae,
         dataNascMae: formatedDataNascMae,
         estadoCivil: funcionario.estadoCivil,
-        nomeEsposoa: funcionario.nomeEsposoa,
+        nomeEsposoa: funcionario.nomeEsposoA,
         filhos: funcionario.filhos,
         nomeFilhos: funcionario.nomeFilhos,
 
@@ -173,6 +173,7 @@ const Editar = () =>{
         bairro: funcionario.bairro,
         numCasa: funcionario.numCasa,
         cep: funcionario.cep,
+        rua: funcionario.rua,
         logadouro: funcionario.logadouro,
         estadoSelecionado: funcionario.estado,
         cidadeSelecionada: funcionario.cidade,
@@ -712,6 +713,7 @@ const Editar = () =>{
     formData.append('bairro', visData.bairro)
     formData.append('numCasa', visData.numCasa)
     formData.append('cep', visData.cep)
+    formData.append('rua', visData.rua)
     formData.append('logadouro', visData.logadouro)
     formData.append('estadoSelecionado', visData.estadoSelecionado)
     formData.append('cidadeSelecionada', visData.cidadeSelecionada)
@@ -1155,7 +1157,7 @@ const Editar = () =>{
                   <label for="cnh">CNH:</label>
                   <input 
                     className={styles.input_cnh}
-                    type='number' 
+                    type='text' 
                     id='cnh' 
                     name='cnh' 
                     value={visData.cnh} 
@@ -1400,6 +1402,18 @@ const Editar = () =>{
                     }}
                   />
                 </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="rua">Rua:</label>
+                  <input 
+                    type='text' 
+                    id='rua' 
+                    name='rua' 
+                    value={visData.rua} 
+                    maxLength={100}
+                    onChange={handleEditValue}>
+                  </input>
+                </div>                
 
                 <div className={styles.div_input}>
                   <label for="logadouro">Logadouro:</label>
