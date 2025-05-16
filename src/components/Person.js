@@ -259,13 +259,13 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.text(`VÍNCULO: ${funcionario.vinculo}`, 12, 112)
         doc.text(`SETOR/DEPARTAMENTO: ${funcionario.setorDepartamento}`, 80, 112)
         doc.text(`CARGO EFETIVO: ${funcionario.cargoEfetivo}`, 12, 117.5)
-        doc.text(`STATUS: ${funcionario.statusServidor}`, 90, 117.5)
         doc.text(`CARGO/FUNÇÃO: ${funcionario.cargoFuncao}`, 130, 117.5)
         doc.text(`ORGÃO ORIGEM: ${funcionario.orgaoOrigem}`, 12, 123.5)
         doc.text(`MATRÍCULA ORIGEM: ${funcionario.matriculaOrigem}`, 130, 123)
         doc.text(`MATRÍCULA SEAI: ${funcionario.matriculaSeai}`, 12, 129.5)
-        doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 97, 129.5)
-        doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 135)
+        doc.text(`STATUS: ${funcionario.statusServidor}`, 130, 129)
+        doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 12, 135)
+        doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 140.5)
 
         doc.addImage(img1, "PNG", -1, 2, 213, 40) //-1 (x), 2(y), 213(width), 40(heigth) 
 

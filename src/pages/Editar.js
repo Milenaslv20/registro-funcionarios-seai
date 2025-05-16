@@ -414,12 +414,6 @@ const Editar = () =>{
       return false;
     }
 
-    if(visData.email.trim() === ''){
-      setModalMessageError("Preencha o email")
-      setOpenModalError(true)
-      return false;
-    }
-
     if(visData.nomePai.trim() === ''){
       setModalMessageError("Preencha o nome do pai")
       setOpenModalError(true)
@@ -431,18 +425,6 @@ const Editar = () =>{
       return false;
     }
 
-    if(visData.cpfPai.trim() === ''){
-      setModalMessageError("Preencha o cpf do pai")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(formatedDataNascPai.trim() === ''){
-      setModalMessageError("Preencha a data de nascimento do pai")
-      setOpenModalError(true)
-      return false;
-    }
-
     if(visData.nomeMae.trim() === ''){
       setModalMessageError("Preencha o nome da mãe")
       setOpenModalError(true)
@@ -450,18 +432,6 @@ const Editar = () =>{
     }
     if(regex.test(visData.nomeMae) === true){
       setModalMessageError("Preencha o nome da mãe apenas com letras")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(visData.cpfMae.trim() === ''){
-      setModalMessageError("Preencha o cpf da mãe")
-      setOpenModalError(true)
-      return false;
-    }
-
-    if(formatedDataNascMae.trim() === ''){
-      setModalMessageError("Preencha a data de nascimento da mãe")
       setOpenModalError(true)
       return false;
     }
@@ -670,6 +640,14 @@ const Editar = () =>{
       return value === '' ? 'Não Possui' : value;
     }
 
+    const emptyInputsCpf = (value) =>{
+      return value.trim() === '' ? '000.000.000-00' : value;
+    }
+
+    const emptyInputsDate = (value) =>{
+      return value.trim() === '' ? '2001-01-01' : value;
+    }
+
     console.log(visData.idFuncionario)
 
     const formData = new FormData();
@@ -686,11 +664,11 @@ const Editar = () =>{
     formData.append('email', visData.email)
 
     formData.append('nomePai', visData.nomePai)
-    formData.append('cpfPai', visData.cpfPai)
-    formData.append('dataNascPai', visData.dataNascPai)
+    formData.append('cpfPai', emptyInputsCpf(visData.cpfPai))
+    formData.append('dataNascPai', emptyInputsDate(visData.dataNascPai))
     formData.append('nomeMae', visData.nomeMae)
-    formData.append('cpfMae', visData.cpfMae)
-    formData.append('dataNascMae', visData.dataNascMae)
+    formData.append('cpfMae', emptyInputsCpf(visData.cpfMae))
+    formData.append('dataNascMae', emptyInputsDate(visData.dataNascMae))
     formData.append('estadoCivil', visData.estadoCivil)
     formData.append('nomeEsposoa', emptyInputs(visData.nomeEsposoa))
     formData.append('filhos', visData.filhos)
@@ -843,7 +821,7 @@ const Editar = () =>{
                     name='nomeFuncionario' 
                     autoFocus 
                     value={visData.nomeFuncionario} 
-                    maxLength={85}
+                    maxLength={120}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -888,6 +866,7 @@ const Editar = () =>{
                     type='text' 
                     id='nacionalidade' 
                     name='nacionalidade' 
+                    maxLength={100}                    
                     value={visData.nacionalidade}
                     onChange={handleEditValue}>
                   </input>
@@ -902,6 +881,7 @@ const Editar = () =>{
                     type='text' 
                     id='naturalidade' 
                     name='naturalidade' 
+                    maxLength={100}                    
                     value={visData.naturalidade} 
                     onChange={handleEditValue}>
                   </input>
@@ -916,6 +896,7 @@ const Editar = () =>{
                     <option value="Preto">Preto</option>
                     <option value="Amarelo">Amarelo</option>
                     <option value="Indígena">Indígena</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -947,7 +928,7 @@ const Editar = () =>{
                     id='email' 
                     name='email' 
                     value={visData.email} 
-                    maxLength={35}
+                    maxLength={50}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -972,7 +953,7 @@ const Editar = () =>{
                     id='nome_pai' 
                     name='nomePai' 
                     value={visData.nomePai} 
-                    maxLength={85}
+                    maxLength={100}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1017,7 +998,7 @@ const Editar = () =>{
                     id='nome_mae' 
                     name='nomeMae' 
                     value={visData.nomeMae} 
-                    maxLength={85}
+                    maxLength={100}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1057,11 +1038,13 @@ const Editar = () =>{
                   <label for="estado_civil">Estado Civil:</label>
                   <select id='estado_civil' name='estadoCivil' value={visData.estadoCivil} onChange={handleEditValue}>
                     <option disabled={true} value="">Selecione</option>
-                    <option value="Solteiro">Solteiro</option>
-                    <option value="Casado">Casado</option>
-                    <option value="Separado">Separado</option>
-                    <option value="Divorciado">Divorciado</option>
-                    <option value="Viúvo">Viúvo</option>
+                      <option value="Solteiro">Solteiro</option>
+                      <option value="Casado">Casado</option>
+                      <option value="União Estável">União Estável</option>
+                      <option value="Separado">Separado</option>
+                      <option value="Divorciado">Divorciado</option>
+                      <option value="Viúvo">Viúvo</option>
+                      <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1073,7 +1056,7 @@ const Editar = () =>{
                     id='nome_esposoa' 
                     name='nomeEsposoa' 
                     value={visData.nomeEsposoa} 
-                    maxLength={85}
+                    maxLength={100}
                     disabled={visData.estadoCivil !== "Casado" || visData.setEstadoCivil === ""} 
                     onChange={handleEditValue}>
                   </input>
@@ -1089,6 +1072,7 @@ const Editar = () =>{
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
+                    <option value="Mais de 3">Mais de 3</option>
                   </select>
                 </div>
 
@@ -1100,6 +1084,7 @@ const Editar = () =>{
                     id='nome_filhos' 
                     name='nomeFilhos' 
                     value={visData.nomeFilhos} 
+                    maxLength={250}
                     disabled={visData.filhos === "0" || visData.nomeFilhos === ""} 
                     onChange={handleEditValue}>
                   </input>
@@ -1141,7 +1126,7 @@ const Editar = () =>{
                     id='pis_pasep' 
                     name='pisPasep' 
                     value={visData.pisPasep} 
-                    maxLength={14}
+                    maxLength={15}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1197,11 +1182,12 @@ const Editar = () =>{
                   <label for="rg_orgao_exped">Orgão Exped:</label>
                   <select id='rg_orgao_exped' name='rgOrgaoExped' value={visData.rgOrgaoExped} onChange={handleEditValue}>
                     <option disabled={true} value="">Selecione</option>
-                    <option value="SSP">SSP</option>
-                    <option value="PC">PC</option>
-                    <option value="PM">PM</option>
-                    <option value="Detran">Detran</option>
+                    <option value="SSP/AM">SSP/AM</option>
+                    <option value="PC/AM">PC/AM</option>
+                    <option value="PM/AM">PM/AM</option>
+                    <option value="Detran/AM">Detran/AM</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1236,6 +1222,7 @@ const Editar = () =>{
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
               </div>
@@ -1249,7 +1236,7 @@ const Editar = () =>{
                     id='titulo' 
                     name='titulo' 
                     value={visData.titulo} 
-                    maxLength={10}
+                    maxLength={15}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1311,6 +1298,7 @@ const Editar = () =>{
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1329,7 +1317,7 @@ const Editar = () =>{
                     id='doc_militar' 
                     name='docMilitar' 
                     value={visData.docMilitar} 
-                    maxLength={7}
+                    maxLength={15}
                     disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
                     onChange={handleEditValue}>
                   </input>
@@ -1343,7 +1331,7 @@ const Editar = () =>{
                     id='doc_militar_serie' 
                     name='docMilitarSerie' 
                     value={visData.docMilitarSerie} 
-                    maxLength={2}
+                    maxLength={12}
                     disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
                     onChange={handleEditValue}>
                   </input>
@@ -1424,6 +1412,7 @@ const Editar = () =>{
                     <option value="Travessa">Travessa</option>
                     <option value="Estrada">Estrada</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
               </div>
@@ -1462,13 +1451,12 @@ const Editar = () =>{
                   <div className={styles.div_input}>
                     <label for="banco">Banco:</label>
                     <input
-   
                       className={styles.input_banco} 
                       type='text' 
                       id='banco' 
                       name='banco' 
                       value={visData.banco} 
-                      maxLength={55}
+                      maxLength={80}
                       onChange={handleEditValue}>
                     </input>
                   </div>
@@ -1481,7 +1469,7 @@ const Editar = () =>{
                     id='banco_agencia' 
                     name='bancoAgencia' 
                     value={visData.bancoAgencia} 
-                    maxLength={6}
+                    maxLength={9}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1519,6 +1507,8 @@ const Editar = () =>{
                     <option value="EJA">EJA</option>
                     <option value="Ensino Superior">Ensino Superior</option>
                     <option value="Tecnólogo">Tecnólogo</option>
+                    <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1531,6 +1521,7 @@ const Editar = () =>{
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
+                    <option value="Mais de 4">Mais de 4</option>
                   </select>
                 </div>
 
@@ -1542,7 +1533,7 @@ const Editar = () =>{
                     id='curso1' 
                     name='curso1' 
                     value={visData.curso1} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={visData.cursos === "" || visData.cursos === "0" ? styles.disabled : ""}
                     onChange={handleEditValue}>
                   </input> 
@@ -1558,7 +1549,7 @@ const Editar = () =>{
                     id='curso2' 
                     name='curso2' 
                     value={visData.curso2} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" ? styles.disabled : ""}
                     onChange={handleEditValue}>
                   </input>
@@ -1572,7 +1563,7 @@ const Editar = () =>{
                     id='curso3' 
                     name='curso3' 
                     value={visData.curso3} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" || visData.cursos === "2" ? styles.disabled : ""}
                     onChange={handleEditValue}>
                   </input>
@@ -1587,7 +1578,7 @@ const Editar = () =>{
                   id='curso4' 
                   name='curso4' 
                   value={visData.curso4} 
-                  maxLength={70}
+                  maxLength={100}
                   disabled={visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" || visData.cursos === "2" || visData.cursos === "3" ? styles.disabled : ""}
                   onChange={handleEditValue}>
                 </input>
@@ -1611,6 +1602,7 @@ const Editar = () =>{
                     <option value="Estagiário(a)">Estagiário(a)</option>
                     <option value="Temporário">Temporário</option>
                     <option value="Efetivo">Efetivo</option>
+                    <option value="Outros">Outros</option>
                   </select>
                 </div>
 
@@ -1627,6 +1619,7 @@ const Editar = () =>{
                     <option value="Laboratório">Laboratório</option>
                     <option value="Inteligência Cibernética">Inteligência Cibernética</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1638,7 +1631,7 @@ const Editar = () =>{
                     id='cargoFuncao' 
                     name='cargoFuncao' 
                     value={visData.cargoFuncao} 
-                    maxLength={20}
+                    maxLength={30}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1653,7 +1646,7 @@ const Editar = () =>{
                     id='cargoEfetivo' 
                     name='cargoEfetivo' 
                     value={visData.cargoEfetivo} 
-                    maxLength={60}
+                    maxLength={30}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1691,7 +1684,7 @@ const Editar = () =>{
                     id='orgaoOrigem' 
                     name='orgaoOrigem' 
                     value={visData.orgaoOrigem} 
-                    maxLength={65}
+                    maxLength={50}
                     onChange={handleEditValue}>
                   </input>
                 </div>
@@ -1704,7 +1697,7 @@ const Editar = () =>{
                     id='matriculaSeai' 
                     name='matriculaSeai' 
                     value={visData.matriculaSeai} 
-                    maxLength={12}
+                    maxLength={15}
                     onChange={handleEditValue}>
                   </input>
                 </div>

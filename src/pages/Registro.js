@@ -485,6 +485,14 @@ function Registro() {
       return value.trim() === '' ? 'Não Possui' : value;
     }
 
+    const emptyInputsCpf = (value) =>{
+      return value.trim() === '' ? '000.000.000-00' : value;
+    }
+
+    const emptyInputsDate = (value) =>{
+      return value.trim() === '' ? '01-01-1111' : value;
+    }
+
     const formData = new FormData();
     formData.append("nome", nome);
     formData.append("sexo", sexo);
@@ -497,11 +505,11 @@ function Registro() {
     formData.append("email", emptyInputs(email));
       
     formData.append("nomePai", nomePai);
-    formData.append("cpfPai", emptyInputs(cpfPai));
-    formData.append("dataNascPai", dataNascPai);
+    formData.append("cpfPai", emptyInputsCpf(cpfPai));
+    formData.append("dataNascPai", emptyInputsDate(dataNascPai));
     formData.append("nomeMae", nomeMae);
-    formData.append("cpfMae", emptyInputs(cpfMae));
-    formData.append("dataNascMae", dataNascMae);
+    formData.append("cpfMae", emptyInputsCpf(cpfMae));
+    formData.append("dataNascMae", emptyInputsDate(dataNascMae));
     formData.append("estadoCivil", estadoCivil);
     formData.append("nomeEsposoa", emptyInputs(nomeEsposoa));
     formData.append("filhos", filhos);
@@ -523,7 +531,7 @@ function Registro() {
       
     formData.append("bairro", bairro);
     formData.append("numCasa", numCasa);
-    formData.append("cep", emptyInputs(cep));
+    formData.append("cep", cep);
     formData.append("rua", rua);
     formData.append("logadouro", logadouro);
     formData.append("cidadeSelecionada", cidadeSelecionada);
@@ -720,7 +728,7 @@ function Registro() {
                     name='nome' 
                     autoFocus 
                     value={nome} 
-                    maxLength={85}
+                    maxLength={120}
                     onChange={(e) => {setNome(e.target.value)}}>
                   </input>
                 </div>
@@ -764,6 +772,7 @@ function Registro() {
                     type='text' 
                     id='nacionalidade' 
                     name='nacionalidade' 
+                    maxLength={100}                        
                     value={nacionalidade}
                     onChange={(e) => {setNacionalidade(e.target.value)}}>
                   </input>
@@ -776,7 +785,8 @@ function Registro() {
                   <input
                     type='text' 
                     id='naturalidade' 
-                    name='naturalidade' 
+                    name='naturalidade'
+                    maxLength={100}                         
                     value={naturalidade} 
                     onChange={(e) => {setNaturalidade(e.target.value)}}>
                   </input>
@@ -791,6 +801,7 @@ function Registro() {
                     <option value="Preto">Preto</option>
                     <option value="Amarelo">Amarelo</option>
                     <option value="Indígena">Indígena</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -814,7 +825,7 @@ function Registro() {
                     id='email' 
                     name='email' 
                     value={email} 
-                    maxLength={35}
+                    maxLength={50}
                     onChange={(e) => {setEmail(e.target.value)}}>
                   </input>
                 </div>
@@ -838,7 +849,7 @@ function Registro() {
                     id='nome_pai' 
                     name='nome_pai' 
                     value={nomePai} 
-                    maxLength={85}
+                    maxLength={100}
                     onChange={(e) => {setNomePai(e.target.value)}}>
                   </input>
                 </div>
@@ -875,7 +886,7 @@ function Registro() {
                     id='nome_mae' 
                     name='nome_mae' 
                     value={nomeMae} 
-                    maxLength={85}
+                    maxLength={100}
                     onChange={(e) => {setNomeMae(e.target.value)}}>
                   </input>
                 </div>
@@ -909,12 +920,13 @@ function Registro() {
                     <label for="estado_civil">Estado Civil:</label>
                     <select id='estado_civil' name='estado_civil' value={estadoCivil} onChange={(e) => {setEstadoCivil(e.target.value)}}>
                       <option disabled={true} value="">Selecione</option>
-                      <option value="Solteiro">Solteiro</option>
-                      <option value="Casado">Casado</option>
-                      <option value="União Estável">União Estável</option>
-                      <option value="Separado">Separado</option>
-                      <option value="Divorciado">Divorciado</option>
-                      <option value="Viúvo">Viúvo</option>
+                        <option value="Solteiro">Solteiro</option>
+                        <option value="Casado">Casado</option>
+                        <option value="União Estável">União Estável</option>
+                        <option value="Separado">Separado</option>
+                        <option value="Divorciado">Divorciado</option>
+                        <option value="Viúvo">Viúvo</option>
+                        <option value="NI">NI</option>
                     </select>
                   </div>
 
@@ -925,7 +937,7 @@ function Registro() {
                       id='nome_esposoa' 
                       name='nome_esposoa' 
                       value={nomeEsposoa} 
-                      maxLength={85}
+                      maxLength={100}
                       disabled={estadoCivil !== "Casado" || estadoCivil === ""} 
                       onChange={(e) => {setNomeEsposoa(e.target.value)}}>
                     </input>
@@ -952,6 +964,7 @@ function Registro() {
                     id='nome_filhos' 
                     name='nome_filhos' 
                     value={nomeFilhos} 
+                    maxLength={250}
                     disabled={filhos === "0" || filhos === ""} 
                     onChange={(e) => {setNomeFilhos(e.target.value)}}>
                   </input>
@@ -991,7 +1004,7 @@ function Registro() {
                     id='pis_pasep' 
                     name='pis_pasep' 
                     value={pisPasep} 
-                    maxLength={14}
+                    maxLength={15}
                     onChange={(e) => {setPisPasep(e.target.value)}}>
                   </input>
                 </div>
@@ -1010,7 +1023,7 @@ function Registro() {
                     id='cnh' 
                     name='cnh' 
                     value={cnh} 
-                    maxLength={11}
+                    maxLength={13}
                     disabled={selectCnh === "Não" || selectCnh === "" ? styles.disabled : ""}
                     onChange={(e) => {setCnh(String(e.target.value))}}>
                   </input>
@@ -1050,6 +1063,7 @@ function Registro() {
                     <option value="PM/AM">PM/AM</option>
                     <option value="Detran/AM">Detran/AM</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1084,6 +1098,7 @@ function Registro() {
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
               </div>
@@ -1156,6 +1171,7 @@ function Registro() {
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
               </div>
@@ -1175,7 +1191,7 @@ function Registro() {
                       id='doc_militar' 
                       name='doc_militar' 
                       value={docMilitar} 
-                      maxLength={7}
+                      maxLength={15}
                       disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
                       onChange={(e) => {setDocMilitar(e.target.value)}}>
                     </input>
@@ -1188,7 +1204,7 @@ function Registro() {
                       id='doc_militar_serie' 
                       name='doc_militar_serie' 
                       value={docMilitarSerie} 
-                      maxLength={2}
+                      maxLength={12}
                       disabled={selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""} 
                       onChange={(e) => {setDocMilitarSerie(e.target.value)}}>
                     </input>
@@ -1260,6 +1276,7 @@ function Registro() {
                     <option value="Travessa">Travessa</option>
                     <option value="Estrada">Estrada</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
               </div>
@@ -1302,7 +1319,7 @@ function Registro() {
                       id='banco' 
                       name='banco' 
                       value={banco} 
-                      maxLength={55}
+                      maxLength={80}
                       onChange={(e) => {setBanco(e.target.value)}}>
                     </input>
                   </div>
@@ -1314,7 +1331,7 @@ function Registro() {
                     id='banco_agencia' 
                     name='banco_agencia' 
                     value={bancoAgencia} 
-                    maxLength={6}
+                    maxLength={9}
                     onChange={(e) => {setBancoAgencia(e.target.value)}}>
                   </input>
                 </div>
@@ -1354,6 +1371,7 @@ function Registro() {
                     <option value="Tecnólogo">Tecnólogo</option>
                     <option value="EJA">EJA</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1377,7 +1395,7 @@ function Registro() {
                     id='curso1' 
                     name='curso1' 
                     value={curso1} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={cursos === "" || cursos === "0" ? styles.disabled : ""}
                     onChange={(e) => {setCurso1(e.target.value)}}>
                   </input> 
@@ -1392,7 +1410,7 @@ function Registro() {
                     id='curso2' 
                     name='curso2' 
                     value={curso2} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={cursos === "" || cursos === "0" || cursos === "1" ? styles.disabled : ""}
                     onChange={(e) => {setCurso2(e.target.value)}}>
                   </input>
@@ -1405,7 +1423,7 @@ function Registro() {
                     id='curso3' 
                     name='curso3' 
                     value={curso3} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" ? styles.disabled : ""}
                     onChange={(e) => {setCurso3(e.target.value)}}>
                   </input>
@@ -1420,7 +1438,7 @@ function Registro() {
                     id='curso4' 
                     name='curso4' 
                     value={curso4} 
-                    maxLength={70}
+                    maxLength={100}
                     disabled={cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" || cursos === "3" ? styles.disabled : ""}
                     onChange={(e) => {setCurso4(e.target.value)}}>
                   </input>
@@ -1445,6 +1463,7 @@ function Registro() {
                     <option value="Estagiário(a)">Estagiário(a)</option>
                     <option value="Temporário">Temporário</option>
                     <option value="Efetivo">Efetivo</option>
+                    <option value="Outros">Outros</option>
                   </select>
                 </div>
 
@@ -1461,6 +1480,7 @@ function Registro() {
                     <option value="Laboratório">Laboratório</option>
                     <option value="Inteligência Cibernética">Inteligência Cibernética</option>
                     <option value="Outros">Outros</option>
+                    <option value="NI">NI</option>
                   </select>
                 </div>
 
@@ -1471,7 +1491,7 @@ function Registro() {
                     id='cargoFuncao' 
                     name='cargoFuncao' 
                     value={cargoFuncao} 
-                    maxLength={20}
+                    maxLength={30}
                     onChange={(e) => {setCargoFuncao(e.target.value)}}>
                   </input>
                 </div>
@@ -1485,7 +1505,7 @@ function Registro() {
                     id='cargoEfetivo' 
                     name='cargoEfetivo' 
                     value={cargoEfetivo} 
-                    maxLength={60}
+                    maxLength={30}
                     onChange={(e) => {setCargoEfetivo(e.target.value)}}>
                   </input>
                 </div>
@@ -1520,7 +1540,7 @@ function Registro() {
                     id='orgaoOrigem' 
                     name='orgaoOrigem' 
                     value={orgaoOrigem} 
-                    maxLength={65}
+                    maxLength={50}
                     onChange={(e) => {setOrgaoOrigem(e.target.value)}}>
                   </input>
                 </div>
@@ -1532,7 +1552,7 @@ function Registro() {
                     id='matriculaSeai' 
                     name='matriculaSeai' 
                     value={matriculaSeai} 
-                    maxLength={12}
+                    maxLength={15}
                     onChange={(e) => {setMatriculaSeai(e.target.value)}}>
                   </input>
                 </div>

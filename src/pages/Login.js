@@ -59,7 +59,7 @@ function Login({ onLogin }) {
         <div className={styles.container_login}>
           <h1>Login</h1>
 
-          <input id='usuario' type='text' placeholder='Usuário' maxLength={20} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
+          <input id='usuario' type='text' placeholder='Usuário' maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
           <input id={styles.input_password} type='password' placeholder='Senha' maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyPress={enterPress}></input>
           <button className={styles.button_login} onClick={handleLogin}>Entrar</button>
         </div>

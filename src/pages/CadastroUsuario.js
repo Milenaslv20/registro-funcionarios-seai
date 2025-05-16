@@ -86,6 +86,7 @@ function CadastroUsuario() {
             name='nomeUsuario'
             type='text'
             placeholder='Nome Usuário'
+            maxLength={25}
             value={nomeUsuario}
             onChange={(e) => {setNomeUsuario(e.target.value)}}>
           </input>
@@ -97,6 +98,7 @@ function CadastroUsuario() {
               name='senhaUsuario'
               type='password'
               placeholder='Senha' 
+              maxLength={8}
               value={senhaUsuario}
               onChange={(e) => {setSenhaUsuario(e.target.value)}}>
             </input>
