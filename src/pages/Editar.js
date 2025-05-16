@@ -715,8 +715,8 @@ const Editar = () =>{
     formData.append('matriculaOrigem', visData.matriculaOrigem)
     formData.append('orgaoOrigem', visData.orgaoOrigem)
     formData.append('matriculaSeai', visData.matriculaSeai)
-    formData.append('dataEntregaDocs', visData.dataEntregaDocs)
-    formData.append('anotacoes', visData.anotacoes)
+    formData.append('dataEntregaDocs', emptyInputsDate(visData.dataEntregaDocs))
+    formData.append('anotacoes', emptyInputs(visData.anotacoes))
 
     console.log(formData)
 

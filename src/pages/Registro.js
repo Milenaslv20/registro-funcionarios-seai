@@ -557,7 +557,7 @@ function Registro() {
     formData.append("orgaoOrigem", emptyInputs(orgaoOrigem));
     formData.append("matriculaSeai", emptyInputs(matriculaSeai));
     formData.append("arquivosNome", files);
-    formData.append("dataEntregaDocs", dataEntregaDocs);
+    formData.append("dataEntregaDocs", emptyInputsDate(dataEntregaDocs));
     formData.append("anotacoes", emptyInputs(anotacoes));
 
     //TODO: SEND TO BACKEND
