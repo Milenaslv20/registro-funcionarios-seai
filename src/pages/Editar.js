@@ -645,7 +645,8 @@ const Editar = () =>{
     }
 
     const emptyInputsDate = (value) =>{
-      return value.trim() === '' ? '2001-01-01' : value;
+      if (!value || typeof value !== 'string') return '1111-01-01';
+      return value.trim() === '' ? '1111-01-01' : value;
     }
 
     console.log(visData.idFuncionario)

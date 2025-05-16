@@ -490,7 +490,8 @@ function Registro() {
     }
 
     const emptyInputsDate = (value) =>{
-      return value.trim() === '' ? '01-01-1111' : value;
+      if (!value || typeof value !== 'string') return '1111-01-01';
+      return value.trim() === '' ? '1111-01-01' : value;
     }
 
     const formData = new FormData();
