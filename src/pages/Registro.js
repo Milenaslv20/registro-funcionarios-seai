@@ -931,7 +931,7 @@ function Registro() {
                     </select>
                   </div>
 
-                  <div className={`${styles.div_input} ${estadoCivil !== "Casado" || estadoCivil === "" ? styles.disabled : ""}`} id={styles.inptspan}>
+                  <div className={`${styles.div_input} ${estadoCivil !== "Casado" ||  estadoCivil !== "União Estável" || estadoCivil === "" ? styles.disabled : ""}`} id={styles.inptspan}>
                     <label for="nome_esposoa">Nome Cônjuge:</label>
                     <input 
                       type='text' 
@@ -1377,7 +1377,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cursos">cursos:</label>
+                  <label for="cursos">Cursos:</label>
                   <select id='cursos' name='cursos' value={cursos} onChange={(e) => {setCursos(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
                     <option value="0">0</option>
