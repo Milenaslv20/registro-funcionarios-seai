@@ -35,7 +35,6 @@ function Login({ onLogin }) {
     e.preventDefault();
       const res = await isAuth(nomeUsuario, senhaUsuario)
       if (res.sucess){
-        localStorage.setItem('token', res.token, nomeUsuario)
         localStorage.setItem('nomeUsuario', nomeUsuario)
         onLogin(res.token)
         setUsuario(nomeUsuario);

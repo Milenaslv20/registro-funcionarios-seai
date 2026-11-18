@@ -12,6 +12,7 @@ import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 import Header from '../components/Header'
 import { useLanguage } from '../i18n/LanguageContext'
+import { urlApi, urlFoto } from '../api'
 
 const Editar = () =>{
   const { t } = useLanguage()
@@ -19,7 +20,7 @@ const Editar = () =>{
 
   const { funcionario } = useFuncionario();
   const { usuario } = useFuncionario();
-  const [imageUrl, setImageUrl] = useState(`${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(urlFoto(funcionario.idFuncionario));
 
   const handleImageError = () =>{
     setImageUrl(defaultImage)
@@ -1738,7 +1739,7 @@ const Editar = () =>{
                     <div className={styles.name_file2} id={styles.name_edit}>
                       {files.map((file, index) => (
                         <div key={index}>
-                          <a href={`${endpoint}/${file.path}`} target="_blank" rel="noopener noreferrer">
+                          <a href={urlApi(file.path)} target="_blank" rel="noopener noreferrer">
                             📄 {file.name} {index + 1}
                           </a>
                         </div>

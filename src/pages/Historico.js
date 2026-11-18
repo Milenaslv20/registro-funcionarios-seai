@@ -11,6 +11,7 @@ import ModalError from '../components/ModalError'
 import { FilterX } from 'lucide-react'
 import Header from '../components/Header'
 import { useLanguage } from '../i18n/LanguageContext'
+import { apiFetch } from '../api'
 
 function Historico ({ funcionarios }){
   const { t } = useLanguage()
@@ -40,14 +41,15 @@ function Historico ({ funcionarios }){
   //TODO: GET TOTALFUNC AND TOTAL DATA
   useEffect(() =>{
     const fetchFuncionarios = async() =>{
-      const reqData = await fetch(`${endpoint}/getRegisters`)
-      const resData = await reqData.json()
+      const reqData = await apiFetch(`${endpoint}/getRegisters`)
+      const json = await reqData.json()
+      const resData = Array.isArray(json) ? json : [] // erro (ex.: 401) vira lista vazia
       setDataFuncionarios(resData)
       setFiltros(resData || [])
 
-      const reqTotal = await fetch(`${endpoint}/getRegisterstot`);
+      const reqTotal = await apiFetch(`${endpoint}/getRegisterstot`);
       const resTotal = await reqTotal.json();
-      setTotalFunc(resTotal.totalFunc);
+      setTotalFunc(resTotal.totalFunc ?? 0);
     }
     fetchFuncionarios()
   }, [])
@@ -64,7 +66,7 @@ function Historico ({ funcionarios }){
     try{
 
       if(deleteFuncionario){
-        const res = await fetch(`${endpoint}/deleteRegister/${deleteFuncionario.idFuncionario}`, {
+        const res = await apiFetch(`${endpoint}/deleteRegister/${deleteFuncionario.idFuncionario}`, {
           method: 'DELETE',
           headers: {
             'Content-type': 'application/json',

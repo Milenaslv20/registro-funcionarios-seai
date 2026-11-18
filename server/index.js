@@ -1,89 +1,42 @@
+require("dotenv").config();
+
 const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
-const bodyParser = require('body-parser');
-const multer = require('multer');
-const fs = require('fs');
-const path = require("path");
-require('dotenv').config()
+const multer = require("multer");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-const app = express();
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: '700mb' }));
-app.use(express.urlencoded({ extended: true, limit: "700mb" }));
-app.use(bodyParser.json());
+const { query, withTransaction, inicializarBanco } = require("./db");
 
-const uploadDirectory = path.join(__dirname, 'uploads')
-
-if (!fs.existsSync(uploadDirectory)){
-    fs.mkdirSync(uploadDirectory, { recursive: true })
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      const nome = req.body.nomeFuncionario || req.body.nome;
-      const nomeAntigo = req.body.nomeAntigo;
-  
-      if (!nome) {
-        return cb(new Error("Nome do funcionário não fornecido."), null);
-      }
-  
-      const uploadDirectory = path.join(__dirname, 'uploads');
-      const oldPath = nomeAntigo ? path.join(uploadDirectory, nomeAntigo) : null;
-      const newPath = path.join(uploadDirectory, nome);
-      console.log('📂 Salvando em pasta:', newPath);
-  
-      if (nomeAntigo && nomeAntigo !== nome && fs.existsSync(oldPath)) {
-        try {
-          fs.renameSync(oldPath, newPath);
-        } catch (error) {
-          return cb(error, null);
-        }
-      }
-  
-      fs.mkdir(newPath, { recursive: true }, (err) => {
-        if (err) return cb(err, null);
-        cb(null, newPath);
-      });
-    },
-  
-    filename: (req, file, cb) => {
-        const nome = req.body.nomeFuncionario || req.body.nome;
-        const originalName = path.basename(file.originalname);
-        const fileExtension = path.extname(originalName).toLowerCase();
-        const baseName = path.basename(originalName, fileExtension);
-      
-        let fileName;
-        if (file.mimetype === "application/pdf") {
-          fileName = `doc_${nome}_${Date.now()}_${baseName}${fileExtension}`;
-        } else {
-          fileName = `foto_${nome}.avif`;
-        }
-      
-        console.log('➡️ Salvando arquivo:', fileName);
-        cb(null, fileName);  
-    }
-  });
-  
-
-
-const upload = multer({ storage: storage, limits: { fileSize: 500 * 1024 * 1024 } });
-
-app.use('/uploads', express.static(uploadDirectory))
-
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "vertix",
-    password: process.env.DB_PASSWORD || "vertix123",
-    database: process.env.DB_NAME || "vertix_funcionarios",
-    port: Number(process.env.DB_PORT || 3307),
-    dateStrings: true, // devolve DATE como 'YYYY-MM-DD' (formato dos inputs de data)
-});
-
+// ===================== Configuração =====================
+const PORT = Number(process.env.PORT || 5000);
 const TIMEZONE = process.env.APP_TIMEZONE || "America/Manaus";
 const JWT_SECRET = process.env.JWT_SECRET || "troque-este-segredo";
+const JWT_EXPIRA = process.env.JWT_EXPIRES_IN || "8h";
+const MAX_ARQUIVO_MB = Number(process.env.MAX_FILE_MB || 10);
 
-// Data (YYYY-MM-DD) e hora (HH:MM:SS) no fuso da aplicação, independente do locale do sistema
+if (!process.env.JWT_SECRET) {
+    console.warn("⚠️  JWT_SECRET não definido: usando um segredo padrão (defina-o em produção).");
+}
+
+const app = express();
+
+// CORS_ORIGIN="https://meu-front.onrender.com" (vários separados por vírgula). Sem valor: libera tudo (dev).
+const origens = (process.env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean);
+app.use(cors({ origin: origens.length ? origens : "*" }));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+
+// Arquivos ficam em memória e são gravados no banco
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: MAX_ARQUIVO_MB * 1024 * 1024, files: 51 },
+});
+
+// Envolve rotas async: qualquer erro vira resposta 500 em vez de derrubar o processo
+const rota = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Data (YYYY-MM-DD) e hora (HH:MM:SS) no fuso da aplicação, independente do locale do servidor
 function agora() {
     const d = new Date();
     return {
@@ -91,845 +44,376 @@ function agora() {
         hora: d.toLocaleTimeString("pt-BR", { timeZone: TIMEZONE, hour12: false }),
     };
 }
-db.connect((err) => {
-    if (err) {
-        console.error("Erro ao conectar com o banco de dados:", err);
-        return;
+
+// ===================== Mapeamento dos campos =====================
+// [coluna no banco, nome do campo na API, tipo]. O nome da API é o mesmo que o front envia e recebe.
+const CAMPOS = {
+    dados_pessoais: [
+        ["sexo", "sexo"], ["data_nasc", "dataNasc", "date"], ["estado_atual", "estadoAtual"],
+        ["nacionalidade", "nacionalidade"], ["naturalidade", "naturalidade"], ["raca", "raca"],
+        ["telefone", "telefone"], ["email", "email"],
+    ],
+    dados_familiares: [
+        ["nome_pai", "nomePai"], ["cpf_pai", "cpfPai"], ["data_nasc_pai", "dataNascPai", "date"],
+        ["nome_mae", "nomeMae"], ["cpf_mae", "cpfMae"], ["data_nasc_mae", "dataNascMae", "date"],
+        ["estado_civil", "estadoCivil"], ["nome_conjuge", "nomeEsposoa"], ["filhos", "filhos"],
+        ["nome_filhos", "nomeFilhos"],
+    ],
+    dados_documentos: [
+        ["cpf", "cpf"], ["pis_pasep", "pisPasep"], ["cnh", "cnh"], ["rg", "rg"],
+        ["rg_data_exped", "rgDataExped", "date"], ["rg_orgao_exped", "rgOrgaoExped"], ["rg_uf", "rgUf"],
+        ["titulo", "titulo"], ["titulo_zona", "tituloZona"], ["titulo_secao", "tituloSecao"],
+        ["titulo_uf", "tituloUf"], ["doc_militar", "docMilitar"], ["doc_militar_serie", "docMilitarSerie"],
+    ],
+    dados_endereco: [
+        ["bairro", "bairro"], ["num_casa", "numCasa"], ["cep", "cep"], ["rua", "rua"],
+        ["logradouro", "logadouro"], ["estado", "estado"], ["cidade", "cidade"],
+    ],
+    dados_bancarios: [
+        ["banco", "banco"], ["banco_agencia", "bancoAgencia"], ["banco_conta", "bancoConta"],
+    ],
+    dados_escolaridade: [
+        ["escolaridade", "escolaridade"], ["cursos", "cursos"], ["curso1", "curso1"],
+        ["curso2", "curso2"], ["curso3", "curso3"], ["curso4", "curso4"],
+    ],
+    dados_vinculo: [
+        ["vinculo", "vinculo"], ["setor_departamento", "setorDepartamento"], ["cargo_funcao", "cargoFuncao"],
+        ["cargo_efetivo", "cargoEfetivo"], ["status_servidor", "statusServidor"],
+        ["matricula_origem", "matriculaOrigem"], ["orgao_origem", "orgaoOrigem"],
+        ["matricula_empresa", "matriculaEmpresa"], ["data_entrega_docs", "dataEntregaDocs", "date"],
+        ["anotacoes", "anotacoes"],
+    ],
+};
+const ALIAS_TABELA = {
+    dados_pessoais: "dp", dados_familiares: "dfam", dados_documentos: "dd", dados_endereco: "de",
+    dados_bancarios: "dbc", dados_escolaridade: "dfe", dados_vinculo: "dv",
+};
+
+// O cadastro e a edição mandam alguns campos com nomes diferentes; aqui eles são unificados
+function normalizarCorpo(body) {
+    return {
+        ...body,
+        nomeFuncionario: body.nomeFuncionario ?? body.nome,
+        dataNasc: body.dataNasc ?? body.data_nasc,
+        estado: body.estadoSelecionado ?? body.estado,
+        cidade: body.cidadeSelecionada ?? body.cidade,
+    };
+}
+
+function valorCampo(valor, tipo) {
+    if (valor === undefined || valor === null) return null;
+    if (tipo === "date" && (valor === "" || valor === "null" || valor === "undefined")) return null;
+    return valor;
+}
+
+// Grava (insere ou atualiza) os dados de todas as tabelas do funcionário
+async function salvarDadosFuncionario(client, idFuncionario, dados) {
+    for (const [tabela, campos] of Object.entries(CAMPOS)) {
+        const colunas = campos.map(([coluna]) => coluna);
+        const valores = campos.map(([, chave, tipo]) => valorCampo(dados[chave], tipo));
+        const marcadores = valores.map((_, i) => `$${i + 2}`).join(", ");
+        const atualizacao = colunas.map((c) => `${c} = EXCLUDED.${c}`).join(", ");
+        await client.query(
+            `INSERT INTO ${tabela} (id_funcionario, ${colunas.join(", ")}) VALUES ($1, ${marcadores})
+             ON CONFLICT (id_funcionario) DO UPDATE SET ${atualizacao}`,
+            [idFuncionario, ...valores]
+        );
     }
-    console.log("⚯  Conectado ao banco de dados ⚯\n");
-});
+}
 
+const SELECT_FUNCIONARIOS = `
+    SELECT f.id_funcionario AS "idFuncionario", f.nome_funcionario AS "nomeFuncionario",
+    ${Object.entries(CAMPOS)
+        .flatMap(([tabela, campos]) => campos.map(([coluna, chave]) => `${ALIAS_TABELA[tabela]}.${coluna} AS "${chave}"`))
+        .join(",\n    ")}
+    FROM funcionario f
+    ${Object.entries(ALIAS_TABELA)
+        .map(([tabela, alias]) => `LEFT JOIN ${tabela} ${alias} ON ${alias}.id_funcionario = f.id_funcionario`)
+        .join("\n    ")}
+    ORDER BY f.id_funcionario`;
 
-//TODO: CREATE
-app.post("/cadastrar", (req, res) =>{
-    console.log("Body recebido:", req.body);
-    const { nome, sexo, data_nasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
-        nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
-        cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie,
-        bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
-        banco, bancoAgencia, bancoConta,
-        escolaridade, cursos, curso1, curso2, curso3, curso4,
-        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes
-    } = req.body;
+// ===================== Arquivos (foto e PDFs no banco) =====================
+async function salvarFoto(client, idFuncionario, arquivo) {
+    await client.query("DELETE FROM arquivos WHERE id_funcionario = $1 AND tipo = 'foto'", [idFuncionario]);
+    await client.query(
+        `INSERT INTO arquivos (id_funcionario, tipo, nome_original, mime, tamanho, conteudo)
+         VALUES ($1, 'foto', $2, $3, $4, $5)`,
+        [idFuncionario, arquivo.originalname, arquivo.mimetype, arquivo.size, arquivo.buffer]
+    );
+}
 
-    db.beginTransaction((err) =>{
-        if(err){
-            console.log("erro ao iniciar transação")
-        }
-    })
-
-    let sqlFuncionario = "INSERT INTO funcionario(nomeFuncionario) VALUES (?)";
-    db.query(sqlFuncionario, [nome], (err, result) =>{
-        if (err) {
-            return db.rollback(() =>{
-                console.log("Erro ao cadastrar funcionario:", err);
-                res.status(500).send("Erro ao cadastrar funcionário");
-            })
-        }
-
-        let idFuncionario = result.insertId;
-        console.log("● Dados recebidos (formatado):", JSON.stringify(req.body, null, 2));
-        console.log(`*idFuncionario rota cadastro: ${idFuncionario}*`)
-
-        let sqlPessoais = "INSERT INTO dadospessoais(idFuncionario, sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        db.query(sqlPessoais, [idFuncionario, sexo, data_nasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email], (err, result) =>{
-            if (err) {
-                return db.rollback(() =>{
-                    console.log("Erro ao cadastrar dados pessoais:", err);
-                    result.status(500).send("Erro ao cadastrar dados pessoais");
-                })
-            } else{
-                console.log("-Dados pessoais cadastrados com sucesso");
-            }
-
-            let sqlFamiliares = "INSERT INTO dadosfamiliares(idFuncionario, nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoA, filhos, nomeFilhos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            db.query(sqlFamiliares, [idFuncionario, nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos], (err, result) =>{
-                if (err) {
-                    return db.rollback(() =>{
-                        console.log("Erro ao cadastrar dados familiares:", err);
-                        result.status(500).send("Erro ao cadastrar dados familiares");
-                    })
-                } else{
-                    console.log("-Dados familiares cadastrados com sucesso");
-                }
-
-                let sqlDocumentos = "INSERT INTO dadosdocumentos(idFuncionario, cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                db.query(sqlDocumentos, [idFuncionario, cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie], (err, result) =>{
-                    if (err) {
-                        return db.rollback(() =>{
-                            console.log("Erro ao cadastrar dados documentos:", err);
-                            result.status(500).send("Erro ao cadastrar dados documentos");
-                        })
-                    } else{
-                        console.log("-Dados documentos cadastrados com sucesso");
-                    }
-
-                    let sqlEndereco = "INSERT INTO dadosendereco(idFuncionario, bairro, numCasa, cep, rua, logadouro, estado, cidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                    db.query(sqlEndereco, [idFuncionario, bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada], (err, result) =>{
-                        if (err) {
-                            return db.rollback(() =>{
-                                console.log("Erro ao cadastrar dados endereço:", err);
-                                result.status(500).send("Erro ao cadastrar dados endereço");
-                            })
-                        } else{
-                            console.log("-Dados endereço cadastrados com sucesso");
-                        }
-
-                        let sqlDadosBancarios = "INSERT INTO dadosbancarios(idFuncionario, banco, bancoAgencia, bancoConta) VALUES (?, ?, ?, ?)";
-                        db.query(sqlDadosBancarios, [idFuncionario, banco, bancoAgencia, bancoConta], (err, result) =>{
-                            if (err) {
-                                return db.rollback(() =>{
-                                    console.log("Erro ao cadastrar dados bancários:", err);
-                                    result.status(500).send("Erro ao cadastrar dados bancários");
-                                })
-                            } else{
-                                console.log("-Dados bancários cadastrados com sucesso");
-                            }
-
-                            let sqlformacaoEscolar = "INSERT INTO dadosescolaridade(idFuncionario, escolaridade, cursos, curso1, curso2, curso3, curso4) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                            db.query(sqlformacaoEscolar, [idFuncionario, escolaridade, cursos, curso1, curso2, curso3, curso4], (err, result) =>{
-                                if (err) {
-                                    return db.rollback(() =>{
-                                        console.log("Erro ao cadastrar dados escolares:", err);
-                                        result.status(500).send("Erro ao cadastrar dados escolares");
-                                    })
-                                } else{
-                                    console.log("-Dados escolares cadastrados com sucesso");
-                                }
-
-                                let sqlVinculo = "INSERT INTO dadosvinculo(idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                                db.query(sqlVinculo, [idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes], (err, result) =>{
-                                    if (err) {
-                                        return db.rollback(() =>{
-                                            console.log("Erro ao cadastrar dados vínculo:", err);
-                                            result.status(500).send("Erro ao cadastrar dados vínculo");
-                                        })
-                                    } else{
-                                        console.log("-Dados vínculo cadastrados com sucesso\n");
-                                    }
-                                })
-
-                                db.commit((err) => {
-                                    if (err) {
-                                        return db.rollback(() => {
-                                            console.error("Erro ao finalizar a transação:", err);
-                                            res.status(500).send("Erro ao finalizar a transação.");
-                                        });
-                                    }
-                                    console.log("✔ Cadastro realizado com sucesso ✔\n");
-                                    //res.status(200).send("Cadastro realizado com sucesso");
-                                    res.status(200).json({ idFuncionario: idFuncionario })
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-});
-
-/*
-app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) =>{
-    const { idFuncionario } = req.body
-    const nome = req.body.nomeFuncionario || req.body.nome;
-
-    const pasta = path.join('uploads', nome);
-
-    const imagemPath = path.join(pasta, req.files['imagem'][0].filename);
-    const pdfsPath = req.files['pdfs'].map(file => path.join(pasta, file.filename));
-    const originalNames = req.files['pdfs'].map(file => file.originalname);
-  
-    const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
-    db.query(query, [
-      idFuncionario,
-      JSON.stringify(originalNames),
-      JSON.stringify(pdfsPath),
-      imagemPath
-    ], (err, result) => {
-      if (err) {
-        console.error("Erro ao salvar documentos:", err);
-        return res.status(500).json({ message: 'Erro ao salvar no banco de dados', error: err });
-      }
-      res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
-    });
-});
-*/
-
-app.post("/uploads", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) =>{
-    const { idFuncionario } = req.body
-    const nome = req.body.nomeFuncionario || req.body.nome;
-
-    let imagemPath = null;
-    const pasta = path.join('uploads', nome);
-    
-    if (req.files && req.files['imagem'] && req.files['imagem'][0]) {
-      imagemPath = path.join(pasta, req.files['imagem'][0].filename);
+async function salvarPdfs(client, idFuncionario, arquivos, substituir) {
+    if (substituir) {
+        await client.query("DELETE FROM arquivos WHERE id_funcionario = $1 AND tipo = 'pdf'", [idFuncionario]);
     }
-    const pdfs = req.files && req.files['pdfs'] ? req.files['pdfs'] : [];
-    const pdfsPath = pdfs.map(file => path.join(pasta, file.filename));
-    const originalNames = pdfs.map(file => file.originalname);
+    for (const arquivo of arquivos) {
+        await client.query(
+            `INSERT INTO arquivos (id_funcionario, tipo, nome_original, mime, tamanho, conteudo)
+             VALUES ($1, 'pdf', $2, $3, $4, $5)`,
+            [idFuncionario, arquivo.originalname, arquivo.mimetype || "application/pdf", arquivo.size, arquivo.buffer]
+        );
+    }
+}
 
+const camposUpload = upload.fields([{ name: "imagem", maxCount: 1 }, { name: "pdfs", maxCount: 50 }]);
 
-    const query = "INSERT INTO documentos (idFuncionario, originalFileNames, filePath, imagePath) VALUES (?, ?, ?, ?)";
-    db.query(query, [idFuncionario, JSON.stringify(originalNames), JSON.stringify(pdfsPath), imagemPath], (err, result) => {
-        if (err) {
-          return res.status(500).json({ message: 'Erro ao salvar no banco de dados', error: err });
-        }
-        res.status(200).json({ message: 'Arquivos enviados e salvos no banco de dados', result });
-    });
-})
-
-app.post("/cadastrarUsuario", (req, res) =>{
-    console.log("Body recebido:", req.body);
-    const { nomeUsuario, senhaUsuario, tipoAcesso, } = req.body;
-
-    db.beginTransaction((err) =>{
-        if(err){
-            console.log("erro ao iniciar transação")
-        }
-    })
-
-    let sqlUsuarios = "INSERT INTO usuarios(nomeUsuario, senhaUsuario, tipoAcesso) VALUES (?, ?, ?)";
-    db.query(sqlUsuarios, [nomeUsuario, senhaUsuario, tipoAcesso], (err, result) =>{
-        if (err) {
-            return db.rollback(() =>{
-                console.log("Erro ao cadastrar usuário:", err);
-                res.status(500).send("Erro ao cadastrar usuArio");
-            })
-        }
-
-        db.commit((err) => {
-            if (err) {
-                return db.rollback(() => {
-                    console.error("Erro ao finalizar a transação:", err);
-                    res.status(500).send("Erro ao finalizar a transação.");
-                });
-            }
-            console.log("✔ Usuário cadastrado com sucesso ✔\n");
-            //res.status(200).send("Cadastro realizado com sucesso");
-            res.status(200).json({ message: 'Usuário cadastrado com sucesso', result })
-        });
-    })
-})
-
-//TODO: READ
-app.get("/getRegisters", (req, res) =>{
-    const dbData = 
-    ` SELECT 
-        fun.idFuncionario,
-        fun.nomeFuncionario,
-        
-        dp.sexo,
-        dp.dataNasc,
-        dp.estadoAtual,
-        dp.nacionalidade,
-        dp.naturalidade,
-        dp.raca,
-        dp.telefone,
-        dp.email,
-        
-        dfam.nomePai,
-        dfam.cpfPai,
-        dfam.dataNascPai,
-        dfam.nomeMae,
-        dfam.cpfMae,
-        dfam.dataNascMae,
-        dfam.estadoCivil,
-        dfam.nomeEsposoA AS nomeEsposoa,
-        dfam.filhos,
-        dfam.nomeFilhos,
-        
-        dd.cpf,
-        dd.pisPasep,
-        dd.cnh,
-        dd.rg,
-        dd.rgDataExped,
-        dd.rgOrgaoExped,
-        dd.rgUf,
-        dd.titulo,
-        dd.tituloZona,
-        dd.tituloSecao,
-        dd.tituloUf,
-        dd.docMilitar,
-        dd.docMilitarSerie,
-        
-        de.bairro,
-        de.numCasa,
-        de.cep,
-        de.rua,
-        de.logadouro,
-        de.estado,
-        de.cidade,
-        
-        dbc.banco,
-        dbc.bancoAgencia,
-        dbc.bancoConta,
-        
-        dfe.escolaridade,
-        dfe.cursos,
-        dfe.curso1,
-        dfe.curso2,
-        dfe.curso3,
-        dfe.curso4,
-
-        dv.vinculo,
-        dv.setorDepartamento,
-        dv.cargoFuncao,
-        dv.cargoEfetivo,
-        dv.statusServidor,
-        dv.matriculaOrigem,
-        dv.orgaoOrigem,
-        dv.matriculaEmpresa,
-        dv.dataEntregaDocs,
-        dv.anotacoes
-
-      FROM funcionario f
-      JOIN funcionario fun ON f.idFuncionario = fun.idFuncionario
-      JOIN dadospessoais dp ON f.idFuncionario = dp.idFuncionario
-      JOIN dadosfamiliares dfam ON f.idFuncionario = dfam.idFuncionario
-      JOIN dadosdocumentos dd ON f.idFuncionario = dd.idFuncionario
-      JOIN dadosendereco de ON f.idFuncionario = de.idFuncionario
-      JOIN dadosbancarios dbc ON f.idFuncionario = dbc.idFuncionario
-      JOIN dadosescolaridade dfe ON f.idFuncionario = dfe.idFuncionario
-      JOIN dadosvinculo dv ON f.idFuncionario = dv.idFuncionario;
-    `
-
-    db.query(dbData, (err, data) =>{
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao consultar banco' });
-        }
-        return res.json(data)
-    })
-})
-
-app.get('/getFiles/:idFuncionario', (req, res) =>{
-    const idFuncionario = req.params.idFuncionario
-
-    const query = 'SELECT filePath, originalFileNames FROM documentos WHERE idFuncionario = ?'
-    db.query(query, [idFuncionario], (err, result) =>{
-        if(err){
-            return res.status(500).json({ message: 'Erro ao recuperar arquivos', error: err })
-        }
-        res.json(result)
-    })
-})
-
-app.get('/getImage/:idFuncionario', (req, res) =>{
-    const idFuncionario = req.params.idFuncionario
-
-    const query = 'SELECT imagePath FROM documentos WHERE idFuncionario = ?'
-    db.query(query, [idFuncionario], (err, result) =>{
-        if(err){
-            return res.status(500).json({ message: 'Erro ao recuperar imagem', error: err })
-        }
-        res.json(result[0].imagePath)
-    })
-})
-
-app.get("/getRegisterstot", (req, res) =>{
-    const dbDatatot = `
-        SELECT COUNT(*) AS totalFunc FROM funcionario;
-    `
-
-    db.query(dbDatatot, (err, datatot) =>{
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao consultar banco' });
-        }
-
-        const restot = {
-            totalFunc: datatot[0]?.totalFunc || 0
-        }
-
-        return res.json(restot)
-    })
-})
-
-app.post("/existenciaUsuario", (req, res) =>{
-    const { cpf } = req.body
-
-    const existenciaUsuario = `
-        SELECT * FROM dadosdocumentos 
-        WHERE cpf = ? LIMIT 1;
-    `;
-
-    db.query(existenciaUsuario, [cpf], (err, result) =>{    
-        if (result.length > 0) {
-            return res.status(200).json({ success: true, message: 'Usuário Existe' });
-        }
-    })
-})
-
-app.get("/getLogsLogin", (req, res) =>{
-    const dbLogsLogin = `
-    SELECT nomeUsuario, DATE_FORMAT(dataLogin,'%e/%m/%y') AS dataLogin, TIME_FORMAT(horaLogin, '%H:%i:%s') AS horaLogin FROM logslogin;
-    `
-
-    db.query(dbLogsLogin, (err, result) =>{
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao consultar logs de login' });
-        }
-
-        return res.json(result)
-    })
-})
-
-app.get("/getLogsEdit", (req, res) =>{
-    const dbLogsEdit = `
-    SELECT nomeUsuario, DATE_FORMAT(dataEdit,'%e/%m/%y') AS dataEdit, registroEditado, TIME_FORMAT(horaEdit, '%H:%i:%s') AS horaEdit FROM logsedicao;
-    `
-
-    db.query(dbLogsEdit, (err, response) =>{
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao consultar logs de edição' });
-        }
-
-        return res.json(response)
-    })
-})
-
-app.post("/validateUser", (req, res) =>{
-    const { usuario, senha } = req.body
-
-    const validateUser = `
-        SELECT * FROM usuarios 
-        WHERE nomeUsuario = ? AND senhaUsuario = ? AND tipoAcesso = 'ADM'
-        LIMIT 1;
-    `;
-
-    db.query(validateUser, [usuario, senha], (err, result) =>{
-        if (result.length > 0) {
-            return res.status(200).json({ success: true, message: 'Usuário ADM validado' });
-        } else {
-            return res.status(401).json({ success: false, message: 'Usuário não autorizado' });
-        }
-    })
-})
-
-
-//TODO: UPDATE
-app.post("/editRegister", upload.none(), (req, res) =>{
-    console.log("Body recebido:", req.body);
-    const { idFuncionario, nomeFuncionario, sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, 
-        nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos,
-        cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie,
-        bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
-        banco, bancoAgencia, bancoConta,
-        escolaridade, cursos, curso1, curso2, curso3, curso4,
-        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes
-    } = req.body;
-
-    
+async function processarUpload(req, substituirPdfs) {
+    const idFuncionario = Number(req.body.idFuncionario);
     if (!idFuncionario) {
-        console.log("ID do funcionário obrigatório");
-        return res.status(400).json({ message: "ID do funcionário obrigatório" });
+        const erro = new Error("ID do funcionário obrigatório");
+        erro.status = 400;
+        throw erro;
     }
+    const imagem = req.files?.imagem?.[0];
+    const pdfs = (req.files?.pdfs || []).filter((f) => f.mimetype === "application/pdf");
 
-    db.beginTransaction((err) =>{
-        if(err){
-            console.log("erro ao iniciar transação")
-        }
-    })
-
-    let sqlFuncionario = "UPDATE funcionario SET nomeFuncionario = ? WHERE idFuncionario = ?";
-    db.query(sqlFuncionario, [nomeFuncionario, idFuncionario], (err, result) =>{
-        if (err) {
-            return db.rollback(() =>{
-                console.log("Erro ao atualizar funcionario:", err);
-                res.status(500).send("Erro ao atualizar funcionário");
-            })
-        }
-
-        let sqlPessoais = "UPDATE dadospessoais SET sexo = ?, dataNasc = ?, estadoAtual = ?, nacionalidade = ?, naturalidade = ?, raca = ?, telefone = ?, email = ? WHERE idFuncionario = ?";
-        db.query(sqlPessoais, [sexo, dataNasc, estadoAtual, nacionalidade, naturalidade, raca, telefone, email, idFuncionario], (err, result) =>{
-            if (err) {
-                return db.rollback(() =>{
-                    console.log("Erro ao atualizar dados pessoais:", err);
-                    result.status(500).send("Erro ao atualizar dados pessoais");
-                })
-            } else{
-                console.log("-Dados pessoais editados com sucesso");
-            }
-
-            let sqlFamiliares = "UPDATE dadosfamiliares SET nomePai = ?, cpfPai = ?, dataNascPai = ?, nomeMae = ?, cpfMae = ?, dataNascMae = ?, estadoCivil = ?, nomeEsposoA = ?, filhos = ?, nomeFilhos = ? WHERE idFuncionario = ?";
-            db.query(sqlFamiliares, [nomePai, cpfPai, dataNascPai, nomeMae, cpfMae, dataNascMae, estadoCivil, nomeEsposoa, filhos, nomeFilhos, idFuncionario], (err, result) =>{
-                if (err) {
-                    return db.rollback(() =>{
-                        console.log("Erro ao atualizar dados familiares:", err);
-                        result.status(500).send("Erro ao atualizar dados familiares");
-                    })
-                } else{
-                    console.log("-Dados familiares editados com sucesso");
-                }
-
-                let sqlDocumentos = "UPDATE dadosdocumentos SET cpf = ?, pisPasep = ?, cnh = ?, rg = ?, rgDataExped = ?, rgOrgaoExped = ?, rgUf = ?, titulo = ?, tituloZona = ?, tituloSecao = ?, tituloUf = ?, docMilitar = ?, docMilitarSerie = ? WHERE idFuncionario = ?";
-                db.query(sqlDocumentos, [cpf, pisPasep, cnh, rg, rgDataExped, rgOrgaoExped, rgUf, titulo, tituloZona, tituloSecao, tituloUf, docMilitar, docMilitarSerie, idFuncionario], (err, result) =>{
-                    if (err) {
-                        return db.rollback(() =>{
-                            console.log("Erro ao atualizar dados documentos:", err);
-                            result.status(500).send("Erro ao atualizar dados documentos");
-                        })
-                    } else{
-                        console.log("-Dados documentos editados com sucesso");
-                    }
-
-                    let sqlEndereco = "UPDATE dadosendereco SET bairro = ?, numCasa = ?, cep = ?, rua = ?, logadouro = ?, estado = ?, cidade = ? WHERE idFuncionario = ?";
-                    db.query(sqlEndereco, [bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada, idFuncionario], (err, result) =>{
-                        if (err) {
-                            return db.rollback(() =>{
-                                console.log("Erro ao atualizar dados endereço:", err);
-                                result.status(500).send("Erro ao atualizar dados endereço");
-                            })
-                        } else{
-                            console.log("-Dados endereço editados com sucesso");
-                        }
-
-                        let sqlDadosBancarios = "UPDATE dadosbancarios SET banco = ?, bancoAgencia = ?, bancoConta = ? WHERE idFuncionario = ?";
-                        db.query(sqlDadosBancarios, [banco, bancoAgencia, bancoConta, idFuncionario], (err, result) =>{
-                            if (err) {
-                                return db.rollback(() =>{
-                                    console.log("Erro ao atualizar dados bancários:", err);
-                                    result.status(500).send("Erro ao atualizar dados bancários");
-                                })
-                            } else{
-                                console.log("-Dados bancários editados com sucesso");
-                            }
-
-                            let sqlformacaoEscolar = "UPDATE dadosescolaridade SET escolaridade = ?, cursos = ?, curso1 = ?, curso2 = ?, curso3 = ?, curso4 = ? WHERE idFuncionario = ?";
-                            db.query(sqlformacaoEscolar, [escolaridade, cursos, curso1, curso2, curso3, curso4, idFuncionario], (err, result) =>{
-                                if (err) {
-                                    return db.rollback(() =>{
-                                        console.log("Erro ao atualizar dados escolares:", err);
-                                        result.status(500).send("Erro ao atualizar dados escolares");
-                                    })
-                                } else{
-                                    console.log("-Dados escolares editados com sucesso");
-                                }
-
-                                let sqlVinculo = "UPDATE dadosvinculo SET vinculo = ?, setorDepartamento = ?, cargoFuncao = ?, cargoEfetivo = ?, statusServidor = ?, matriculaOrigem = ?, orgaoOrigem = ?, matriculaEmpresa = ?, dataEntregaDocs = ?, anotacoes = ? WHERE idFuncionario = ?";
-                                db.query(sqlVinculo, [vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes, idFuncionario], (err, result) =>{
-                                    if (err) {
-                                        return db.rollback(() =>{
-                                            console.log("Erro ao atualizar dados vínculo:", err);
-                                            result.status(500).send("Erro ao atualizar dados vínculo");
-                                        })
-                                    } else{
-                                        console.log("-Dados vínculo editados com sucesso\n");
-                                    }
-                                })
-
-                                db.commit((err) => {
-                                    if (err) {
-                                        return db.rollback(() => {
-                                            console.error("Erro ao finalizar a transação:", err);
-                                            res.status(500).send("Erro ao finalizar a transação.");
-                                        });
-                                    }
-                                    console.log("✔ Cadastro realizado com sucesso ✔\n");
-                                    //res.status(200).send("Cadastro realizado com sucesso");
-                                    res.status(200).json({ idFuncionario: idFuncionario })
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
+    await withTransaction(async (client) => {
+        if (imagem) await salvarFoto(client, idFuncionario, imagem);
+        if (pdfs.length) await salvarPdfs(client, idFuncionario, pdfs, substituirPdfs);
     });
-});
+    return { imagem: !!imagem, pdfs: pdfs.length };
+}
 
-app.post("/uploadsEdit", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxCount: 50 }]), (req, res) => {
-    console.log('👀 req.files front:', req.files);
-    console.log('🧾 req.body front:', req.body);
-  
-    const { idFuncionario, nomeFuncionario, nomeAntigo } = req.body;
-    const nomeNovo = nomeFuncionario || req.body.nome;
-  
-    if (!idFuncionario || !nomeNovo) {
-      return res.status(400).json({ message: 'ID ou nome do funcionário ausente' });
-    }
-  
-    const pastaBase = path.join(__dirname, 'uploads');
-    const pastaAntiga = nomeAntigo ? path.join(pastaBase, nomeAntigo) : null;
-    const pastaNova = path.join(pastaBase, nomeNovo);
-  
+function enviarArquivo(res, arquivo) {
+    res.set({
+        "Content-Type": arquivo.mime,
+        "Content-Length": arquivo.tamanho,
+        "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(arquivo.nome_original)}`,
+        "Cache-Control": "private, no-cache",
+    });
+    res.send(arquivo.conteudo);
+}
+
+// ===================== Autenticação =====================
+// Token no cabeçalho "Authorization: Bearer ..." ou em ?token= (usado por <img> e links de PDF)
+function autenticar(req, res, next) {
+    const cabecalho = req.headers.authorization || "";
+    const token = cabecalho.startsWith("Bearer ") ? cabecalho.slice(7) : req.query.token;
+    if (!token) return res.status(401).json({ message: "Não autenticado" });
     try {
-      // Renomeia a pasta se o nome foi alterado
-      if (pastaAntiga && pastaAntiga !== pastaNova && fs.existsSync(pastaAntiga)) {
-        fs.renameSync(pastaAntiga, pastaNova);
-  
-        // Renomeia os arquivos dentro da nova pasta
-        const arquivos = fs.readdirSync(pastaNova);
-  
-        arquivos.forEach((nomeArquivo) => {
-          const ext = path.extname(nomeArquivo);
-          const caminhoAntigo = path.join(pastaNova, nomeArquivo);
-  
-          // Renomear imagem antiga
-          if (nomeArquivo.startsWith("foto_") && ext === ".avif") {
-            const novoNome = `foto_${nomeNovo}.avif`;
-            const caminhoNovo = path.join(pastaNova, novoNome);
-            fs.renameSync(caminhoAntigo, caminhoNovo);
-          }
-  
-          // Renomear PDFs antigos
-          if (nomeArquivo.startsWith("doc_") && ext === ".pdf") {
-            const partes = nomeArquivo.split('_');
-            if (partes.length >= 4) {
-              const timestamp = partes[2];
-              const base = partes.slice(3).join('_');
-              const novoNome = `doc_${nomeNovo}_${timestamp}_${base}`;
-              const caminhoNovo = path.join(pastaNova, novoNome);
-              fs.renameSync(caminhoAntigo, caminhoNovo);
-            }
-          }
-        });
-      }
-  
-      // Cria a nova pasta caso não exista
-      if (!fs.existsSync(pastaNova)) {
-        fs.mkdirSync(pastaNova, { recursive: true });
-      }
-  
-      // Busca dados antigos do banco
-      const queryBusca = "SELECT filePath, imagePath, originalFileNames FROM documentos WHERE idFuncionario = ?";
-      db.query(queryBusca, [idFuncionario], (err, results) => {
-        if (err || results.length === 0) {
-          return res.status(500).json({ message: 'Erro ao buscar documentos antigos', error: err });
-        }
-  
-        const antigos = results[0];
-        let imagemPath = antigos.imagePath;
-        let pdfsPath = antigos.filePath ? JSON.parse(antigos.filePath) : [];
-        let originalNames = antigos.originalFileNames ? JSON.parse(antigos.originalFileNames) : [];
-  
-        // === ATUALIZAÇÃO DE IMAGEM ===
-  
-        if (req.files['imagem'] && req.files['imagem'][0]) {
-          const imgFile = req.files['imagem'][0];
-          const newImageName = `foto_${nomeNovo}.avif`;
-          const newImagePath = path.join(pastaNova, newImageName);
-          fs.renameSync(imgFile.path, newImagePath);
-          imagemPath = path.join('uploads', nomeNovo, newImageName);
-        } else if (nomeAntigo && nomeAntigo !== nomeNovo && antigos.imagePath) {
-          const caminhoAntigo = path.join(__dirname, antigos.imagePath);
-          const novoNomeImagem = `foto_${nomeNovo}.avif`;
-          const caminhoNovo = path.join(pastaNova, novoNomeImagem);
-  
-          if (fs.existsSync(caminhoAntigo)) {
-            fs.renameSync(caminhoAntigo, caminhoNovo);
-            imagemPath = path.join('uploads', nomeNovo, novoNomeImagem);
-          }
-          imagemPath = `uploads\\${nomeNovo}\\${novoNomeImagem}`
-        }
-  
-        // === ATUALIZAÇÃO DE PDFs ===
-  
-        if (req.files['pdfs'] && req.files['pdfs'].length > 0) {
-          const novosPdfsPath = [];
-          const novosOriginalNames = [];
-  
-          req.files['pdfs'].forEach((file) => {
-            const ext = path.extname(file.originalname);
-            const baseName = path.basename(file.originalname, ext);
-            const newPdfName = `doc_${nomeNovo}_${Date.now()}_${baseName}${ext}`;
-            const newPdfPath = path.join(pastaNova, newPdfName);
-  
-            fs.renameSync(file.path, newPdfPath);
-            novosPdfsPath.push(path.join('uploads', nomeNovo, newPdfName));
-            novosOriginalNames.push(file.originalname);
-          });
-  
-          // Remove arquivos antigos do disco
-          pdfsPath.forEach(file => {
-            const fullPath = path.join(__dirname, file);
-            if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
-          });
-  
-          pdfsPath = novosPdfsPath;
-          originalNames = novosOriginalNames;
-        } else if (nomeAntigo && nomeAntigo !== nomeNovo && pdfsPath.length > 0) {
-          // Renomeia os PDFs antigos se apenas o nome foi alterado
-          const arquivosNaNovaPasta = fs.readdirSync(pastaNova);
-          const novosPdfsPath = [];
-          const novosOriginalNames = [];
-  
-          arquivosNaNovaPasta.forEach((arquivo) => {
-            const ext = path.extname(arquivo);
-            if (arquivo.startsWith("doc_") && ext === ".pdf") {
-              const caminhoAntigo = path.join(pastaNova, arquivo);
-        
-              // Gera novo nome com base no nome novo
-              const base = path.basename(arquivo, ext).split('_').slice(3).join('_'); // pega o nome original
-              const novoNome = `doc_${nomeNovo}_${Date.now()}_${base}${ext}`;
-              const caminhoNovo = path.join(pastaNova, novoNome);
-        
-              fs.renameSync(caminhoAntigo, caminhoNovo);
-        
-              novosPdfsPath.push(path.join('uploads', nomeNovo, novoNome));
-              novosOriginalNames.push(base + ext);
-            }
-          });
-  
-          pdfsPath = novosPdfsPath;
-          originalNames = novosOriginalNames;
-        }
-  
-        // === ATUALIZAÇÃO NO BANCO DE DADOS ===
-        console.log(originalNames)
-        console.log(pdfsPath)
-        const queryUpdate = `UPDATE documentos SET originalFileNames = ?, filePath = ?, imagePath = ? WHERE idFuncionario = ?`;
-        db.query(queryUpdate, [
-          JSON.stringify(originalNames),
-          JSON.stringify(pdfsPath),
-          imagemPath,
-          idFuncionario
-        ], (err, result) => {
-          if (err) {
-            console.error("Erro ao atualizar documentos:", err);
-            return res.status(500).json({ message: 'Erro ao atualizar documentos', error: err });
-          }
-          return res.status(200).json({ message: 'Arquivos atualizados com sucesso' });
-        });
-      });
-  
-    } catch (err) {
-      console.error("Erro geral no upload edit:", err);
-      return res.status(500).json({ message: 'Erro no servidor', error: err });
+        req.usuario = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch {
+        res.status(401).json({ message: "Sessão expirada ou inválida" });
     }
-  });
+}
 
+// ===================== Rotas públicas =====================
+app.get("/health", rota(async (req, res) => {
+    await query("SELECT 1");
+    res.json({ status: "ok" });
+}));
 
-
-app.post("/logEdicao", (req, res) =>{
-    const { data: dataMySQL, hora: hour } = agora()
-    const { nomeUsuario, nomeFuncionario } = req.body;
-
-    db.beginTransaction((err) =>{
-        if(err){
-            console.log("erro ao iniciar transação")
-        }
-    })
-
-    let sqlLogEdicao = "INSERT INTO logsedicao(nomeUsuario, registroEditado, dataEdit, horaEdit) VALUES (?, ?, ?, ?)";
-    db.query(sqlLogEdicao, [nomeUsuario, nomeFuncionario, dataMySQL, hour], (err, result) =>{
-        if (err) {
-            return db.rollback(() =>{
-                console.log("Erro ao cadastrar log de edição:", err);
-                res.status(500).send("Erro ao cadastrar log de edição");
-            })
-        }
-
-        db.commit((err) => {
-            if (err) {
-                return db.rollback(() => {
-                    console.error("Erro ao finalizar a transação:", err);
-                    res.status(500).send("Erro ao finalizar a transação.");
-                });
-            }
-            console.log("✔ Log edição cadastrado com sucesso ✔\n");
-            //res.status(200).send("Cadastro realizado com sucesso");
-            res.status(200).json({ message: 'Log edição cadastrado com sucesso', result })
-        });
-    })
-})
-
-
-//TODO: DELETE
-app.delete("/deleteRegister/:id", (req, res) =>{
-    const { id } = req.params;
-    const { nome } = req.body
-
-    console.log(req.body);
-
-    db.beginTransaction((err) =>{
-        if (err){
-            console.error('Erro ao iniciar transação', err);
-            return res.status(500).json({ error: 'Erro ao iniciar transação' })
-        }
-
-        let sqlDeleteFuncionario = "DELETE FROM funcionario WHERE idFuncionario = ?";
-
-        db.query(sqlDeleteFuncionario, [id], (err, result) =>{
-            if (err){
-                console.error('Erro ao excluir registro', err);
-                return db.rollback(() =>{
-                    return result.status(500).json({ error: 'Erro ao excluir registro' });
-                })
-            } 
-
-            // Remover o diretório do funcionário
-            const dirPath = path.join(uploadDirectory, nome);
-            console.log('Excluindo diretório: ', dirPath);
-            fs.rm(dirPath, { recursive: true, force: true }, (err) => {
-                if (err) {
-                    console.error('Erro ao excluir a pasta do funcionário', err);
-                    return db.rollback(() => {
-                        return res.status(500).json({ error: 'Erro ao excluir pasta do funcionário' });
-                    });
-                }
-
-                db.commit((err) =>{
-                    if (err){
-                            console.error('Erro ao finalizar a transação', err);
-                            return db.rollback(() =>{
-                            return result.status(500).json({ error: 'Erro ao finalizar transação' });
-                        })
-                    }
-
-                    const sqlTotalFuncs = "SELECT COUNT(*) AS totalFunc FROM funcionario"
-
-                    db.query(sqlTotalFuncs, (err, totResult) =>{
-                        if (err) {
-                            console.error('Erro ao obter o total de funcionários', err);
-                            return res.status(500).json({ error: 'Erro ao obter total de funcionários' });
-                        }
-
-                        return res.status(200).json({
-                            message: 'Funcionário excluido com sucesso',
-                            affectedRows: res.affectedRows,
-                            totalFunc: totResult[0].totalFunc
-                        })
-                    })
-                })
-            })
-        })
-    })
-})
-
-//TODO: LOGIN
-app.post("/login", (req, res) =>{
-    const { data: dataMySQL, hora: hour } = agora()
+app.post("/login", rota(async (req, res) => {
     const { nomeUsuario, senhaUsuario } = req.body;
-    const jwt = require('jsonwebtoken');
+    const { rows } = await query(
+        "SELECT id_usuario, nome_usuario, senha_hash, tipo_acesso FROM usuarios WHERE nome_usuario = $1",
+        [nomeUsuario]
+    );
+    const usuario = rows[0];
+    const valido = usuario && senhaUsuario && (await bcrypt.compare(String(senhaUsuario), usuario.senha_hash));
 
-    db.query(
-        "SELECT * FROM usuarios WHERE nomeUsuario = ? AND senhaUsuario = ?",
-        [nomeUsuario, senhaUsuario],
-        (err, results) => {
-            if(err){
-                console.error("Erro ao consultar usuário:", err);
-                return res.status(500).json({ sucess: false });
-            }
-            if(results.length > 0){
-                const token = jwt.sign({ userId: results[0].idUsuario }, JWT_SECRET)
-                res.json({ sucess: true, token });
-                console.log("\n☑ Usuário %s Logado com sucesso dia %s ☑\n", nomeUsuario, dataMySQL)
-                db.query(
-                    "INSERT INTO logslogin(nomeUsuario, dataLogin, horaLogin) VALUES (?, ?, ?)", 
-                    [nomeUsuario, dataMySQL, hour],
-                )
-            }
-            else{
-                res.json({ sucess: false });
-                console.log("\n☒ Erro de login em usuário: %s ☒\n", nomeUsuario)
-            }
-        } 
-    )
-})
+    if (!valido) {
+        console.log(`☒ Erro de login em usuário: ${nomeUsuario}`);
+        return res.json({ sucess: false });
+    }
 
+    const token = jwt.sign(
+        { id: usuario.id_usuario, nomeUsuario: usuario.nome_usuario, tipoAcesso: usuario.tipo_acesso },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRA }
+    );
+    const { data, hora } = agora();
+    await query("INSERT INTO logs_login (nome_usuario, data_login, hora_login) VALUES ($1, $2, $3)", [usuario.nome_usuario, data, hora]);
+    console.log(`☑ Usuário ${usuario.nome_usuario} logado em ${data} ${hora}`);
+    res.json({ sucess: true, token });
+}));
 
-const PORT = Number(process.env.PORT || 5000);
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`↺ Serv rodando, porta ${PORT} ↺`)
+// Daqui para baixo, todas as rotas exigem login
+app.use(autenticar);
+
+// ===================== Funcionários =====================
+app.post("/cadastrar", rota(async (req, res) => {
+    const dados = normalizarCorpo(req.body);
+    if (!dados.nomeFuncionario) return res.status(400).json({ message: "Nome do funcionário obrigatório" });
+
+    const idFuncionario = await withTransaction(async (client) => {
+        const { rows } = await client.query(
+            "INSERT INTO funcionario (nome_funcionario) VALUES ($1) RETURNING id_funcionario",
+            [dados.nomeFuncionario]
+        );
+        const id = rows[0].id_funcionario;
+        await salvarDadosFuncionario(client, id, dados);
+        return id;
+    });
+
+    console.log(`✔ Funcionário ${idFuncionario} cadastrado`);
+    res.status(200).json({ idFuncionario });
+}));
+
+app.post("/editRegister", upload.none(), rota(async (req, res) => {
+    const dados = normalizarCorpo(req.body);
+    const idFuncionario = Number(dados.idFuncionario);
+    if (!idFuncionario) return res.status(400).json({ message: "ID do funcionário obrigatório" });
+
+    const encontrado = await withTransaction(async (client) => {
+        const { rowCount } = await client.query(
+            "UPDATE funcionario SET nome_funcionario = $1 WHERE id_funcionario = $2",
+            [dados.nomeFuncionario, idFuncionario]
+        );
+        if (rowCount === 0) return false;
+        await salvarDadosFuncionario(client, idFuncionario, dados);
+        return true;
+    });
+
+    if (!encontrado) return res.status(404).json({ message: "Funcionário não encontrado" });
+    console.log(`✔ Funcionário ${idFuncionario} editado`);
+    res.status(200).json({ idFuncionario });
+}));
+
+app.get("/getRegisters", rota(async (req, res) => {
+    const { rows } = await query(SELECT_FUNCIONARIOS);
+    res.json(rows);
+}));
+
+app.get("/getRegisterstot", rota(async (req, res) => {
+    const { rows } = await query("SELECT COUNT(*)::int AS \"totalFunc\" FROM funcionario");
+    res.json({ totalFunc: rows[0].totalFunc });
+}));
+
+app.post("/existenciaUsuario", rota(async (req, res) => {
+    const { rowCount } = await query("SELECT 1 FROM dados_documentos WHERE cpf = $1 LIMIT 1", [req.body.cpf]);
+    res.json({ success: rowCount > 0, message: rowCount > 0 ? "Usuário Existe" : "Usuário não encontrado" });
+}));
+
+app.delete("/deleteRegister/:id", rota(async (req, res) => {
+    const id = Number(req.params.id);
+    // As tabelas de dados e os arquivos são apagados em cascata
+    const { rowCount } = await query("DELETE FROM funcionario WHERE id_funcionario = $1", [id]);
+    if (rowCount === 0) return res.status(404).json({ message: "Funcionário não encontrado" });
+
+    const { rows } = await query("SELECT COUNT(*)::int AS total FROM funcionario");
+    res.status(200).json({ message: "Funcionário excluido com sucesso", affectedRows: rowCount, totalFunc: rows[0].total });
+}));
+
+// ===================== Arquivos =====================
+app.post("/uploads", camposUpload, rota(async (req, res) => {
+    const resultado = await processarUpload(req, false);
+    res.status(200).json({ message: "Arquivos enviados e salvos no banco de dados", ...resultado });
+}));
+
+// Na edição, PDFs novos substituem os anteriores (mesmo comportamento da versão com disco)
+app.post("/uploadsEdit", camposUpload, rota(async (req, res) => {
+    const resultado = await processarUpload(req, true);
+    res.status(200).json({ message: "Arquivos atualizados com sucesso", ...resultado });
+}));
+
+// Mantém o formato antigo: filePath e originalFileNames são arrays em JSON
+app.get("/getFiles/:idFuncionario", rota(async (req, res) => {
+    const { rows } = await query(
+        "SELECT id_arquivo, nome_original FROM arquivos WHERE id_funcionario = $1 AND tipo = 'pdf' ORDER BY id_arquivo",
+        [req.params.idFuncionario]
+    );
+    res.json([{
+        filePath: JSON.stringify(rows.map((r) => `arquivo/${r.id_arquivo}`)),
+        originalFileNames: JSON.stringify(rows.map((r) => r.nome_original)),
+    }]);
+}));
+
+app.get("/foto/:idFuncionario", rota(async (req, res) => {
+    const { rows } = await query(
+        "SELECT nome_original, mime, tamanho, conteudo FROM arquivos WHERE id_funcionario = $1 AND tipo = 'foto' ORDER BY id_arquivo DESC LIMIT 1",
+        [req.params.idFuncionario]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Sem foto" });
+    enviarArquivo(res, rows[0]);
+}));
+
+app.get("/arquivo/:id", rota(async (req, res) => {
+    const { rows } = await query(
+        "SELECT nome_original, mime, tamanho, conteudo FROM arquivos WHERE id_arquivo = $1",
+        [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Arquivo não encontrado" });
+    enviarArquivo(res, rows[0]);
+}));
+
+// ===================== Usuários =====================
+app.post("/validateUser", rota(async (req, res) => {
+    const { usuario, senha } = req.body;
+    const { rows } = await query(
+        "SELECT senha_hash FROM usuarios WHERE nome_usuario = $1 AND tipo_acesso = 'ADM'",
+        [usuario]
+    );
+    const valido = rows[0] && senha && (await bcrypt.compare(String(senha), rows[0].senha_hash));
+    if (valido) return res.status(200).json({ success: true, message: "Usuário ADM validado" });
+    res.status(401).json({ success: false, message: "Usuário não autorizado" });
+}));
+
+app.post("/cadastrarUsuario", rota(async (req, res) => {
+    const { nomeUsuario, senhaUsuario, tipoAcesso } = req.body;
+    if (!nomeUsuario || !senhaUsuario) return res.status(400).json({ message: "Usuário e senha obrigatórios" });
+
+    try {
+        await query(
+            "INSERT INTO usuarios (nome_usuario, senha_hash, tipo_acesso) VALUES ($1, $2, $3)",
+            [nomeUsuario, await bcrypt.hash(String(senhaUsuario), 10), tipoAcesso || "Usuário"]
+        );
+    } catch (err) {
+        if (err.code === "23505") return res.status(409).json({ message: "Usuário já existe" });
+        throw err;
+    }
+    console.log(`✔ Usuário ${nomeUsuario} cadastrado`);
+    res.status(200).json({ message: "Usuário cadastrado com sucesso" });
+}));
+
+// ===================== Logs =====================
+app.get("/getLogsLogin", rota(async (req, res) => {
+    const { rows } = await query(`
+        SELECT nome_usuario AS "nomeUsuario",
+               to_char(data_login, 'FMDD/MM/YY') AS "dataLogin",
+               to_char(hora_login, 'HH24:MI:SS') AS "horaLogin"
+        FROM logs_login ORDER BY id_log DESC`);
+    res.json(rows);
+}));
+
+app.get("/getLogsEdit", rota(async (req, res) => {
+    const { rows } = await query(`
+        SELECT nome_usuario AS "nomeUsuario",
+               to_char(data_edit, 'FMDD/MM/YY') AS "dataEdit",
+               registro_editado AS "registroEditado",
+               to_char(hora_edit, 'HH24:MI:SS') AS "horaEdit"
+        FROM logs_edicao ORDER BY id_log DESC`);
+    res.json(rows);
+}));
+
+// O autor do log vem do token (não do que o navegador envia)
+app.post("/logEdicao", rota(async (req, res) => {
+    const { data, hora } = agora();
+    await query(
+        "INSERT INTO logs_edicao (nome_usuario, registro_editado, data_edit, hora_edit) VALUES ($1, $2, $3, $4)",
+        [req.usuario.nomeUsuario, req.body.nomeFuncionario, data, hora]
+    );
+    res.status(200).json({ message: "Log edição cadastrado com sucesso" });
+}));
+
+// ===================== Erros =====================
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        const status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+        return res.status(status).json({ message: `Erro no upload: ${err.message} (máx. ${MAX_ARQUIVO_MB} MB por arquivo)` });
+    }
+    console.error("Erro na requisição:", req.method, req.path, err);
+    res.status(err.status || 500).json({ message: err.status ? err.message : "Erro interno do servidor" });
 });
+
+// ===================== Inicialização =====================
+inicializarBanco()
+    .then(() => {
+        console.log("⚯  Banco de dados pronto ⚯");
+        app.listen(PORT, "0.0.0.0", () => console.log(`↺ Serv rodando, porta ${PORT} ↺`));
+    })
+    .catch((err) => {
+        console.error("Falha ao inicializar o banco de dados:", err);
+        process.exit(1);
+    });

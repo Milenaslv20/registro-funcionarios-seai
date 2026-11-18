@@ -24,3 +24,6 @@ yarn-error.log*
 
 # uploads da API
 /server/uploads
+
+# variáveis locais da API
+server/.env

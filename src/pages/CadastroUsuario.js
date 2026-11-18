@@ -71,7 +71,8 @@ function CadastroUsuario() {
         setModalMessageError("Erro ao enviar dados de cadastro do usuário")
       }
     } catch(err){
-      setModalMessageError("Ocorreu um erro, tente novamente");
+      setModalMessageError(err.response?.status === 409 ? "Usuário já existe" : "Ocorreu um erro, tente novamente");
+      setOpenModalError(true);
       console.error("Erro:", err);
     }
   }

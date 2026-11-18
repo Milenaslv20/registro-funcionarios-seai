@@ -13,16 +13,16 @@ import defaultImage from '../svg/icon-person.jpg'
 
 import { useFuncionario } from '../pages/FuncionarioContext'
 import { useLanguage } from '../i18n/LanguageContext'
+import { urlFoto } from '../api'
 
 const Person = ({ funcionario, handleOpenDeleteModal }) => {
   const { t, locale } = useLanguage()
-  const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   const { setFuncionario } = useFuncionario();
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
-    const url = `${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`;
+    const url = urlFoto(funcionario.idFuncionario);
     setImageUrl(url);
   }, [funcionario]);
 
@@ -56,7 +56,9 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
 
   const convertBase64 = async (imageUrl) =>{
     try{
-      const response = await fetch(imageUrl)
+      let response = await fetch(imageUrl)
+      // sem foto cadastrada (404): usa o avatar padrão no PDF
+      if (!response.ok) response = await fetch(defaultImage)
       const avifBlob = await response.blob()
 
       const image = new Image()

@@ -37,6 +37,7 @@ const en = {
   'Confirme o usuário': 'Confirm your admin user',
   'Usuário não autorizado': 'Unauthorized user',
   'Usuário cadastrado com sucesso': 'User created successfully',
+  'Usuário já existe': 'This username already exists',
   'Erro ao enviar dados de cadastro do usuário': 'Error sending user registration data',
 
   // ---------- Seções do formulário ----------

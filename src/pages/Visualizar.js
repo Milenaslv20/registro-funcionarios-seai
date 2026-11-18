@@ -10,6 +10,7 @@ import { FolderDown } from 'lucide-react'
 import defaultImage from '../svg/icon-person.jpg'
 import Header from '../components/Header'
 import { useLanguage } from '../i18n/LanguageContext'
+import { urlApi, urlFoto } from '../api'
 
 function Visualizar() {
   const { t, locale } = useLanguage()
@@ -35,7 +36,7 @@ function Visualizar() {
   const dataExped = new Date(`${funcionario.rgDataExped}T00:00:00`)
   const formatedDataExped = dataExped.toLocaleDateString(locale)
 
-  const [imageUrl, setImageUrl] = useState(`${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
+  const [imageUrl, setImageUrl] = useState(urlFoto(funcionario.idFuncionario));
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -61,7 +62,9 @@ function Visualizar() {
 
   const convertBase64 = async (imageUrl) =>{
     try{
-      const response = await fetch(imageUrl)
+      let response = await fetch(imageUrl)
+      // sem foto cadastrada (404): usa o avatar padrão no PDF
+      if (!response.ok) response = await fetch(defaultImage)
       const avifBlob = await response.blob()
 
       const image = new Image()
@@ -685,7 +688,7 @@ function Visualizar() {
                       ) : (
                         files.map((file, index) => (
                           <div key={index} className={styles.name_edits_pdf}>
-                            <a href={`${endpoint}/${file.path}`} target="_blank" rel="noopener noreferrer">
+                            <a href={urlApi(file.path)} target="_blank" rel="noopener noreferrer">
                               📄 {file.name} {index + 1}
                             </a>
                           </div>

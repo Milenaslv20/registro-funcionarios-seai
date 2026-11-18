@@ -6,7 +6,7 @@ export const isAuth = async (nomeUsuario, senhaUsuario) => {
     try{
         const res = await Axios.post(`${endpoint}/login`, { nomeUsuario, senhaUsuario })
         if(res.data.sucess){
-            return { sucess:true }
+            return { sucess:true, token: res.data.token }
         }
         else{
             return { sucess:false }

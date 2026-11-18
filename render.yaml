@@ -1,0 +1,46 @@
+# Blueprint do Render: cria a API (Node) e o front (site estático) a partir deste repositório.
+# O banco fica no Neon: cole a connection string em DATABASE_URL quando o Render pedir.
+# Valores com "sync: false" são preenchidos por você no painel do Render (não ficam no repositório).
+services:
+  # ---------- API ----------
+  - type: web
+    name: vertix-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: node index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL          # connection string do Neon (postgresql://...?sslmode=require)
+        sync: false
+      - key: CORS_ORIGIN           # URL do front, ex.: https://vertix-web.onrender.com
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASSWORD        # senha do usuário admin criado no primeiro start
+        sync: false
+      - key: APP_TIMEZONE
+        value: America/Manaus
+      - key: SEED_DEMO             # "false" para não criar os funcionários de exemplo
+        value: "true"
+
+  # ---------- Front ----------
+  - type: web
+    name: vertix-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_BASE_URL  # URL da API, ex.: https://vertix-api.onrender.com
+        sync: false
+      - key: GENERATE_SOURCEMAP
+        value: "false"
+    routes:
+      - type: rewrite              # rotas do React Router (/historico, /editar...) caem no index.html
+        source: /*
+        destination: /index.html

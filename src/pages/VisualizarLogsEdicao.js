@@ -4,6 +4,7 @@ import Header from '../components/Header'
 
 import { FilterX } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext'
+import { apiFetch } from '../api'
 
 function VisualizarLogsEdicao() {
   const { t } = useLanguage()
@@ -22,8 +23,9 @@ function VisualizarLogsEdicao() {
     
     useEffect(() =>{
         const dataLogsEdit = async() =>{
-        const reqData = await fetch(`${endpoint}/getLogsEdit`)
-        const resData = await reqData.json()
+        const reqData = await apiFetch(`${endpoint}/getLogsEdit`)
+        const json = await reqData.json()
+        const resData = Array.isArray(json) ? json : [] // erro (ex.: 401) vira lista vazia
         setdataLogsEdit(resData)
         }
         dataLogsEdit()
