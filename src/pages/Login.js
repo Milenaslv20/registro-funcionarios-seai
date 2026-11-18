@@ -8,8 +8,11 @@ import logo from '../svg/logo.svg'
 import EMPRESA from '../config/empresa'
 
 import ModalError from '../components/ModalError';
+import LanguageSwitcher from '../components/LanguageSwitcher'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function Login({ onLogin }) {
+  const { t } = useLanguage()
 
   const[nomeUsuario, setNomeUsuario] = useState('')
   const[senhaUsuario, setSenhaUsuario] = useState('')
@@ -53,19 +56,20 @@ function Login({ onLogin }) {
       <div className={styles.container_left}>
         <img src={logo} alt={`Logo ${EMPRESA.nome}`}/>
         <span className={styles.login_brand}>{EMPRESA.nomeCompleto}</span>
-        <h1>Registro de Funcionários</h1>
+        <h1>{t('Registro de Funcionários')}</h1>
       </div>
 
       <div className={styles.container_right}>
+        <div className={styles.login_lang}><LanguageSwitcher variant='light' /></div>
         <div className={styles.container_login}>
-          <h2>Entrar</h2>
-          <p>Acesse com seu usuário e senha.</p>
+          <h2>{t('Entrar')}</h2>
+          <p>{t('Acesse com seu usuário e senha.')}</p>
 
-          <label htmlFor='usuario'>Usuário</label>
-          <input id='usuario' type='text' placeholder='Seu usuário' maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
-          <label htmlFor='senha'>Senha</label>
-          <input id='senha' type='password' placeholder='Sua senha' maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyDown={enterPress}></input>
-          <button className={styles.button_login} onClick={handleLogin}>Entrar</button>
+          <label htmlFor='usuario'>{t('Usuário')}</label>
+          <input id='usuario' type='text' placeholder={t('Seu usuário')} maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
+          <label htmlFor='senha'>{t('Senha')}</label>
+          <input id='senha' type='password' placeholder={t('Sua senha')} maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyDown={enterPress}></input>
+          <button className={styles.button_login} onClick={handleLogin}>{t('Entrar')}</button>
         </div>
       </div>
       <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError}/>

@@ -10,8 +10,10 @@ import { Paperclip } from 'lucide-react'
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 import Header from '../components/Header'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function Registro() {
+  const { t } = useLanguage()
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   //TODO: DECLARATION MODAL
@@ -718,7 +720,7 @@ function Registro() {
             <form className={styles.form_dados_pessoais} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome">Nome Completo:</label>
+                  <label for="nome">{t('Nome Completo:')}</label>
                   <input 
                     type='text' 
                     id='nome' 
@@ -731,20 +733,20 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="sexo">Sexo:</label>
+                  <label for="sexo">{t('Sexo:')}</label>
                   <select id="sexo" name='sexo' value={sexo} onChange={e => setSexo(e.target.value)}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="M">M</option>
                     <option value="F">F</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}> 
                 <div className={styles.div_input}>
-                  <label for="data_nasc">Data Nasc:</label>
+                  <label for="data_nasc">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc' 
@@ -755,16 +757,16 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="estadoAtual">Estado:</label>
+                  <label for="estadoAtual">{t('Estado:')}</label>
                   <select id='estadoAtual' name='estadoAtual' value={estadoAtual} onChange={(e) => {setEstadoAtual(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="AM">AM</option>
-                    <option value="Outros">Outros</option>
+                    <option value="Outros">{t('Outros')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nacionalidade">Nacionalidade:</label>
+                  <label for="nacionalidade">{t('Nacionalidade:')}</label>
                   <input 
                     type='text' 
                     id='nacionalidade' 
@@ -778,7 +780,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="Naturalidade">Naturalidade:</label>
+                  <label for="Naturalidade">{t('Naturalidade:')}</label>
                   <input
                     type='text' 
                     id='naturalidade' 
@@ -790,20 +792,20 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="raca">Raça:</label>
+                  <label for="raca">{t('Raça:')}</label>
                   <select id='raca' name='raca' value={raca} onChange={(e) => {setRaca(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Branco">Branco</option>
-                    <option value="Pardo">Pardo</option>
-                    <option value="Preto">Preto</option>
-                    <option value="Amarelo">Amarelo</option>
-                    <option value="Indígena">Indígena</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Branco">{t('Branco')}</option>
+                    <option value="Pardo">{t('Pardo')}</option>
+                    <option value="Preto">{t('Preto')}</option>
+                    <option value="Amarelo">{t('Amarelo')}</option>
+                    <option value="Indígena">{t('Indígena')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="telefone">Telefone:</label>
+                  <label for="telefone">{t('Telefone:')}</label>
                   <IMaskInput
                     mask="(00) 00000-0000"
                     id='telefone' 
@@ -816,7 +818,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="email">Email:</label>
+                  <label for="email">{t('Email:')}</label>
                   <input 
                     type='email' 
                     id='email' 
@@ -834,13 +836,13 @@ function Registro() {
             <form className={styles.form_dados_familiares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria}>
                 <hr></hr>
-                <span className={styles.title_divis}>Dados Familiares</span>
+                <span className={styles.title_divis}>{t('Dados Familiares')}</span>
               </div>
 
-              <span className={styles.spandf}>Pai</span>
+              <span className={styles.spandf}>{t('Pai')}</span>
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_pai">Nome Completo:</label>
+                  <label for="nome_pai">{t('Nome Completo:')}</label>
                   <input 
                     type='text' 
                     id='nome_pai' 
@@ -852,7 +854,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf_pai">CPF:</label>
+                  <label for="cpf_pai">{t('CPF:')}</label>
                   <IMaskInput
                     id='cpf_pai' 
                     name='cpf_pai' 
@@ -863,7 +865,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="data_nasc">Data Nasc:</label>
+                  <label for="data_nasc">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc_pai' 
@@ -874,10 +876,10 @@ function Registro() {
                 </div>
               </div>
 
-              <span className={styles.spandf}>Mãe</span>
+              <span className={styles.spandf}>{t('Mãe')}</span>
               <div className={styles.form_group} id={styles.form_group_mae}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_mae">Nome Completo:</label>
+                  <label for="nome_mae">{t('Nome Completo:')}</label>
                   <input 
                     type='text' 
                     id='nome_mae' 
@@ -889,7 +891,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf_mae">CPF:</label>
+                  <label for="cpf_mae">{t('CPF:')}</label>
                     <IMaskInput
                       id='cpf_mae' 
                       name='cpf_mae' 
@@ -900,7 +902,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="data_nasc_mae">Data Nasc:</label>
+                  <label for="data_nasc_mae">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc_mae' 
@@ -914,21 +916,21 @@ function Registro() {
               <div id={styles.dado_civil}>
                 <div className={styles.form_group}>
                   <div className={styles.div_input}>
-                    <label for="estado_civil">Estado Civil:</label>
+                    <label for="estado_civil">{t('Estado Civil:')}</label>
                     <select id='estado_civil' name='estado_civil' value={estadoCivil} onChange={(e) => {setEstadoCivil(e.target.value)}}>
-                      <option disabled={true} value="">Selecione</option>
-                        <option value="Solteiro">Solteiro</option>
-                        <option value="Casado">Casado</option>
-                        <option value="União Estável">União Estável</option>
-                        <option value="Separado">Separado</option>
-                        <option value="Divorciado">Divorciado</option>
-                        <option value="Viúvo">Viúvo</option>
-                        <option value="NI">NI</option>
+                      <option disabled={true} value="">{t('Selecione')}</option>
+                        <option value="Solteiro">{t('Solteiro')}</option>
+                        <option value="Casado">{t('Casado')}</option>
+                        <option value="União Estável">{t('União Estável')}</option>
+                        <option value="Separado">{t('Separado')}</option>
+                        <option value="Divorciado">{t('Divorciado')}</option>
+                        <option value="Viúvo">{t('Viúvo')}</option>
+                        <option value="NI">{t('NI')}</option>
                     </select>
                   </div>
 
                   <div className={`${styles.div_input} ${estadoCivil !== "Casado" &&  estadoCivil !== "União Estável" || estadoCivil === "" ? styles.disabled : ""}`} id={styles.inptspan}>
-                    <label for="nome_esposoa">Nome Cônjuge:</label>
+                    <label for="nome_esposoa">{t('Nome Cônjuge:')}</label>
                     <input 
                       type='text' 
                       id='nome_esposoa' 
@@ -943,19 +945,19 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="filhos">Filhos:</label>
+                  <label for="filhos">{t('Filhos:')}</label>
                   <select id='filhos' name='filhos' value={filhos} onChange={(e) => {setFilhos(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
-                    <option value="Mais de 3">Mais de 3</option>
+                    <option value="Mais de 3">{t('Mais de 3')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${filhos === "0" || filhos === "" ? styles.disabled : ""}`} id={styles.inptspan}>
-                  <label for="nome_filhos">Nome Filhos:</label>
+                  <label for="nome_filhos">{t('Nome Filhos:')}</label>
                   <input 
                     type='text' 
                     id='nome_filhos' 
@@ -974,12 +976,12 @@ function Registro() {
             <form className={styles.form_dados_documentos} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria}>
                 <hr></hr>
-                <span className={styles.title_divis}>Documentos</span>
+                <span className={styles.title_divis}>{t('Documentos')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label>CPF:</label>
+                  <label>{t('CPF:')}</label>
                   <IMaskInput
                     id='cpf' 
                     name='cpf' 
@@ -995,7 +997,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="pis_pasep">PIS/PASEP:</label>
+                  <label for="pis_pasep">{t('PIS/PASEP:')}</label>
                   <input 
                     type='text' 
                     id='pis_pasep' 
@@ -1007,15 +1009,15 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="selectCnh">Possui CNH?</label>
+                  <label for="selectCnh">{t('Possui CNH?')}</label>
                   <select id='selectCnh' name='selectCnh' value={selectCnh} onChange={(e) => {setSelectCnh(e.target.value)}}>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
+                    <option value="Não">{t('Não')}</option>
+                    <option value="Sim">{t('Sim')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${selectCnh === "Não" || selectCnh === "" ? styles.disabled : ""}`} id={styles.inptspan}>
-                  <label for="cnh">CNH:</label>
+                  <label for="cnh">{t('CNH:')}</label>
                   <input 
                     type='number' 
                     id='cnh' 
@@ -1030,7 +1032,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rg">RG:</label>
+                  <label for="rg">{t('RG:')}</label>
                   <input 
                     type='text' 
                     id='rg' 
@@ -1042,7 +1044,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_data_exped">Data Exped:</label>
+                  <label for="rg_data_exped">{t('Data Exped:')}</label>
                   <input 
                     type='date' 
                     id='rg_data_exped' 
@@ -1053,22 +1055,22 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_orgao_exped">Orgão Exped:</label>
+                  <label for="rg_orgao_exped">{t('Orgão Exped:')}</label>
                   <select id='rg_orgao_exped' name='rg_orgao_exped' value={rgOrgaoExped} onChange={(e) => {setRgOrgaoExped(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="SSP/AM">SSP/AM</option>
-                    <option value="PC/AM">PC/AM</option>
-                    <option value="PM/AM">PM/AM</option>
-                    <option value="Detran/AM">Detran/AM</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="SSP/AM">{t('SSP/AM')}</option>
+                    <option value="PC/AM">{t('PC/AM')}</option>
+                    <option value="PM/AM">{t('PM/AM')}</option>
+                    <option value="Detran/AM">{t('Detran/AM')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_uf">UF:</label>
+                  <label for="rg_uf">{t('UF:')}</label>
                   <select id="rg_uf" name="rg_uf" value={rgUf} onChange={(e) => {setRgUf(e.target.value)}}>
-                    <option disabled={true} value="">Selecione:</option>
+                    <option disabled={true} value="">{t('Selecione:')}</option>
                     <option value="AM">AM</option>
                     <option value="AC">AC</option>
                     <option value="AL">AL</option>
@@ -1096,14 +1098,14 @@ function Registro() {
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
-                    <option value="NI">NI</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo">Título:</label>
+                  <label for="titulo">{t('Título:')}</label>
                   <input 
                     type='text' 
                     id='titulo' 
@@ -1115,7 +1117,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo_zona">Zona:</label>
+                  <label for="titulo_zona">{t('Zona:')}</label>
                   <input 
                     type='text' 
                     id='titulo_zona'
@@ -1127,7 +1129,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo_secao">Seção:</label>
+                  <label for="titulo_secao">{t('Seção:')}</label>
                   <input 
                     type='text' 
                     id='titulo_secao' 
@@ -1139,9 +1141,9 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="titulo_uf">UF:</label>
+                  <label for="titulo_uf">{t('UF:')}</label>
                   <select id="titulo_uf" name="titulo_uf" value={tituloUf} onChange={(e) => {setTituloUf(e.target.value)}}>
-                    <option disabled={true} value="">Selecione:</option>
+                    <option disabled={true} value="">{t('Selecione:')}</option>
                     <option value="AM">AM</option>
                     <option value="AC">AC</option>
                     <option value="AL">AL</option>
@@ -1169,22 +1171,22 @@ function Registro() {
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
-                    <option value="NI">NI</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                    <label for="selectDocMilitar">Possui Doc. Militar?</label>
+                    <label for="selectDocMilitar">{t('Possui Doc. Militar?')}</label>
                     <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
-                      <option value="Não">Não</option>
-                      <option value="Sim">Sim</option>
+                      <option value="Não">{t('Não')}</option>
+                      <option value="Sim">{t('Sim')}</option>
                     </select>
                   </div>
 
                   <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`} id={styles.inptspan}>
-                    <label for="doc_militar">Doc. Militar:</label>
+                    <label for="doc_militar">{t('Doc. Militar:')}</label>
                     <input
                       type='text' 
                       id='doc_militar' 
@@ -1197,7 +1199,7 @@ function Registro() {
                   </div>
 
                   <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`} id={styles.inptspan}> 
-                    <label for="doc_militar_serie">Série:</label>
+                    <label for="doc_militar_serie">{t('Série:')}</label>
                     <input 
                       type='text' 
                       id='doc_militar_serie' 
@@ -1215,12 +1217,12 @@ function Registro() {
             <form className={styles.form_dados_endereco} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Endereço</span>
+                <span className={styles.title_divis}>{t('Endereço')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="bairro">Bairro:</label>
+                  <label for="bairro">{t('Bairro:')}</label>
                   <input
                     type='text' 
                     id='bairro' 
@@ -1232,7 +1234,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="num_casa">Número:</label>
+                  <label for="num_casa">{t('Número:')}</label>
                   <input 
                     type='text' 
                     id='num_casa' 
@@ -1244,7 +1246,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cep">CEP:</label>
+                  <label for="cep">{t('CEP:')}</label>
                   <IMaskInput
                     mask="00000-000"
                     id='cep' 
@@ -1255,7 +1257,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rua">Rua:</label>
+                  <label for="rua">{t('Rua:')}</label>
                   <input 
                     type='text' 
                     id='rua' 
@@ -1267,24 +1269,24 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="logadouro">Logadouro:</label>
+                  <label for="logadouro">{t('Logadouro:')}</label>
                   <select id='logadouro' name='logadouro' value={logadouro} onChange={(e) => {setLogadouro(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Rua">Rua</option>
-                    <option value="Avenida">Avenida</option>
-                    <option value="Travessa">Travessa</option>
-                    <option value="Estrada">Estrada</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Rua">{t('Rua')}</option>
+                    <option value="Avenida">{t('Avenida')}</option>
+                    <option value="Travessa">{t('Travessa')}</option>
+                    <option value="Estrada">{t('Estrada')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for='estadoSelecionado'>Estado:</label>
+                  <label for='estadoSelecionado'>{t('Estado:')}</label>
                   <select id="estadoSelecionado" name='estadoSelecionado' value={estadoSelecionado} onChange={handleEstados}>
-                    <option value="" disabled>Selecione</option>
+                    <option value="" disabled>{t('Selecione')}</option>
                     {Object.keys(estadosCidades).map(estado =>(
                       <option key={estado} value={estado}>{estado}</option>
                     ))}
@@ -1292,9 +1294,9 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cidadeSelecionada">Cidade</label>
+                  <label for="cidadeSelecionada">{t('Cidade')}</label>
                   <select id="cidadeSelecionada" name='cidadeSelecionada' value={cidadeSelecionada} onChange={handleCidade}>
-                    <option value="" disabled>Selecione</option>
+                    <option value="" disabled>{t('Selecione')}</option>
                     {cidades.map((cidade, index) =>(
                       <option key={index} value={cidade}>{cidade}</option>
                     ))}
@@ -1307,12 +1309,12 @@ function Registro() {
              <form className={styles.form_dados_bancarios} autoComplete='off' method='post' encType='multipart/form-data'>
                 <div className={styles.divisoria} id={styles.divis_docs}>
                   <hr></hr>
-                  <span className={styles.title_divis}>Dados Bancários</span>
+                  <span className={styles.title_divis}>{t('Dados Bancários')}</span>
                 </div>
 
                 <div className={styles.form_group}>
                   <div className={styles.div_input} id={styles.inptspan}>
-                    <label for="banco">Banco:</label>
+                    <label for="banco">{t('Banco:')}</label>
                     <input
                       type='text' 
                       id='banco' 
@@ -1324,7 +1326,7 @@ function Registro() {
                   </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="banco_agencia">Agência:</label>
+                  <label for="banco_agencia">{t('Agência:')}</label>
                   <input 
                     type='text' 
                     id='banco_agencia' 
@@ -1336,7 +1338,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="banco_conta">Conta:</label>
+                  <label for="banco_conta">{t('Conta:')}</label>
                   <input 
                     type='text' 
                     id='banco_conta' 
@@ -1353,42 +1355,42 @@ function Registro() {
             <form className={styles.form_dados_escolares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Formação Escolar</span>
+                <span className={styles.title_divis}>{t('Formação Escolar')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="escolaridade">Escolaridade:</label>
+                  <label for="escolaridade">{t('Escolaridade:')}</label>
                   <select id='escolaridade' name='escolaridade' value={escolaridade} onChange={(e) => {setEscolaridade(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Ensino Fundamental">Ensino Fundamental</option>
-                    <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="Ensino Superior">Ensino Superior</option>
-                    <option value="Pós Graduação">Pós Graduação</option>
-                    <option value="Mestrado">Mestrado</option>
-                    <option value="Doutorado">Doutorado</option>
-                    <option value="Tecnólogo">Tecnólogo</option>
-                    <option value="EJA">EJA</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Ensino Fundamental">{t('Ensino Fundamental')}</option>
+                    <option value="Ensino Médio">{t('Ensino Médio')}</option>
+                    <option value="Ensino Superior">{t('Ensino Superior')}</option>
+                    <option value="Pós Graduação">{t('Pós Graduação')}</option>
+                    <option value="Mestrado">{t('Mestrado')}</option>
+                    <option value="Doutorado">{t('Doutorado')}</option>
+                    <option value="Tecnólogo">{t('Tecnólogo')}</option>
+                    <option value="EJA">{t('EJA')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cursos">Cursos:</label>
+                  <label for="cursos">{t('Cursos:')}</label>
                   <select id='cursos' name='cursos' value={cursos} onChange={(e) => {setCursos(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
-                    <option value="Mais de 4">Mais de 4</option>
+                    <option value="Mais de 4">{t('Mais de 4')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${cursos === "" || cursos === "0" ? styles.disabled : ""}`} id={styles.inptspan}>
-                  <label for="curso1">Curso 1:</label>
+                  <label for="curso1">{t('Curso 1:')}</label>
                   <input 
                     type='text' 
                     id='curso1' 
@@ -1403,7 +1405,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" ? styles.disabled : ""}`} id={styles.inptspan}>
-                  <label for="curso2">Curso 2:</label>
+                  <label for="curso2">{t('Curso 2:')}</label>
                   <input 
                     type='text' 
                     id='curso2' 
@@ -1416,7 +1418,7 @@ function Registro() {
                 </div>
 
                 <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" ? styles.disabled : ""}`} id={styles.inptspan}>
-                  <label for="curso3">Curso 3:</label>
+                  <label for="curso3">{t('Curso 3:')}</label>
                   <input 
                     type='text' 
                     id='curso3' 
@@ -1431,7 +1433,7 @@ function Registro() {
 
               <div className={`${styles.div_input} ${cursos === "" || cursos === "0" || cursos === "1" || cursos === "2" || cursos === "3" ? styles.disabled : ""}`}>
                 <div className={styles.div_input}>
-                  <label for="curso4">Curso 4:</label>
+                  <label for="curso4">{t('Curso 4:')}</label>
                   <input 
                     type='text' 
                     id='curso4' 
@@ -1450,41 +1452,41 @@ function Registro() {
             <form className={styles.form_dados_vinculo} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Vínculo</span>
+                <span className={styles.title_divis}>{t('Vínculo')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="vinculo">Vínculo:</label>
+                  <label for="vinculo">{t('Vínculo:')}</label>
                   <select id='vinculo' name='vinculo' value={vinculo} onChange={(e) => {setVinculo(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Cargo Comissionado">Cargo Comissionado</option>
-                    <option value="Estagiário(a)">Estagiário(a)</option>
-                    <option value="Temporário">Temporário</option>
-                    <option value="Efetivo">Efetivo</option>
-                    <option value="Outros">Outros</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Cargo Comissionado">{t('Cargo Comissionado')}</option>
+                    <option value="Estagiário(a)">{t('Estagiário(a)')}</option>
+                    <option value="Temporário">{t('Temporário')}</option>
+                    <option value="Efetivo">{t('Efetivo')}</option>
+                    <option value="Outros">{t('Outros')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="setorDepartamento">Setor/Departamento:</label>
+                  <label for="setorDepartamento">{t('Setor/Departamento:')}</label>
                   <select id='setorDepartamento' name='setorDepartamento' value={setorDepartamento} onChange={(e) => {setSetorDepartamento(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Administrativo">Administrativo</option>
-                    <option value="Financeiro">Financeiro</option>
-                    <option value="Recursos Humanos">Recursos Humanos</option>
-                    <option value="Tecnologia da Informação">Tecnologia da Informação</option>
-                    <option value="Comercial">Comercial</option>
-                    <option value="Operações">Operações</option>
-                    <option value="Logística">Logística</option>
-                    <option value="Jurídico">Jurídico</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Administrativo">{t('Administrativo')}</option>
+                    <option value="Financeiro">{t('Financeiro')}</option>
+                    <option value="Recursos Humanos">{t('Recursos Humanos')}</option>
+                    <option value="Tecnologia da Informação">{t('Tecnologia da Informação')}</option>
+                    <option value="Comercial">{t('Comercial')}</option>
+                    <option value="Operações">{t('Operações')}</option>
+                    <option value="Logística">{t('Logística')}</option>
+                    <option value="Jurídico">{t('Jurídico')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cargoFuncao">Cargo/Função:</label>
+                  <label for="cargoFuncao">{t('Cargo/Função:')}</label>
                   <input 
                     type='text' 
                     id='cargoFuncao' 
@@ -1498,7 +1500,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cargoEfetivo">Cargo Efetivo:</label>
+                  <label for="cargoEfetivo">{t('Cargo Efetivo:')}</label>
                   <input 
                     type='text' 
                     id='cargoEfetivo' 
@@ -1510,16 +1512,16 @@ function Registro() {
                 </div>
                   
                 <div className={styles.div_input}>
-                  <label for="status">Status:</label>
+                  <label for="status">{t('Status:')}</label>
                   <select id='status' name='status' value={statusServidor} onChange={(e) => {setStatusServidor(e.target.value)}}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Ativo">Ativo</option>
-                    <option value="Desligado">Desligado</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Ativo">{t('Ativo')}</option>
+                    <option value="Desligado">{t('Desligado')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaOrigem">Matricula Origem:</label>
+                  <label for="matriculaOrigem">{t('Matricula Origem:')}</label>
                   <input 
                     type='text' 
                     id='matriculaOrigem' 
@@ -1533,7 +1535,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="orgaoOrigem">Orgão Origem:</label>
+                  <label for="orgaoOrigem">{t('Orgão Origem:')}</label>
                   <input 
                     type='text' 
                     id='orgaoOrigem' 
@@ -1545,7 +1547,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaEmpresa">Matrícula {EMPRESA.sigla}:</label>
+                  <label for="matriculaEmpresa">{t('Matrícula {sigla}:', { sigla: EMPRESA.sigla })}</label>
                   <input 
                     type='text' 
                     id='matriculaEmpresa' 
@@ -1559,7 +1561,7 @@ function Registro() {
                   
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.data_docs}>
-                  <label for="dataEntregaDocs">Data de entrega dos documentos:</label>
+                  <label for="dataEntregaDocs">{t('Data de entrega dos documentos:')}</label>
                   <input 
                     type='date' 
                     id='dataEntregaDocs' 
@@ -1572,7 +1574,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.anexoss}>
-                  <label for="nome_anexos">Anexos:</label>
+                  <label for="nome_anexos">{t('Anexos:')}</label>
                   <input
                     name='pdfs'
                     id={styles.input_files}
@@ -1594,11 +1596,11 @@ function Registro() {
                     )}
                   </div>
 
-                  <button type='button' className={styles.clear_files} onClick={clearFiles}>Limpar anexos</button>
+                  <button type='button' className={styles.clear_files} onClick={clearFiles}>{t('Limpar anexos')}</button>
                 </div>
 
                 <div className={styles.div_input} id={styles.anotacoes}>
-                  <label for="anotacoes">Anotações:</label>
+                  <label for="anotacoes">{t('Anotações:')}</label>
                   <textarea 
                     className={styles.input_anotacoes} 
                     type='text' 
@@ -1616,7 +1618,7 @@ function Registro() {
 
           </div>
         </div>
-        <button onClick={submitForm} className={styles.button_send}>Salvar</button>
+        <button onClick={submitForm} className={styles.button_send}>{t('Salvar')}</button>
       </div>
 
       {/***TODO: MODALS***/}

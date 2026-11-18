@@ -46,6 +46,7 @@
 }
 
 .container_right {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -166,6 +167,7 @@
 }
 
 .header_nav {
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -211,7 +213,9 @@
         padding: 10px 16px;
     }
     .header_nav {
+        order: 3;
         width: 100%;
+        margin-left: 0;
     }
     .brand_text span {
         display: none;
@@ -935,4 +939,64 @@
 }
 .container_confirm_user button:hover {
     background-color: var(--brand-strong);
+}
+
+
+/* ===================== SELETOR DE IDIOMA ===================== */
+.lang_switch {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+.lang_switch button {
+    min-width: 38px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    transition: background-color 0.15s, color 0.15s;
+}
+.lang_switch button:hover {
+    color: #fff;
+}
+.lang_switch .lang_active,
+.lang_switch .lang_active:hover {
+    background-color: var(--accent);
+    color: var(--text);
+}
+
+/* versão para fundo claro (tela de login) */
+.lang_switch_light {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+}
+.lang_switch_light button {
+    color: var(--text-muted);
+}
+.lang_switch_light button:hover {
+    color: var(--text);
+}
+.lang_switch_light .lang_active,
+.lang_switch_light .lang_active:hover {
+    background-color: var(--brand);
+    color: var(--text-on-brand);
+}
+
+.login_lang {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+@media (max-width: 860px) {
+    .login_lang {
+        top: 12px;
+        right: 16px;
+    }
 }

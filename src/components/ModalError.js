@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../pages/styles.module.css'
+import { useLanguage } from '../i18n/LanguageContext'
 
 export default function ModalError({openModalError, setOpenModalError, message, reload, onConfirm, onConfirmPassword}) {
+  const { t } = useLanguage()
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -36,10 +38,10 @@ export default function ModalError({openModalError, setOpenModalError, message, 
       <div className={styles.modal_overlay_error}>
         <div className={styles.modal_content_error}>
           <button onClick={handleClose} className={styles.close_button_error}><span>X</span></button>
-          <h1>{message}</h1>
+          <h1>{t(message)}</h1>
 
           {onConfirm && (
-            <button onClick={handleConfirm} className={styles.confirm_button}>Confirmar</button>
+            <button onClick={handleConfirm} className={styles.confirm_button}>{t('Confirmar')}</button>
           )}
 
           {onConfirmPassword  && message === "Confirme o usuário" &&  (
@@ -47,7 +49,7 @@ export default function ModalError({openModalError, setOpenModalError, message, 
               <input 
                 autoComplete='off'
                 className={styles.inputsss} 
-                placeholder='Usuário'
+                placeholder={t('Usuário')}
                 type='text'
                 name='usuario'
                 value={usuario}
@@ -57,13 +59,13 @@ export default function ModalError({openModalError, setOpenModalError, message, 
               <input 
                 autoComplete='off'
                 className={styles.inputsss} 
-                placeholder='Senha'
+                placeholder={t('Senha')}
                 type='password'
                 name='senha'
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}>
               </input>
-              <button className={styles.inputsss} onClick={handleConfirmPassword}>Confirmar</button>
+              <button className={styles.inputsss} onClick={handleConfirmPassword}>{t('Confirmar')}</button>
             </div>
           )}
         </div>

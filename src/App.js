@@ -2,6 +2,7 @@ import './App.css';
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { FuncionarioProvider } from './pages/FuncionarioContext';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 import Login from './pages/Login';
 import Registro from './pages/Registro';
@@ -51,6 +52,7 @@ function App() {
   }, [])
 
   return (
+    <LanguageProvider>
     <FuncionarioProvider>
       <Router>
         <Routes>
@@ -65,6 +67,7 @@ function App() {
         </Routes>
       </Router>  
     </FuncionarioProvider>
+    </LanguageProvider>
   );
 }
 

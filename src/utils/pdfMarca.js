@@ -14,7 +14,7 @@ function resetarEstilo(doc) {
 }
 
 // Cabeçalho desenhado no topo da página (0–32 mm)
-export function desenharCabecalho(doc) {
+export function desenharCabecalho(doc, t = (s) => s) {
   doc.setFillColor(...BRAND)
   doc.rect(0, 0, 210, 30, 'F')
   doc.setFillColor(...ACCENT)
@@ -36,19 +36,19 @@ export function desenharCabecalho(doc) {
   doc.text(EMPRESA.nome, 33, 15)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
-  doc.text(`${EMPRESA.nomeCompleto} · Recursos Humanos`, 33, 21)
+  doc.text(`${EMPRESA.nomeCompleto} · ${t('Recursos Humanos')}`, 33, 21)
 
   resetarEstilo(doc)
 }
 
 // Rodapé desenhado na base da página (287–297 mm)
-export function desenharRodape(doc) {
+export function desenharRodape(doc, t = (s) => s) {
   doc.setFillColor(...BRAND)
   doc.rect(0, 287, 210, 10, 'F')
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text(`${EMPRESA.nomeCompleto} · Documento de uso interno`, 105, 293, { align: 'center' })
+  doc.text(`${EMPRESA.nomeCompleto} · ${t('Documento de uso interno')}`, 105, 293, { align: 'center' })
 
   resetarEstilo(doc)
 }

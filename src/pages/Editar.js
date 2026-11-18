@@ -11,8 +11,10 @@ import defaultImage from '../svg/icon-person.jpg'
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 import Header from '../components/Header'
+import { useLanguage } from '../i18n/LanguageContext'
 
 const Editar = () =>{
+  const { t } = useLanguage()
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   const { funcionario } = useFuncionario();
@@ -614,7 +616,7 @@ const Editar = () =>{
     }
 
     if(visData.matriculaEmpresa.trim() === ''){
-      setModalMessageError(`Preencha a Matrícula ${EMPRESA.sigla}`)
+      setModalMessageError(t('Preencha a Matrícula {sigla}', { sigla: EMPRESA.sigla }))
       setOpenModalError(true)
       return false;
     }
@@ -783,7 +785,7 @@ const Editar = () =>{
 
   return (
     <div className={styles.container_register}>
-      <Header title='Editar Dados' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header title={t('Editar Dados')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
 
       <div className={styles.container_record}>
         <div className={styles.record}>
@@ -814,7 +816,7 @@ const Editar = () =>{
             <form className={styles.form_dados_pessoais} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="nome">Nome Completo:</label>
+                  <label for="nome">{t('Nome Completo:')}</label>
                   <input 
                     className={styles.input_nome} 
                     type='text' 
@@ -828,20 +830,20 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="sexo">Sexo:</label>
+                  <label for="sexo">{t('Sexo:')}</label>
                   <select id="sexo" name='sexo' value={visData.sexo} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="M">M</option>
                     <option value="F">F</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}> 
                 <div className={styles.div_input}>
-                  <label for="data_nasc">Data Nasc:</label>
+                  <label for="data_nasc">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc' 
@@ -852,16 +854,16 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="estadoAtual">Estado:</label>
+                  <label for="estadoAtual">{t('Estado:')}</label>
                   <select id='estadoAtual' name='estadoAtual' value={visData.estadoAtual} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="AM">AM</option>
-                    <option value="Outros">Outros</option>
+                    <option value="Outros">{t('Outros')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="nacionalidade">Nacionalidade:</label>
+                  <label for="nacionalidade">{t('Nacionalidade:')}</label>
                   <input 
                     className={styles.input_nacionalidade} 
                     type='text' 
@@ -876,7 +878,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="Naturalidade">Naturalidade:</label>
+                  <label for="Naturalidade">{t('Naturalidade:')}</label>
                   <input
                     className={styles.input_naturalidade} 
                     type='text' 
@@ -889,20 +891,20 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="raca">Raça:</label>
+                  <label for="raca">{t('Raça:')}</label>
                   <select id='raca' name='raca' value={visData.raca} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Branco">Branco</option>
-                    <option value="Pardo">Pardo</option>
-                    <option value="Preto">Preto</option>
-                    <option value="Amarelo">Amarelo</option>
-                    <option value="Indígena">Indígena</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Branco">{t('Branco')}</option>
+                    <option value="Pardo">{t('Pardo')}</option>
+                    <option value="Preto">{t('Preto')}</option>
+                    <option value="Amarelo">{t('Amarelo')}</option>
+                    <option value="Indígena">{t('Indígena')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="telefone">Telefone:</label>
+                  <label for="telefone">{t('Telefone:')}</label>
                   <IMaskInput
                     mask="(00) 00000-0000"
                     id='telefone' 
@@ -922,7 +924,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="email">Email:</label>
+                  <label for="email">{t('Email:')}</label>
                   <input 
                     className={styles.input_email} 
                     type='email' 
@@ -941,13 +943,13 @@ const Editar = () =>{
             <form className={styles.form_dados_familiares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria}>
                 <hr></hr>
-                <span className={styles.title_divis}>Dados Familiares</span>
+                <span className={styles.title_divis}>{t('Dados Familiares')}</span>
               </div>
 
-              <span className={styles.span}>Pai</span>
+              <span className={styles.span}>{t('Pai')}</span>
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="nome_pai">Nome Completo:</label>
+                  <label for="nome_pai">{t('Nome Completo:')}</label>
                   <input 
                     className={styles.input_nome_pai} 
                     type='text' 
@@ -960,7 +962,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cpf_pai">CPF:</label>
+                  <label for="cpf_pai">{t('CPF:')}</label>
                   <IMaskInput
                     id='cpf_pai' 
                     name='cpf_pai' 
@@ -978,7 +980,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="data_nasc">Data Nasc:</label>
+                  <label for="data_nasc">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc_pai' 
@@ -989,10 +991,10 @@ const Editar = () =>{
                 </div>
               </div>
 
-              <span className={styles.span}>Mãe</span>
+              <span className={styles.span}>{t('Mãe')}</span>
               <div className={styles.form_group} id={styles.form_group_mae}>
                 <div className={styles.div_input}>
-                  <label for="nome_mae">Nome Completo:</label>
+                  <label for="nome_mae">{t('Nome Completo:')}</label>
                   <input 
                     className={styles.input_nome_mae} 
                     type='text' 
@@ -1005,7 +1007,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cpf_mae">CPF:</label>
+                  <label for="cpf_mae">{t('CPF:')}</label>
                   <IMaskInput
                     id='cpf_mae' 
                     name='cpf_mae' 
@@ -1023,7 +1025,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="data_nasc_mae">Data Nasc:</label>
+                  <label for="data_nasc_mae">{t('Data Nasc:')}</label>
                   <input 
                     type='date' 
                     id='data_nasc_mae' 
@@ -1036,21 +1038,21 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.input_estado_civil}>
-                  <label for="estado_civil">Estado Civil:</label>
+                  <label for="estado_civil">{t('Estado Civil:')}</label>
                   <select id='estado_civil' name='estadoCivil' value={visData.estadoCivil} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                      <option value="Solteiro">Solteiro</option>
-                      <option value="Casado">Casado</option>
-                      <option value="União Estável">União Estável</option>
-                      <option value="Separado">Separado</option>
-                      <option value="Divorciado">Divorciado</option>
-                      <option value="Viúvo">Viúvo</option>
-                      <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                      <option value="Solteiro">{t('Solteiro')}</option>
+                      <option value="Casado">{t('Casado')}</option>
+                      <option value="União Estável">{t('União Estável')}</option>
+                      <option value="Separado">{t('Separado')}</option>
+                      <option value="Divorciado">{t('Divorciado')}</option>
+                      <option value="Viúvo">{t('Viúvo')}</option>
+                      <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${visData.estadoCivil !== "Casado" || visData.estadoCivil === "" ? styles.disabled : ""}`}>
-                  <label for="nome_esposoa">Nome Cônjuge:</label>
+                  <label for="nome_esposoa">{t('Nome Cônjuge:')}</label>
                   <input 
                     className={styles.input_nome_esposoa} 
                     type='text' 
@@ -1066,19 +1068,19 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.input_filhos}>
-                  <label for="filhos">Filhos:</label>
+                  <label for="filhos">{t('Filhos:')}</label>
                   <select id='filhos' name='filhos' value={visData.filhos} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
-                    <option value="Mais de 3">Mais de 3</option>
+                    <option value="Mais de 3">{t('Mais de 3')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${visData.filhos === "0" || visData.nomeFilhos === "" ? styles.disabled : ""}`}>
-                  <label for="nome_filhos">Nome Filhos:</label>
+                  <label for="nome_filhos">{t('Nome Filhos:')}</label>
                   <input 
                     className={styles.input_nome_filhos} 
                     type='text' 
@@ -1097,12 +1099,12 @@ const Editar = () =>{
             <form className={styles.form_dados_documentos} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Documentos</span>
+                <span className={styles.title_divis}>{t('Documentos')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="cpf">CPF:</label>
+                  <label for="cpf">{t('CPF:')}</label>
                   <IMaskInput
                     id='cpf' 
                     name='cpf' 
@@ -1120,7 +1122,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="pis_pasep">PIS/PASEP:</label>
+                  <label for="pis_pasep">{t('PIS/PASEP:')}</label>
                   <input 
                     className={styles.input_pis_pasep} 
                     type='text' 
@@ -1133,15 +1135,15 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="selectCnh">Possui CNH?</label>
+                  <label for="selectCnh">{t('Possui CNH?')}</label>
                   <select id='selectCnh' name='selectCnh' value={selectCnh} onChange={(e) => {setSelectCnh(e.target.value)}}>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
+                    <option value="Não">{t('Não')}</option>
+                    <option value="Sim">{t('Sim')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${selectCnh === "Não" || selectCnh === "" ? styles.disabled : ""}`}>
-                  <label for="cnh">CNH:</label>
+                  <label for="cnh">{t('CNH:')}</label>
                   <input 
                     className={styles.input_cnh}
                     type='text' 
@@ -1157,7 +1159,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="rg">RG:</label>
+                  <label for="rg">{t('RG:')}</label>
                   <input 
                     className={styles.input_rg} 
                     type='text' 
@@ -1170,7 +1172,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_data_exped">Data Exped:</label>
+                  <label for="rg_data_exped">{t('Data Exped:')}</label>
                   <input 
                     type='date' 
                     id='rg_data_exped' 
@@ -1181,22 +1183,22 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_orgao_exped">Orgão Exped:</label>
+                  <label for="rg_orgao_exped">{t('Orgão Exped:')}</label>
                   <select id='rg_orgao_exped' name='rgOrgaoExped' value={visData.rgOrgaoExped} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="SSP/AM">SSP/AM</option>
-                    <option value="PC/AM">PC/AM</option>
-                    <option value="PM/AM">PM/AM</option>
-                    <option value="Detran/AM">Detran/AM</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="SSP/AM">{t('SSP/AM')}</option>
+                    <option value="PC/AM">{t('PC/AM')}</option>
+                    <option value="PM/AM">{t('PM/AM')}</option>
+                    <option value="Detran/AM">{t('Detran/AM')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="rg_uf">UF:</label>
+                  <label for="rg_uf">{t('UF:')}</label>
                   <select id="rg_uf" name="rgUf" value={visData.rgUf} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione:</option>
+                    <option disabled={true} value="">{t('Selecione:')}</option>
                     <option value="AM">AM</option>
                     <option value="AC">AC</option>
                     <option value="AL">AL</option>
@@ -1224,14 +1226,14 @@ const Editar = () =>{
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
-                    <option value="NI">NI</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="titulo">Título:</label>
+                  <label for="titulo">{t('Título:')}</label>
                   <input 
                     className={styles.input_titulo} 
                     type='text' 
@@ -1244,7 +1246,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="titulo_zona">Zona:</label>
+                  <label for="titulo_zona">{t('Zona:')}</label>
                   <input 
                     className={styles.input_titulo_zona} 
                     type='text' 
@@ -1257,7 +1259,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="titulo_secao">Seção:</label>
+                  <label for="titulo_secao">{t('Seção:')}</label>
                   <input 
                     className={styles.input_titulo_secao} 
                     type='text' 
@@ -1270,9 +1272,9 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="titulo_uf">UF:</label>
+                  <label for="titulo_uf">{t('UF:')}</label>
                   <select id="titulo_uf" name="tituloUf" value={visData.tituloUf} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione:</option>
+                    <option disabled={true} value="">{t('Selecione:')}</option>
                     <option value="AM">AM</option>
                     <option value="AC">AC</option>
                     <option value="AL">AL</option>
@@ -1300,20 +1302,20 @@ const Editar = () =>{
                     <option value="SP">SP</option>
                     <option value="SE">SE</option>
                     <option value="TO">TO</option>
-                    <option value="NI">NI</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="selectDocMilitar">Possui Doc. Militar?</label>
+                  <label for="selectDocMilitar">{t('Possui Doc. Militar?')}</label>
                   <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
+                    <option value="Não">{t('Não')}</option>
+                    <option value="Sim">{t('Sim')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`}>
-                  <label for="doc_militar">Doc. Militar:</label>
+                  <label for="doc_militar">{t('Doc. Militar:')}</label>
                   <input
                     className={styles.input_doc_militar} 
                     type='text' 
@@ -1327,7 +1329,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={`${styles.div_input} ${selectDocMilitar === "Não" || selectDocMilitar === "" ? styles.disabled : ""}`}>
-                  <label for="doc_militar_serie">Série:</label>
+                  <label for="doc_militar_serie">{t('Série:')}</label>
                   <input 
                     className={styles.input_doc_militar_serie} 
                     type='text' 
@@ -1346,12 +1348,12 @@ const Editar = () =>{
             <form className={styles.form_dados_endereco} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Endereço</span>
+                <span className={styles.title_divis}>{t('Endereço')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="bairro">Bairro:</label>
+                  <label for="bairro">{t('Bairro:')}</label>
                   <input
                     className={styles.input_bairro} 
                     type='text' 
@@ -1364,7 +1366,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="num_casa">Número:</label>
+                  <label for="num_casa">{t('Número:')}</label>
                   <input 
                     className={styles.input_num_casa} 
                     type='text' 
@@ -1377,7 +1379,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cep">CEP:</label>
+                  <label for="cep">{t('CEP:')}</label>
                   <IMaskInput
                     id='cep' 
                     name='cep' 
@@ -1395,7 +1397,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rua">Rua:</label>
+                  <label for="rua">{t('Rua:')}</label>
                   <input 
                     type='text' 
                     id='rua' 
@@ -1407,24 +1409,24 @@ const Editar = () =>{
                 </div>                
 
                 <div className={styles.div_input}>
-                  <label for="logadouro">Logadouro:</label>
+                  <label for="logadouro">{t('Logadouro:')}</label>
                   <select id='logadouro' name='logadouro' value={visData.logadouro} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Rua">Rua</option>
-                    <option value="Avenida">Avenida</option>
-                    <option value="Travessa">Travessa</option>
-                    <option value="Estrada">Estrada</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Rua">{t('Rua')}</option>
+                    <option value="Avenida">{t('Avenida')}</option>
+                    <option value="Travessa">{t('Travessa')}</option>
+                    <option value="Estrada">{t('Estrada')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for='estadoSelecionado'>Estado:</label>
+                  <label for='estadoSelecionado'>{t('Estado:')}</label>
                   <select id="estadoSelecionado" name='estadoSelecionado' value={visData.estadoSelecionado} onChange={handleEstados}>
-                    <option value="" disabled>Selecione</option>
+                    <option value="" disabled>{t('Selecione')}</option>
                     {Object.keys(estadosCidades).map(estado =>(
                       <option key={estado} value={estado}>{estado}</option>
                     ))}
@@ -1432,9 +1434,9 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cidadeSelecionada">Cidade</label>
+                  <label for="cidadeSelecionada">{t('Cidade')}</label>
                   <select id="cidadeSelecionada" name='cidadeSelecionada' value={visData.cidadeSelecionada} onChange={handleCidade}>
-                    <option value="" disabled>Selecione</option>
+                    <option value="" disabled>{t('Selecione')}</option>
                     {cidades.map((cidade, index) =>(
                       <option key={index} value={cidade}>{cidade}</option>
                     ))}
@@ -1447,12 +1449,12 @@ const Editar = () =>{
              <form className={styles.form_dados_bancarios} autoComplete='off' method='post' encType='multipart/form-data'>
                 <div className={styles.divisoria} id={styles.divis_docs}>
                   <hr></hr>
-                  <span className={styles.title_divis}>Dados Bancários</span>
+                  <span className={styles.title_divis}>{t('Dados Bancários')}</span>
                 </div>
 
                 <div className={styles.form_group}>
                   <div className={styles.div_input}>
-                    <label for="banco">Banco:</label>
+                    <label for="banco">{t('Banco:')}</label>
                     <input
                       className={styles.input_banco} 
                       type='text' 
@@ -1465,7 +1467,7 @@ const Editar = () =>{
                   </div>
 
                 <div className={styles.div_input}>
-                  <label for="banco_agencia">Agência:</label>
+                  <label for="banco_agencia">{t('Agência:')}</label>
                   <input 
                     className={styles.input_banco_agencia} 
                     type='text' 
@@ -1478,7 +1480,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="banco_conta">Conta:</label>
+                  <label for="banco_conta">{t('Conta:')}</label>
                   <input 
                     className={styles.input_banco_conta} 
                     type='text' 
@@ -1496,40 +1498,40 @@ const Editar = () =>{
             <form className={styles.form_dados_escolares} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Formação Escolar</span>
+                <span className={styles.title_divis}>{t('Formação Escolar')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="escolaridade">Escolaridade:</label>
+                  <label for="escolaridade">{t('Escolaridade:')}</label>
                   <select id='escolaridade' name='escolaridade' value={visData.escolaridade} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Ensino Fundamental">Ensino Fundamental</option>
-                    <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="Ensino Médio">Ensino Médio</option>
-                    <option value="EJA">EJA</option>
-                    <option value="Ensino Superior">Ensino Superior</option>
-                    <option value="Tecnólogo">Tecnólogo</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Ensino Fundamental">{t('Ensino Fundamental')}</option>
+                    <option value="Ensino Médio">{t('Ensino Médio')}</option>
+                    <option value="Ensino Médio">{t('Ensino Médio')}</option>
+                    <option value="EJA">{t('EJA')}</option>
+                    <option value="Ensino Superior">{t('Ensino Superior')}</option>
+                    <option value="Tecnólogo">{t('Tecnólogo')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cursos">cursos:</label>
+                  <label for="cursos">{t('cursos:')}</label>
                   <select id='cursos' name='cursos' value={visData.cursos} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
                     <option value="0">0</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
-                    <option value="Mais de 4">Mais de 4</option>
+                    <option value="Mais de 4">{t('Mais de 4')}</option>
                   </select>
                 </div>
 
                 <div className={`${styles.div_input} ${visData.cursos === "" || visData.cursos === "0" ? styles.disabled : ""}`}>
-                  <label for="curso1">Curso 1:</label>
+                  <label for="curso1">{t('Curso 1:')}</label>
                   <input 
                     className={styles.input_curso1} 
                     type='text' 
@@ -1545,7 +1547,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={`${styles.div_input} ${visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" ? styles.disabled : ""}`}>
-                  <label for="curso2">Curso 2:</label>
+                  <label for="curso2">{t('Curso 2:')}</label>
                   <input 
                     className={styles.input_curso2} 
                     type='text' 
@@ -1559,7 +1561,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={`${styles.div_input} ${visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" || visData.cursos === "2" ? styles.disabled : ""}`}>
-                  <label for="curso3">Curso 3:</label>
+                  <label for="curso3">{t('Curso 3:')}</label>
                   <input 
                     className={styles.input_curso3} 
                     type='text' 
@@ -1574,7 +1576,7 @@ const Editar = () =>{
               </div>
 
               <div className={`${styles.div_input} ${visData.cursos === "" || visData.cursos === "0" || visData.cursos === "1" || visData.cursos === "2" || visData.cursos === "3" ? styles.disabled : ""}`}>
-                <label for="curso4">Curso 4:</label>
+                <label for="curso4">{t('Curso 4:')}</label>
                 <input 
                   className={styles.input_curso3} 
                   type='text' 
@@ -1593,41 +1595,41 @@ const Editar = () =>{
             <form className={styles.form_dados_vinculo} autoComplete='off' method='post' encType='multipart/form-data'>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Vínculo</span>
+                <span className={styles.title_divis}>{t('Vínculo')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="vinculo">Vínculo:</label>
+                  <label for="vinculo">{t('Vínculo:')}</label>
                   <select id='vinculo' name='vinculo' value={visData.vinculo} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Cargo Comissionado">Cargo Comissionado</option>
-                    <option value="Estagiário(a)">Estagiário(a)</option>
-                    <option value="Temporário">Temporário</option>
-                    <option value="Efetivo">Efetivo</option>
-                    <option value="Outros">Outros</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Cargo Comissionado">{t('Cargo Comissionado')}</option>
+                    <option value="Estagiário(a)">{t('Estagiário(a)')}</option>
+                    <option value="Temporário">{t('Temporário')}</option>
+                    <option value="Efetivo">{t('Efetivo')}</option>
+                    <option value="Outros">{t('Outros')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="setorDepartamento">Setor/Departamento:</label>
+                  <label for="setorDepartamento">{t('Setor/Departamento:')}</label>
                   <select id='setorDepartamento' name='setorDepartamento' value={visData.setorDepartamento} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Administrativo">Administrativo</option>
-                    <option value="Financeiro">Financeiro</option>
-                    <option value="Recursos Humanos">Recursos Humanos</option>
-                    <option value="Tecnologia da Informação">Tecnologia da Informação</option>
-                    <option value="Comercial">Comercial</option>
-                    <option value="Operações">Operações</option>
-                    <option value="Logística">Logística</option>
-                    <option value="Jurídico">Jurídico</option>
-                    <option value="Outros">Outros</option>
-                    <option value="NI">NI</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Administrativo">{t('Administrativo')}</option>
+                    <option value="Financeiro">{t('Financeiro')}</option>
+                    <option value="Recursos Humanos">{t('Recursos Humanos')}</option>
+                    <option value="Tecnologia da Informação">{t('Tecnologia da Informação')}</option>
+                    <option value="Comercial">{t('Comercial')}</option>
+                    <option value="Operações">{t('Operações')}</option>
+                    <option value="Logística">{t('Logística')}</option>
+                    <option value="Jurídico">{t('Jurídico')}</option>
+                    <option value="Outros">{t('Outros')}</option>
+                    <option value="NI">{t('NI')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="cargoFuncao">Cargo/Função:</label>
+                  <label for="cargoFuncao">{t('Cargo/Função:')}</label>
                   <input 
                     className={styles.input_cargoFuncao} 
                     type='text' 
@@ -1642,7 +1644,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="cargoEfetivo">Cargo Efetivo:</label>
+                  <label for="cargoEfetivo">{t('Cargo Efetivo:')}</label>
                   <input 
                     className={styles.input_cargoEfetivo} 
                     type='text' 
@@ -1655,16 +1657,16 @@ const Editar = () =>{
                 </div>
                   
                 <div className={styles.div_input}>
-                  <label for="status">Status:</label>
+                  <label for="status">{t('Status:')}</label>
                   <select id='status' name='statusServidor' value={visData.statusServidor} onChange={handleEditValue}>
-                    <option disabled={true} value="">Selecione</option>
-                    <option value="Ativo">Ativo</option>
-                    <option value="Desligado">Desligado</option>
+                    <option disabled={true} value="">{t('Selecione')}</option>
+                    <option value="Ativo">{t('Ativo')}</option>
+                    <option value="Desligado">{t('Desligado')}</option>
                   </select>
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="matriculaOrigem">Matricula Origem:</label>
+                  <label for="matriculaOrigem">{t('Matricula Origem:')}</label>
                   <input 
                     className={styles.input_matriculaOrigem} 
                     type='text' 
@@ -1679,7 +1681,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
-                  <label for="orgaoOrigem">Orgão Origem:</label>
+                  <label for="orgaoOrigem">{t('Orgão Origem:')}</label>
                   <input 
 
                     className={styles.input_orgaoOrigem} 
@@ -1693,7 +1695,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="matriculaEmpresa">Matrícula {EMPRESA.sigla}:</label>
+                  <label for="matriculaEmpresa">{t('Matrícula {sigla}:', { sigla: EMPRESA.sigla })}</label>
                   <input 
                     className={styles.input_matriculaEmpresa} 
                     type='text' 
@@ -1708,7 +1710,7 @@ const Editar = () =>{
                   
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.data_docs}>
-                  <label for="dataEntregaDocs">Data de entrega dos documentos:</label>
+                  <label for="dataEntregaDocs">{t('Data de entrega dos documentos:')}</label>
                   <input 
                     className={styles.input_data_docs}
                     type='date' 
@@ -1722,7 +1724,7 @@ const Editar = () =>{
 
               <div className={styles.form_group}>
                   <div className={styles.div_input} id={styles.anexoss}>
-                    <label for="nome_anexos">Anexos:</label>
+                    <label for="nome_anexos">{t('Anexos:')}</label>
                     <input
                      name='pdfs'
                      id={styles.input_files}
@@ -1745,7 +1747,7 @@ const Editar = () =>{
                   </div>
 
                   <div className={styles.div_input} id={styles.anotacoes_vis}>
-                    <label for="anotacoes">Anotações:</label>
+                    <label for="anotacoes">{t('Anotações:')}</label>
                     <textarea 
                       className={styles.input_anotacoes} 
                       type='text' 
@@ -1764,7 +1766,7 @@ const Editar = () =>{
           </div>
         </div>
 
-        <button onClick={submitForm} className={styles.button_send}>Salvar</button>
+        <button onClick={submitForm} className={styles.button_send}>{t('Salvar')}</button>
       </div>
 
       {/***TODO: MODALS***/}

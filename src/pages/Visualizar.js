@@ -9,8 +9,10 @@ import Axios from 'axios'
 import { FolderDown } from 'lucide-react'
 import defaultImage from '../svg/icon-person.jpg'
 import Header from '../components/Header'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function Visualizar() {
+  const { t, locale } = useLanguage()
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   const { funcionario } = useFuncionario();
@@ -19,19 +21,19 @@ function Visualizar() {
   const [files, setFiles] = useState([])
   
   const dataNasc = new Date(`${funcionario.dataNasc}T00:00:00`)
-  const formatedDataNasc = dataNasc.toLocaleDateString('pt-BR')
+  const formatedDataNasc = dataNasc.toLocaleDateString(locale)
 
   const dataNascPai = new Date(`${funcionario.dataNascPai}T00:00:00`)
-  const formatedDataNascPai = dataNascPai.toLocaleDateString('pt-BR')
+  const formatedDataNascPai = dataNascPai.toLocaleDateString(locale)
 
   const dataNascMae = new Date(`${funcionario.dataNascMae}T00:00:00`)
-  const formatedDataNascMae = dataNascMae.toLocaleDateString('pt-BR')
+  const formatedDataNascMae = dataNascMae.toLocaleDateString(locale)
 
   const dataDocs = new Date(`${funcionario.dataEntregaDocs}T00:00:00`)
-  const formatedDataEntregaDocs = dataDocs.toLocaleDateString('pt-BR')
+  const formatedDataEntregaDocs = dataDocs.toLocaleDateString(locale)
 
   const dataExped = new Date(`${funcionario.rgDataExped}T00:00:00`)
-  const formatedDataExped = dataExped.toLocaleDateString('pt-BR')
+  const formatedDataExped = dataExped.toLocaleDateString(locale)
 
   const [imageUrl, setImageUrl] = useState(`${endpoint}/uploads/${funcionario.nomeFuncionario}/foto_${funcionario.nomeFuncionario}.avif`);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -142,138 +144,138 @@ function Visualizar() {
         doc.setFontSize(10)
         doc.setFont("helvetica", "bold");
         doc.text(EMPRESA.nomeCompleto.toUpperCase(), 105, 50, { align: "center" })
-        doc.text(`FICHA CADASTRAL DE FUNCIONÁRIOS`, 105, 59, { align: "center" })
+        doc.text(t('FICHA CADASTRAL DE FUNCIONÁRIOS'), 105, 59, { align: "center" })
 
       //  
         doc.addImage(cropBase64, 'JPEG', 12, 75, squareSize / scaleFactor, squareSize / scaleFactor);
         
-        doc.text(`1 - DADOS PESSOAIS`, 30, 70, { align: "center" })
+        doc.text(t('1 - DADOS PESSOAIS'), 30, 70, { align: "center" })
         doc.line(52, 68.5, 196, 68.5)
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(11)
-        doc.text(`NOME: ${funcionario.nomeFuncionario}`, 60, 77)
-        doc.text(`DATA NASC.: ${formatedDataNasc}`, 60, 82.5)
-        doc.text(`ESTADO: ${funcionario.estadoAtual}`, 60, 88.5)
-        doc.text(`NACIONALIDADE: ${funcionario.nacionalidade}`, 60, 94.5)
-        doc.text(`NATURALIDADE: ${funcionario.naturalidade}`, 60, 100.8)
-        doc.text(`RAÇA: ${funcionario.raca}`, 60, 106.5)
-        doc.text(`TELEFONE: ${funcionario.telefone}`, 60, 118.5)
-        doc.text(`EMAIL: ${funcionario.email}`, 60, 112.5)
+        doc.text(`${t('NOME')}: ${t(funcionario.nomeFuncionario)}`, 60, 77)
+        doc.text(`${t('DATA NASC.')}: ${formatedDataNasc}`, 60, 82.5)
+        doc.text(`${t('ESTADO')}: ${t(funcionario.estadoAtual)}`, 60, 88.5)
+        doc.text(`${t('NACIONALIDADE')}: ${t(funcionario.nacionalidade)}`, 60, 94.5)
+        doc.text(`${t('NATURALIDADE')}: ${t(funcionario.naturalidade)}`, 60, 100.8)
+        doc.text(`${t('RAÇA')}: ${t(funcionario.raca)}`, 60, 106.5)
+        doc.text(`${t('TELEFONE')}: ${t(funcionario.telefone)}`, 60, 118.5)
+        doc.text(`${t('EMAIL')}: ${t(funcionario.email)}`, 60, 112.5)
 
       //   
 
         doc.setFont("helvetica", "bold");
-        doc.text(`2 - DADOS FAMILIARES`, 34, 128, { align: "center" })
+        doc.text(t('2 - DADOS FAMILIARES'), 34, 128, { align: "center" })
         doc.line(60, 126.5, 195, 126.5)
 
-        doc.text(`Pai`, 12, 136)
+        doc.text(t('Pai'), 12, 136)
         doc.setFont("helvetica", "normal");
-        doc.text(`NOME: ${funcionario.nomePai}`, 12, 141)
-        doc.text(`DATA NASC.: ${formatedDataNascPai}`, 150, 141)
-        doc.text(`CPF: ${funcionario.cpfPai}`, 12, 146)
+        doc.text(`${t('NOME')}: ${t(funcionario.nomePai)}`, 12, 141)
+        doc.text(`${t('DATA NASC.')}: ${formatedDataNascPai}`, 150, 141)
+        doc.text(`${t('CPF')}: ${t(funcionario.cpfPai)}`, 12, 146)
 
         doc.setFont("helvetica", "bold");
-        doc.text(`Mãe`, 12, 153)
+        doc.text(t('Mãe'), 12, 153)
         doc.setFont("helvetica", "normal");
-        doc.text(`NOME: ${funcionario.nomeMae}`, 12, 158)
-        doc.text(`DATA NASC.: ${formatedDataNascMae}`, 150, 158)
-        doc.text(`CPF: ${funcionario.cpfMae}`, 12, 163)
+        doc.text(`${t('NOME')}: ${t(funcionario.nomeMae)}`, 12, 158)
+        doc.text(`${t('DATA NASC.')}: ${formatedDataNascMae}`, 150, 158)
+        doc.text(`${t('CPF')}: ${t(funcionario.cpfMae)}`, 12, 163)
 
-        doc.text(`ESTADO CIVIL: ${funcionario.estadoCivil}`, 12, 172)
-        doc.text(`NOME CÔNJUGE: ${funcionario.nomeEsposoa}`, 85, 172)
-        doc.text(`FILHOS: ${funcionario.filhos}`, 12, 177.5)
-        doc.text(`NOME FILHOS: ${funcionario.nomeFilhos}`, 12, 183)
+        doc.text(`${t('ESTADO CIVIL')}: ${t(funcionario.estadoCivil)}`, 12, 172)
+        doc.text(`${t('NOME CÔNJUGE')}: ${t(funcionario.nomeEsposoa)}`, 85, 172)
+        doc.text(`${t('FILHOS')}: ${t(funcionario.filhos)}`, 12, 177.5)
+        doc.text(`${t('NOME FILHOS')}: ${t(funcionario.nomeFilhos)}`, 12, 183)
 
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(`3 - DOCUMENTOS`, 29, 192, { align: "center" })
+        doc.text(t('3 - DOCUMENTOS'), 29, 192, { align: "center" })
         doc.line(49, 190.5, 195, 190.5)
 
         doc.setFont("helvetica", "normal");
-        doc.text(`CPF: ${funcionario.cpf}`, 12, 199)
-        doc.text(`PIS/PASEP: ${funcionario.pisPasep}`, 70, 199)
-        doc.text(`CNH: ${funcionario.cnh}`, 140, 199)
-        doc.text(`RG: ${funcionario.rg}`, 12, 204.5)
-        doc.text(`DATA EXPED.: ${formatedDataExped}`, 60, 204.5)
-        doc.text(`ORGÃO EXPED.: ${funcionario.rgOrgaoExped}`, 120, 204.5)
-        doc.text(`UF: ${funcionario.rgUf}`, 180, 204.5)
-        doc.text(`TÍTULO: ${funcionario.titulo}`, 12, 210.5)
-        doc.text(`ZONA: ${funcionario.tituloZona}`, 75, 210.5)
-        doc.text(`SEÇÃO: ${funcionario.tituloSecao}`, 120, 210.5)
-        doc.text(`UF: ${funcionario.tituloUf}`, 180, 210.5)
-        doc.text(`DOC. MILITAR: ${funcionario.docMilitar}`, 12, 216)
-        doc.text(`SÉRIE: ${funcionario.docMilitarSerie}`, 120, 216)
+        doc.text(`${t('CPF')}: ${t(funcionario.cpf)}`, 12, 199)
+        doc.text(`${t('PIS/PASEP')}: ${t(funcionario.pisPasep)}`, 70, 199)
+        doc.text(`${t('CNH')}: ${t(funcionario.cnh)}`, 140, 199)
+        doc.text(`${t('RG')}: ${t(funcionario.rg)}`, 12, 204.5)
+        doc.text(`${t('DATA EXPED.')}: ${formatedDataExped}`, 60, 204.5)
+        doc.text(`${t('ORGÃO EXPED.')}: ${t(funcionario.rgOrgaoExped)}`, 120, 204.5)
+        doc.text(`${t('UF')}: ${t(funcionario.rgUf)}`, 180, 204.5)
+        doc.text(`${t('TÍTULO')}: ${t(funcionario.titulo)}`, 12, 210.5)
+        doc.text(`${t('ZONA')}: ${t(funcionario.tituloZona)}`, 75, 210.5)
+        doc.text(`${t('SEÇÃO')}: ${t(funcionario.tituloSecao)}`, 120, 210.5)
+        doc.text(`${t('UF')}: ${t(funcionario.tituloUf)}`, 180, 210.5)
+        doc.text(`${t('DOC. MILITAR')}: ${t(funcionario.docMilitar)}`, 12, 216)
+        doc.text(`${t('SÉRIE')}: ${t(funcionario.docMilitarSerie)}`, 120, 216)
 
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(`4 - ENDEREÇO`, 25.5, 225, { align: "center" })
+        doc.text(t('4 - ENDEREÇO'), 25.5, 225, { align: "center" })
         doc.line(43, 224, 195, 224)
 
         doc.setFont("helvetica", "normal");
-        doc.text(`BAIRRO: ${funcionario.bairro}`, 12, 232)
-        doc.text(`LOGADOURO: ${funcionario.logadouro}`, 140, 232)
-        doc.text(`RUA: ${funcionario.rua}`, 12, 237.5)
-        doc.text(`NÚMERO: ${funcionario.numCasa}`, 150, 237.5)
-        doc.text(`CEP: ${funcionario.cep}`, 12, 243.5)
-        doc.text(`ESTADO: ${funcionario.estado}`, 140, 243.5)
-        doc.text(`CIDADE: ${funcionario.cidade}`, 60, 243.5)
+        doc.text(`${t('BAIRRO')}: ${t(funcionario.bairro)}`, 12, 232)
+        doc.text(`${t('LOGADOURO')}: ${t(funcionario.logadouro)}`, 140, 232)
+        doc.text(`${t('RUA')}: ${t(funcionario.rua)}`, 12, 237.5)
+        doc.text(`${t('NÚMERO')}: ${t(funcionario.numCasa)}`, 150, 237.5)
+        doc.text(`${t('CEP')}: ${t(funcionario.cep)}`, 12, 243.5)
+        doc.text(`${t('ESTADO')}: ${t(funcionario.estado)}`, 140, 243.5)
+        doc.text(`${t('CIDADE')}: ${t(funcionario.cidade)}`, 60, 243.5)
 
-        desenharCabecalho(doc)
+        desenharCabecalho(doc, t)
 
-        desenharRodape(doc)
+        desenharRodape(doc, t)
       //
         doc.addPage()
       //
         doc.setFont("helvetica", "bold");
-        doc.text(`5 - DADOS BANCÁRIOS`, 34, 48, { align: "center" })
+        doc.text(t('5 - DADOS BANCÁRIOS'), 34, 48, { align: "center" })
         doc.line(60, 46.5, 194, 46.5)
 
         doc.setFont("helvetica", "normal");
-        doc.text(`BANCO: ${funcionario.banco}`, 12, 55)
-        doc.text(`AGÊNCIA: ${funcionario.bancoAgencia}`, 90, 55)
-        doc.text(`CONTA: ${funcionario.bancoConta}`, 140, 55)
+        doc.text(`${t('BANCO')}: ${t(funcionario.banco)}`, 12, 55)
+        doc.text(`${t('AGÊNCIA')}: ${t(funcionario.bancoAgencia)}`, 90, 55)
+        doc.text(`${t('CONTA')}: ${t(funcionario.bancoConta)}`, 140, 55)
 
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(`6 - FORMAÇÃO ESCOLAR`, 36, 65, { align: "center" })
+        doc.text(t('6 - FORMAÇÃO ESCOLAR'), 36, 65, { align: "center" })
         doc.line(64, 64, 194, 64)
 
         doc.setFont("helvetica", "normal");
-        doc.text(`ESCOLARIDADE: ${funcionario.escolaridade}`, 12, 72)
-        doc.text(`CURSOS: ${funcionario.cursos}`, 173.5, 72)
-        doc.text(`CURSO 1: ${funcionario.curso1}`, 12, 77.5)
-        doc.text(`CURSO 2: ${funcionario.curso2}`, 12, 83)
-        doc.text(`CURSO 3: ${funcionario.curso3}`, 12, 89)
-        doc.text(`CURSO 4: ${funcionario.curso4}`, 12, 94.5)
+        doc.text(`${t('ESCOLARIDADE')}: ${t(funcionario.escolaridade)}`, 12, 72)
+        doc.text(`${t('CURSOS')}: ${t(funcionario.cursos)}`, 173.5, 72)
+        doc.text(`${t('CURSO 1')}: ${t(funcionario.curso1)}`, 12, 77.5)
+        doc.text(`${t('CURSO 2')}: ${t(funcionario.curso2)}`, 12, 83)
+        doc.text(`${t('CURSO 3')}: ${t(funcionario.curso3)}`, 12, 89)
+        doc.text(`${t('CURSO 4')}: ${t(funcionario.curso4)}`, 12, 94.5)
 
     //
 
         doc.setFont("helvetica", "bold");
-        doc.text(`7 - VÍNCULO`, 23.5, 105, { align: "center" })
+        doc.text(t('7 - VÍNCULO'), 23.5, 105, { align: "center" })
         doc.line(39, 103.5, 194, 103.5)
 
         doc.setFont("helvetica", "normal");
-        doc.text(`VÍNCULO: ${funcionario.vinculo}`, 12, 112)
-        doc.text(`SETOR/DEPARTAMENTO: ${funcionario.setorDepartamento}`, 80, 112)
-        doc.text(`CARGO EFETIVO: ${funcionario.cargoEfetivo}`, 12, 117.5)
-        doc.text(`CARGO/FUNÇÃO: ${funcionario.cargoFuncao}`, 130, 117.5)
-        doc.text(`ORGÃO ORIGEM: ${funcionario.orgaoOrigem}`, 12, 123.5)
-        doc.text(`MATRÍCULA ORIGEM: ${funcionario.matriculaOrigem}`, 130, 123)
-        doc.text(`MATRÍCULA ${EMPRESA.sigla}: ${funcionario.matriculaEmpresa}`, 12, 129.5)
-        doc.text(`STATUS: ${funcionario.statusServidor}`, 130, 129)
-        doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 12, 135)
-        doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 140.5)
+        doc.text(`${t('VÍNCULO')}: ${t(funcionario.vinculo)}`, 12, 112)
+        doc.text(`${t('SETOR/DEPARTAMENTO')}: ${t(funcionario.setorDepartamento)}`, 80, 112)
+        doc.text(`${t('CARGO EFETIVO')}: ${t(funcionario.cargoEfetivo)}`, 12, 117.5)
+        doc.text(`${t('CARGO/FUNÇÃO')}: ${t(funcionario.cargoFuncao)}`, 130, 117.5)
+        doc.text(`${t('ORGÃO ORIGEM')}: ${t(funcionario.orgaoOrigem)}`, 12, 123.5)
+        doc.text(`${t('MATRÍCULA ORIGEM')}: ${t(funcionario.matriculaOrigem)}`, 130, 123)
+        doc.text(`${t('MATRÍCULA {sigla}', { sigla: EMPRESA.sigla })}: ${t(funcionario.matriculaEmpresa)}`, 12, 129.5)
+        doc.text(`${t('STATUS')}: ${t(funcionario.statusServidor)}`, 130, 129)
+        doc.text(`${t('DATA DE ENTREGA DOS DOCUMENTOS')}: ${formatedDataEntregaDocs}`, 12, 135)
+        doc.text(`${t('ANOTAÇÕES')}: ${t(funcionario.anotacoes)}`, 12, 140.5)
 
 
-        desenharCabecalho(doc)
+        desenharCabecalho(doc, t)
 
-        desenharRodape(doc)
+        desenharRodape(doc, t)
       //
-        doc.save(`FICHA ${funcionario.nomeFuncionario}.pdf`);
+        doc.save(`${t('FICHA')} ${funcionario.nomeFuncionario}.pdf`);
         //doc.output('dataurlnewwindow') 
       }
     } catch (error){
@@ -283,17 +285,17 @@ function Visualizar() {
 
   return (
     <div className={styles.container_register}>
-      <Header title='Visualizar Dados' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header title={t('Visualizar Dados')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
       <div className={styles.container_record}>
         <div className={styles.record}>
           <div className={styles.foto_vis}>
             <img
                 className={styles.img_vis}
                 src={selectedImage || imageUrl} 
-                alt='Imagem do Funcionário' 
+                alt={t('Imagem do Funcionário')} 
                 onError={handleImageError}
             />
-            <button type='button' onClick={getPdf} className={styles.button_download} title='Baixar ficha em PDF'><FolderDown size={20} strokeWidth={1.75}/> Baixar PDF</button>
+            <button type='button' onClick={getPdf} className={styles.button_download} title={t('Baixar ficha em PDF')}><FolderDown size={20} strokeWidth={1.75}/> {t('Baixar PDF')}</button>
           </div>
 
           <div className={styles.inputs}>
@@ -301,54 +303,54 @@ function Visualizar() {
             <form className={styles.form_dados_pessoais}>
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome">Nome Completo:</label>
-                  <span className={styles.span}>{funcionario.nomeFuncionario}</span>
+                  <label for="nome">{t('Nome Completo:')}</label>
+                  <span className={styles.span}>{t(funcionario.nomeFuncionario)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="sexo">Sexo:</label>
-                  <span className={styles.span}>{funcionario.sexo}</span>
+                  <label for="sexo">{t('Sexo:')}</label>
+                  <span className={styles.span}>{t(funcionario.sexo)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}> 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="dataNasc">Data Nasc:</label>
+                  <label for="dataNasc">{t('Data Nasc:')}</label>
                   <span className={styles.span}>{formatedDataNasc}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="estado">Estado:</label>
-                  <span className={styles.span}>{funcionario.estadoAtual}</span>
+                  <label for="estado">{t('Estado:')}</label>
+                  <span className={styles.span}>{t(funcionario.estadoAtual)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nacionalidade">Nacionalidade:</label>
-                  <span className={styles.span}>{funcionario.nacionalidade}</span>
-                </div>
-              </div>
-
-              <div className={styles.form_group}>
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="Naturalidade">Naturalidade:</label>
-                  <span className={styles.span}>{funcionario.naturalidade}</span>
-                </div>
-
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="raca">Raça:</label>
-                  <span className={styles.span}>{funcionario.raca}</span>
-                </div>
-
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="telefone">Telefone:</label>
-                  <span className={styles.span}>{funcionario.telefone}</span>
+                  <label for="nacionalidade">{t('Nacionalidade:')}</label>
+                  <span className={styles.span}>{t(funcionario.nacionalidade)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="email">Email:</label>
-                  <span className={styles.span}>{funcionario.email}</span>
+                  <label for="Naturalidade">{t('Naturalidade:')}</label>
+                  <span className={styles.span}>{t(funcionario.naturalidade)}</span>
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="raca">{t('Raça:')}</label>
+                  <span className={styles.span}>{t(funcionario.raca)}</span>
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="telefone">{t('Telefone:')}</label>
+                  <span className={styles.span}>{t(funcionario.telefone)}</span>
+                </div>
+              </div>
+
+              <div className={styles.form_group}>
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="email">{t('Email:')}</label>
+                  <span className={styles.span}>{t(funcionario.email)}</span>
                 </div>
               </div>
             </form>
@@ -358,66 +360,66 @@ function Visualizar() {
             <form className={styles.form_dados_familiares}>
               <div className={styles.divisoria}>
                 <hr></hr>
-                <span className={styles.title_divis}>Dados Familiares</span>
+                <span className={styles.title_divis}>{t('Dados Familiares')}</span>
               </div>
 
-              <span className={styles.spandf}>Pai</span>
+              <span className={styles.spandf}>{t('Pai')}</span>
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_pai">Nome Completo:</label>
-                  <span className={styles.span}>{funcionario.nomePai}</span>
+                  <label for="nome_pai">{t('Nome Completo:')}</label>
+                  <span className={styles.span}>{t(funcionario.nomePai)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf_pai">CPF:</label>
-                  <span className={styles.span}>{funcionario.cpfPai}</span>
+                  <label for="cpf_pai">{t('CPF:')}</label>
+                  <span className={styles.span}>{t(funcionario.cpfPai)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="data_nasc">Data Nasc:</label>
+                  <label for="data_nasc">{t('Data Nasc:')}</label>
                   <span className={styles.span}>{formatedDataNascPai}</span>
                 </div>
               </div>
 
-              <span className={styles.spandf}>Mãe</span>
+              <span className={styles.spandf}>{t('Mãe')}</span>
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_mae">Nome Completo:</label>
-                  <span className={styles.span}>{funcionario.nomeMae}</span>
+                  <label for="nome_mae">{t('Nome Completo:')}</label>
+                  <span className={styles.span}>{t(funcionario.nomeMae)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf_mae">CPF:</label>
-                  <span className={styles.span}>{funcionario.cpfMae}</span>
+                  <label for="cpf_mae">{t('CPF:')}</label>
+                  <span className={styles.span}>{t(funcionario.cpfMae)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="data_nasc_mae">Data Nasc:</label>
+                  <label for="data_nasc_mae">{t('Data Nasc:')}</label>
                   <span className={styles.span}>{formatedDataNascMae}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="estado_civil">Estado Civil:</label>
-                  <span className={styles.span}>{funcionario.estadoCivil}</span>
+                  <label for="estado_civil">{t('Estado Civil:')}</label>
+                  <span className={styles.span}>{t(funcionario.estadoCivil)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_esposoa">Nome Cônjuge:</label>
-                  <span className={styles.span}>{funcionario.nomeEsposoa}</span>
+                  <label for="nome_esposoa">{t('Nome Cônjuge:')}</label>
+                  <span className={styles.span}>{t(funcionario.nomeEsposoa)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="filhos">Filhos:</label>
-                  <span className={styles.span}>{funcionario.filhos}</span>
+                  <label for="filhos">{t('Filhos:')}</label>
+                  <span className={styles.span}>{t(funcionario.filhos)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="nome_filhos">Nome Filhos:</label>
-                  <span className={styles.span}>{funcionario.nomeFilhos}</span>
+                  <label for="nome_filhos">{t('Nome Filhos:')}</label>
+                  <span className={styles.span}>{t(funcionario.nomeFilhos)}</span>
                 </div>
               </div>
             </form>
@@ -426,79 +428,79 @@ function Visualizar() {
             <form className={styles.form_dados_documentos}>
               <div className={styles.divisoria} id={styles.inptspan}>
                 <hr></hr>
-                <span className={styles.title_divis}>Documentos</span>
+                <span className={styles.title_divis}>{t('Documentos')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cpf">CPF:</label>
-                  <span className={styles.span}>{funcionario.cpf}</span>
+                  <label for="cpf">{t('CPF:')}</label>
+                  <span className={styles.span}>{t(funcionario.cpf)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="pis_pasep">PIS/PASEP:</label>
-                  <span className={styles.span}>{funcionario.pisPasep}</span>
+                  <label for="pis_pasep">{t('PIS/PASEP:')}</label>
+                  <span className={styles.span}>{t(funcionario.pisPasep)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cnh">CNH:</label>
-                  <span className={styles.span}>{funcionario.cnh}</span>
+                  <label for="cnh">{t('CNH:')}</label>
+                  <span className={styles.span}>{t(funcionario.cnh)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rg">RG:</label>
-                  <span className={styles.span}>{funcionario.rg}</span>
+                  <label for="rg">{t('RG:')}</label>
+                  <span className={styles.span}>{t(funcionario.rg)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rg_data_exped">Data Exped:</label>
+                  <label for="rg_data_exped">{t('Data Exped:')}</label>
                   <span className={styles.span}>{formatedDataExped}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rg_orgao_exped">Orgão Exped:</label>
-                  <span className={styles.span}>{funcionario.rgOrgaoExped}</span>
+                  <label for="rg_orgao_exped">{t('Orgão Exped:')}</label>
+                  <span className={styles.span}>{t(funcionario.rgOrgaoExped)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rg_uf">UF:</label>
-                  <span className={styles.span}>{funcionario.rgUf}</span>
-                </div>
-              </div>
-
-              <div className={styles.form_group}>
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo">Título:</label>
-                  <span className={styles.span}>{funcionario.titulo}</span>
-                </div>
-
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo_zona">Zona:</label>
-                  <span className={styles.span}>{funcionario.tituloZona}</span>
-                </div>
-
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo_secao">Seção:</label>
-                  <span className={styles.span}>{funcionario.tituloSecao}</span>
-                </div>
-
-                <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="titulo_uf">UF:</label>
-                  <span className={styles.span}>{funcionario.tituloUf}</span>
+                  <label for="rg_uf">{t('UF:')}</label>
+                  <span className={styles.span}>{t(funcionario.rgUf)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="doc_militar">Doc. Militar:</label>
-                  <span className={styles.span}>{funcionario.docMilitar}</span>
+                  <label for="titulo">{t('Título:')}</label>
+                  <span className={styles.span}>{t(funcionario.titulo)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="doc_militar_serie">Série:</label>
-                  <span className={styles.span}>{funcionario.docMilitarSerie}</span>
+                  <label for="titulo_zona">{t('Zona:')}</label>
+                  <span className={styles.span}>{t(funcionario.tituloZona)}</span>
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="titulo_secao">{t('Seção:')}</label>
+                  <span className={styles.span}>{t(funcionario.tituloSecao)}</span>
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="titulo_uf">{t('UF:')}</label>
+                  <span className={styles.span}>{t(funcionario.tituloUf)}</span>
+                </div>
+              </div>
+
+              <div className={styles.form_group}>
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="doc_militar">{t('Doc. Militar:')}</label>
+                  <span className={styles.span}>{t(funcionario.docMilitar)}</span>
+                </div>
+
+                <div className={styles.div_input} id={styles.inptspan}>
+                  <label for="doc_militar_serie">{t('Série:')}</label>
+                  <span className={styles.span}>{t(funcionario.docMilitarSerie)}</span>
                 </div>
               </div>
             </form>
@@ -507,45 +509,45 @@ function Visualizar() {
             <form className={styles.form_dados_endereco}>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Endereço</span>
+                <span className={styles.title_divis}>{t('Endereço')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="bairro">Bairro:</label>
-                  <span className={styles.span}>{funcionario.bairro}</span>
+                  <label for="bairro">{t('Bairro:')}</label>
+                  <span className={styles.span}>{t(funcionario.bairro)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="num_casa">Número:</label>
-                  <span className={styles.span}>{funcionario.numCasa}</span>
+                  <label for="num_casa">{t('Número:')}</label>
+                  <span className={styles.span}>{t(funcionario.numCasa)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cep">CEP:</label>
-                  <span className={styles.span}>{funcionario.cep}</span>
+                  <label for="cep">{t('CEP:')}</label>
+                  <span className={styles.span}>{t(funcionario.cep)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="rua">Rua:</label>
-                  <span className={styles.span}>{funcionario.rua}</span>
+                  <label for="rua">{t('Rua:')}</label>
+                  <span className={styles.span}>{t(funcionario.rua)}</span>
                 </div>                
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="logadouro">Logadouro:</label>
-                  <span className={styles.span}>{funcionario.logadouro}</span>
+                  <label for="logadouro">{t('Logadouro:')}</label>
+                  <span className={styles.span}>{t(funcionario.logadouro)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for='estadoSelecionado'>Estado:</label>
-                  <span className={styles.span}>{funcionario.estado}</span>
+                  <label for='estadoSelecionado'>{t('Estado:')}</label>
+                  <span className={styles.span}>{t(funcionario.estado)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cidadeSelecionada">Cidade:</label>
-                  <span className={styles.span}>{funcionario.cidade}</span>
+                  <label for="cidadeSelecionada">{t('Cidade:')}</label>
+                  <span className={styles.span}>{t(funcionario.cidade)}</span>
                 </div>
               </div>
             </form>
@@ -554,23 +556,23 @@ function Visualizar() {
              <form className={styles.form_dados_bancarios}>
                 <div className={styles.divisoria} id={styles.inptspan}>
                   <hr></hr>
-                  <span className={styles.title_divis}>Dados Bancários</span>
+                  <span className={styles.title_divis}>{t('Dados Bancários')}</span>
                 </div>
 
                 <div className={styles.form_group}>
                   <div className={styles.div_input} id={styles.inptspan}>
-                    <label for="banco">Banco:</label>
-                    <span className={styles.span}>{funcionario.banco}</span>
+                    <label for="banco">{t('Banco:')}</label>
+                    <span className={styles.span}>{t(funcionario.banco)}</span>
                   </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="banco_agencia">Agência:</label>
-                  <span className={styles.span}>{funcionario.bancoAgencia}</span>
+                  <label for="banco_agencia">{t('Agência:')}</label>
+                  <span className={styles.span}>{t(funcionario.bancoAgencia)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="banco_conta">Conta:</label>
-                  <span className={styles.span}>{funcionario.bancoConta}</span>
+                  <label for="banco_conta">{t('Conta:')}</label>
+                  <span className={styles.span}>{t(funcionario.bancoConta)}</span>
                 </div>
               </div>
             </form>
@@ -579,42 +581,42 @@ function Visualizar() {
             <form className={styles.form_dados_escolares}>
               <div className={styles.divisoria} id={styles.divis_docs}>
                 <hr></hr>
-                <span className={styles.title_divis}>Formação Escolar</span>
+                <span className={styles.title_divis}>{t('Formação Escolar')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="escolaridade">Escolaridade:</label>
-                  <span className={styles.span}>{funcionario.escolaridade}</span>
+                  <label for="escolaridade">{t('Escolaridade:')}</label>
+                  <span className={styles.span}>{t(funcionario.escolaridade)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cursos">Cursos:</label>
-                  <span className={styles.span}>{funcionario.cursos}</span>
+                  <label for="cursos">{t('Cursos:')}</label>
+                  <span className={styles.span}>{t(funcionario.cursos)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="curso1">Curso 1:</label>
-                  <span className={styles.span}>{funcionario.curso1}</span>
+                  <label for="curso1">{t('Curso 1:')}</label>
+                  <span className={styles.span}>{t(funcionario.curso1)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="curso2">Curso 2:</label>
-                  <span className={styles.span}>{funcionario.curso2}</span>
+                  <label for="curso2">{t('Curso 2:')}</label>
+                  <span className={styles.span}>{t(funcionario.curso2)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="curso3">Curso 3:</label>
-                  <span className={styles.span}>{funcionario.curso3}</span>
+                  <label for="curso3">{t('Curso 3:')}</label>
+                  <span className={styles.span}>{t(funcionario.curso3)}</span>
                 </div>
               </div>
 
               <div className={styles.div_input}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="curso4">Curso 4:</label>
-                  <span className={styles.span}>{funcionario.curso4}</span>
+                  <label for="curso4">{t('Curso 4:')}</label>
+                  <span className={styles.span}>{t(funcionario.curso4)}</span>
                 </div>
               </div>
             </form>
@@ -624,69 +626,69 @@ function Visualizar() {
             <form className={styles.form_dados_vinculo}>
               <div className={styles.divisoria} id={styles.inptspan}>
                 <hr></hr>
-                <span className={styles.title_divis}>Vínculo</span>
+                <span className={styles.title_divis}>{t('Vínculo')}</span>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="vinculo">Vínculo:</label>
-                  <span className={styles.span}>{funcionario.vinculo}</span>
+                  <label for="vinculo">{t('Vínculo:')}</label>
+                  <span className={styles.span}>{t(funcionario.vinculo)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="setorDepartamento">Setor/Departamento:</label>
-                  <span className={styles.span}>{funcionario.setorDepartamento}</span>
+                  <label for="setorDepartamento">{t('Setor/Departamento:')}</label>
+                  <span className={styles.span}>{t(funcionario.setorDepartamento)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cargoFuncao">Cargo/Função:</label>
-                  <span className={styles.span}>{funcionario.cargoFuncao}</span>
+                  <label for="cargoFuncao">{t('Cargo/Função:')}</label>
+                  <span className={styles.span}>{t(funcionario.cargoFuncao)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="cargoEfetivo">Cargo Efetivo:</label>
-                  <span className={styles.span}>{funcionario.cargoEfetivo}</span>
+                  <label for="cargoEfetivo">{t('Cargo Efetivo:')}</label>
+                  <span className={styles.span}>{t(funcionario.cargoEfetivo)}</span>
                 </div>
                   
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="status">Status:</label>
-                  <span className={styles.span}>{funcionario.statusServidor}</span>
+                  <label for="status">{t('Status:')}</label>
+                  <span className={styles.span}>{t(funcionario.statusServidor)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaOrigem">Matricula Origem:</label>
-                  <span className={styles.span}>{funcionario.matriculaOrigem}</span>
+                  <label for="matriculaOrigem">{t('Matricula Origem:')}</label>
+                  <span className={styles.span}>{t(funcionario.matriculaOrigem)}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="orgaoOrigem">Orgão Origem:</label>
-                  <span className={styles.span}>{funcionario.orgaoOrigem}</span>
+                  <label for="orgaoOrigem">{t('Orgão Origem:')}</label>
+                  <span className={styles.span}>{t(funcionario.orgaoOrigem)}</span>
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaEmpresa">Matrícula {EMPRESA.sigla}:</label>
-                  <span className={styles.span}>{funcionario.matriculaEmpresa}</span>
+                  <label for="matriculaEmpresa">{t('Matrícula {sigla}:', { sigla: EMPRESA.sigla })}</label>
+                  <span className={styles.span}>{t(funcionario.matriculaEmpresa)}</span>
                 </div>
               </div>
                   
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="dataEntregaDocs">Data de entrega dos documentos:</label>
+                  <label for="dataEntregaDocs">{t('Data de entrega dos documentos:')}</label>
                   <span className={styles.span}>{formatedDataEntregaDocs}</span>
                 </div>
               </div>
 
               <div className={styles.form_group}>
                   <div className={styles.div_input} id={styles.anexoss}>
-                    <label for="nome_anexos">Anexos:</label>
+                    <label for="nome_anexos">{t('Anexos:')}</label>
 
                     <div className={styles.name_file2_vis} id={styles.name_edit_vis}>
                       {files.length === 0 ? (
-                        <p>Não Possui</p>
+                        <p>{t('Não Possui')}</p>
                       ) : (
                         files.map((file, index) => (
                           <div key={index} className={styles.name_edits_pdf}>
@@ -700,8 +702,8 @@ function Visualizar() {
                   </div>
 
                   <div className={styles.div_input}>
-                    <label for="anotacoes">Anotações:</label>
-                    <p className={styles.span}>{funcionario.anotacoes}</p>
+                    <label for="anotacoes">{t('Anotações:')}</label>
+                    <p className={styles.span}>{t(funcionario.anotacoes)}</p>
                   </div>
               </div>
 

@@ -5,8 +5,10 @@ import Axios from 'axios'
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 import Header from '../components/Header'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function CadastroUsuario() {
+  const { t } = useLanguage()
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   const [openModal, setOpenModal] = useState(false);
@@ -76,11 +78,11 @@ function CadastroUsuario() {
 
   return (
     <div>
-      <Header title='Cadastrar Usuário' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header title={t('Cadastrar Usuário')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
       <div className={styles.container_cadastro_usuario}>
       <div className={styles.container_cad}>
         <div className={styles.container_inputs}>
-          <h1>Cadastrar Usuário</h1>
+          <h1>{t('Cadastrar Usuário')}</h1>
           <input 
             autoFocus
             autoComplete='off'
@@ -88,7 +90,7 @@ function CadastroUsuario() {
             id='nomeUsuario'
             name='nomeUsuario'
             type='text'
-            placeholder='Nome Usuário'
+            placeholder={t('Nome Usuário')}
             maxLength={25}
             value={nomeUsuario}
             onChange={(e) => {setNomeUsuario(e.target.value)}}>
@@ -100,20 +102,20 @@ function CadastroUsuario() {
               id='senhaUsuario'
               name='senhaUsuario'
               type='password'
-              placeholder='Senha' 
+              placeholder={t('Senha')} 
               maxLength={8}
               value={senhaUsuario}
               onChange={(e) => {setSenhaUsuario(e.target.value)}}>
             </input>
-            <label for="tipoAcesso">Tipo Acesso:</label>
+            <label for="tipoAcesso">{t('Tipo Acesso:')}</label>
             <select className={styles.container_inputs_select} id="tipoAcesso" name='tipoAcesso' value={tipoAcesso} onChange={e => setTipoAcesso(e.target.value)}>
-              <option disabled={true} value="">Selecione</option>
-              <option value='ADM'>ADM</option>
-              <option value='Usuário'>Usuário</option>
+              <option disabled={true} value="">{t('Selecione')}</option>
+              <option value='ADM'>{t('ADM')}</option>
+              <option value='Usuário'>{t('Usuário')}</option>
             </select>
           </div>
 
-          <button className={styles.button_send} onClick={modal}>Enviar</button>
+          <button className={styles.button_send} onClick={modal}>{t('Enviar')}</button>
         </div>
       </div>
       </div>

@@ -10,8 +10,10 @@ import ModalError from '../components/ModalError'
 
 import { FilterX } from 'lucide-react'
 import Header from '../components/Header'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function Historico ({ funcionarios }){
+  const { t } = useLanguage()
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
   const [dataFuncionarios, setDataFuncionarios] = useState([])
@@ -54,7 +56,7 @@ function Historico ({ funcionarios }){
   const handleOpenDeleteModal = (funcionario) =>{
     setDeleteFuncionario(funcionario)
     setOpenModalError(true)
-    setModalMessageError(`O registro ${funcionario.nomeFuncionario} será excluido`)
+    setModalMessageError(t('O registro {nome} será excluído', { nome: funcionario.nomeFuncionario }))
   }
 
 
@@ -81,7 +83,7 @@ function Historico ({ funcionarios }){
         if (res.status && resLogEdit.status === 200) {
             setOpenModalError(false)
             setOpenModal(true)
-            setModalMessage(`O registro ${deleteFuncionario.nomeFuncionario} foi excluido com sucesso`)
+            setModalMessage(t('O registro {nome} foi excluído com sucesso', { nome: deleteFuncionario.nomeFuncionario }))
             setFiltros(prevFiltros => prevFiltros.filter(func => func.idFuncionario !== deleteFuncionario.idFuncionario));
             setTotalFunc(prevTotal => prevTotal -1)
         } else{
@@ -120,7 +122,7 @@ function Historico ({ funcionarios }){
 
           <div className={styles.filters_history}>
             <div className={styles.totalFunc}>
-              <span>Total de Funcionários: {totalFunc}</span>
+              <span>{t('Total de Funcionários:')} {totalFunc}</span>
             </div>
 
             <div className={styles.input_filters}>
@@ -129,7 +131,7 @@ function Historico ({ funcionarios }){
                 type='text'
                 id='nome'
                 name='nome'
-                placeholder='Nome'
+                placeholder={t('Nome')}
                 maxLength={85}
                 onChange={(e) => setFiltroNome(e.target.value)}
                 value={filtroNome}
@@ -138,43 +140,43 @@ function Historico ({ funcionarios }){
 
             <div className={styles.input_filters}>
               <select id='sexo' name='sexo' onChange={(e) => setFiltroSexo(e.target.value)} value={filtroSexo}>
-                <option disabled={true} value="">Sexo</option>
+                <option disabled={true} value="">{t('Sexo')}</option>
                 <option value="M">M</option>
                 <option value="F">F</option>
-                <option value="Outros">Outros</option>
-                <option value="NI">NI</option>
-                <option value="">-Limpar-</option>
+                <option value="Outros">{t('Outros')}</option>
+                <option value="NI">{t('NI')}</option>
+                <option value="">{t('-Limpar-')}</option>
               </select>
             </div>
 
             <div className={styles.input_filters}>
               <select id='setorDepartamento' name='setorDepartamento' onChange={(e) => setfiltroSetorDepartamento(e.target.value)} value={filtroSetorDepartamento}>
-                <option disabled={true} value="">Setor/Departamento</option>
-                <option value="Administrativo">Administrativo</option>
-                <option value="Financeiro">Financeiro</option>
-                <option value="Recursos Humanos">Recursos Humanos</option>
-                <option value="Tecnologia da Informação">Tecnologia da Informação</option>
-                <option value="Comercial">Comercial</option>
-                <option value="Operações">Operações</option>
-                <option value="Logística">Logística</option>
-                <option value="Jurídico">Jurídico</option>
-                <option value="Outros">Outros</option>
-                <option value="">-Limpar-</option>
+                <option disabled={true} value="">{t('Setor/Departamento')}</option>
+                <option value="Administrativo">{t('Administrativo')}</option>
+                <option value="Financeiro">{t('Financeiro')}</option>
+                <option value="Recursos Humanos">{t('Recursos Humanos')}</option>
+                <option value="Tecnologia da Informação">{t('Tecnologia da Informação')}</option>
+                <option value="Comercial">{t('Comercial')}</option>
+                <option value="Operações">{t('Operações')}</option>
+                <option value="Logística">{t('Logística')}</option>
+                <option value="Jurídico">{t('Jurídico')}</option>
+                <option value="Outros">{t('Outros')}</option>
+                <option value="">{t('-Limpar-')}</option>
               </select>
             </div>
 
             <div className={styles.input_filters}>
               <select id='vinculo' name='vinculo' onChange={(e) => setFiltroVinculo(e.target.value)} value={filtroVinculo}>
-                <option disabled={true} value="">Vínculo</option>
-                <option value="Cargo Comissionado">Cargo Comissionado</option>
-                <option value="Estagiário(a)">Estagiário(a)</option>
-                <option value="Temporário">Temporário</option>
-                <option value="Efetivo">Efetivo</option>
-                <option value="">-Limpar-</option>
+                <option disabled={true} value="">{t('Vínculo')}</option>
+                <option value="Cargo Comissionado">{t('Cargo Comissionado')}</option>
+                <option value="Estagiário(a)">{t('Estagiário(a)')}</option>
+                <option value="Temporário">{t('Temporário')}</option>
+                <option value="Efetivo">{t('Efetivo')}</option>
+                <option value="">{t('-Limpar-')}</option>
               </select>
             </div>
 
-            <button type='button' className={styles.filter_icon} onClick={clearFilters} title='Limpar filtros'><FilterX size={20}/></button>
+            <button type='button' className={styles.filter_icon} onClick={clearFilters} title={t('Limpar filtros')}><FilterX size={20}/></button>
           </div>
         </div>
 
@@ -184,7 +186,7 @@ function Historico ({ funcionarios }){
               <Person key={funcionario.id} funcionario={funcionario} handleOpenDeleteModal={handleOpenDeleteModal} parenttochild={data}/>
             ))
           ) : (
-            <p className={styles.error_msg}>Nenhum funcionário encontrado</p>
+            <p className={styles.error_msg}>{t('Nenhum funcionário encontrado')}</p>
           )}
         </div>
       </div>
