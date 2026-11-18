@@ -1,0 +1,9 @@
+node_modules
+build
+server
+database
+.git
+.env
+.env.*
+*.md
+rasc.txt

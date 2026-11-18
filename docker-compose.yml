@@ -1,0 +1,57 @@
+name: vertix-funcionarios
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: vertix_funcionarios
+      MYSQL_USER: ${DB_USER:-vertix}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-vertix123}
+      TZ: America/Manaus
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "3307:3306"   # acesso externo (DBeaver/Workbench) em localhost:3307
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-vertix}
+      DB_PASSWORD: ${DB_PASSWORD:-vertix123}
+      DB_NAME: vertix_funcionarios
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo}
+      APP_TIMEZONE: America/Manaus
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      args:
+        REACT_APP_API_BASE_URL: ${API_PUBLIC_URL:-http://localhost:5000}
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  db_data:
+  uploads:

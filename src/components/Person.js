@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from '../pages/styles.module.css'
 import EMPRESA from '../config/empresa'
+import { desenharCabecalho, desenharRodape } from '../utils/pdfMarca'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 
@@ -35,19 +36,19 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
     setImageUrl(defaultImage)
   }
 
-  const dataNasc = new Date(funcionario.dataNasc)
+  const dataNasc = new Date(`${funcionario.dataNasc}T00:00:00`)
   const formatedDataNasc = dataNasc.toLocaleDateString('pt-BR')
 
-  const dataNascPai = new Date(funcionario.dataNascPai)
+  const dataNascPai = new Date(`${funcionario.dataNascPai}T00:00:00`)
   const formatedDataNascPai = dataNascPai.toLocaleDateString('pt-BR')
 
-  const dataNascMae = new Date(funcionario.dataNascMae)
+  const dataNascMae = new Date(`${funcionario.dataNascMae}T00:00:00`)
   const formatedDataNascMae = dataNascMae.toLocaleDateString('pt-BR')
 
-  const dataDocs = new Date(funcionario.dataEntregaDocs)
+  const dataDocs = new Date(`${funcionario.dataEntregaDocs}T00:00:00`)
   const formatedDataEntregaDocs = dataDocs.toLocaleDateString('pt-BR')
 
-  const dataExped = new Date(funcionario.rgDataExped)
+  const dataExped = new Date(`${funcionario.rgDataExped}T00:00:00`)
   const formatedDataExped = dataExped.toLocaleDateString('pt-BR')
 
 
@@ -179,7 +180,7 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.text(`CPF: ${funcionario.cpfMae}`, 12, 163)
 
         doc.text(`ESTADO CIVIL: ${funcionario.estadoCivil}`, 12, 172)
-        doc.text(`NOME CÔNJUGE: ${funcionario.nomeEsposoA}`, 85, 172)
+        doc.text(`NOME CÔNJUGE: ${funcionario.nomeEsposoa}`, 85, 172)
         doc.text(`FILHOS: ${funcionario.filhos}`, 12, 177.5)
         doc.text(`NOME FILHOS: ${funcionario.nomeFilhos}`, 12, 183)
 
@@ -219,11 +220,9 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.text(`ESTADO: ${funcionario.estado}`, 140, 243.5)
         doc.text(`CIDADE: ${funcionario.cidade}`, 60, 243.5)
 
-        const img1 = process.env.REACT_APP_API_IMG_1;
-        doc.addImage(img1, "PNG", -1, 2, 213, 40) //-1 (x), 2(y), 213(width), 40(heigth) 
+        desenharCabecalho(doc)
 
-        const img2 = process.env.REACT_APP_API_IMG_2;
-        doc.addImage(img2, "PNG", -1, 263, 213, 37)
+        desenharRodape(doc)
       //
         doc.addPage()
       //
@@ -263,14 +262,14 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.text(`CARGO/FUNÇÃO: ${funcionario.cargoFuncao}`, 130, 117.5)
         doc.text(`ORGÃO ORIGEM: ${funcionario.orgaoOrigem}`, 12, 123.5)
         doc.text(`MATRÍCULA ORIGEM: ${funcionario.matriculaOrigem}`, 130, 123)
-        doc.text(`MATRÍCULA ${EMPRESA.sigla}: ${funcionario.matriculaSeai}`, 12, 129.5)
+        doc.text(`MATRÍCULA ${EMPRESA.sigla}: ${funcionario.matriculaEmpresa}`, 12, 129.5)
         doc.text(`STATUS: ${funcionario.statusServidor}`, 130, 129)
         doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 12, 135)
         doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 140.5)
 
-        doc.addImage(img1, "PNG", -1, 2, 213, 40) //-1 (x), 2(y), 213(width), 40(heigth) 
+        desenharCabecalho(doc)
 
-        doc.addImage(img2, "PNG", -1, 263, 213, 37)
+        desenharRodape(doc)
       //
         doc.save(`FICHA ${funcionario.nomeFuncionario}.pdf`);
         //doc.output('dataurlnewwindow') 

@@ -72,12 +72,25 @@ const upload = multer({ storage: storage, limits: { fileSize: 500 * 1024 * 1024 
 app.use('/uploads', express.static(uploadDirectory))
 
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "dev",
-    password: "123456",
-    database: "seaifuncionarios",
-    port: "3307"
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "vertix",
+    password: process.env.DB_PASSWORD || "vertix123",
+    database: process.env.DB_NAME || "vertix_funcionarios",
+    port: Number(process.env.DB_PORT || 3307),
+    dateStrings: true, // devolve DATE como 'YYYY-MM-DD' (formato dos inputs de data)
 });
+
+const TIMEZONE = process.env.APP_TIMEZONE || "America/Manaus";
+const JWT_SECRET = process.env.JWT_SECRET || "troque-este-segredo";
+
+// Data (YYYY-MM-DD) e hora (HH:MM:SS) no fuso da aplicação, independente do locale do sistema
+function agora() {
+    const d = new Date();
+    return {
+        data: d.toLocaleDateString("sv-SE", { timeZone: TIMEZONE }),
+        hora: d.toLocaleTimeString("pt-BR", { timeZone: TIMEZONE, hour12: false }),
+    };
+}
 db.connect((err) => {
     if (err) {
         console.error("Erro ao conectar com o banco de dados:", err);
@@ -96,7 +109,7 @@ app.post("/cadastrar", (req, res) =>{
         bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
         banco, bancoAgencia, bancoConta,
         escolaridade, cursos, curso1, curso2, curso3, curso4,
-        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes
+        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes
     } = req.body;
 
     db.beginTransaction((err) =>{
@@ -184,8 +197,8 @@ app.post("/cadastrar", (req, res) =>{
                                     console.log("-Dados escolares cadastrados com sucesso");
                                 }
 
-                                let sqlVinculo = "INSERT INTO dadosvinculo(idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                                db.query(sqlVinculo, [idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes], (err, result) =>{
+                                let sqlVinculo = "INSERT INTO dadosvinculo(idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                db.query(sqlVinculo, [idFuncionario, vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes], (err, result) =>{
                                     if (err) {
                                         return db.rollback(() =>{
                                             console.log("Erro ao cadastrar dados vínculo:", err);
@@ -323,7 +336,7 @@ app.get("/getRegisters", (req, res) =>{
         dfam.cpfMae,
         dfam.dataNascMae,
         dfam.estadoCivil,
-        dfam.nomeEsposoA,
+        dfam.nomeEsposoA AS nomeEsposoa,
         dfam.filhos,
         dfam.nomeFilhos,
         
@@ -367,7 +380,7 @@ app.get("/getRegisters", (req, res) =>{
         dv.statusServidor,
         dv.matriculaOrigem,
         dv.orgaoOrigem,
-        dv.matriculaSeai,
+        dv.matriculaEmpresa,
         dv.dataEntregaDocs,
         dv.anotacoes
 
@@ -503,7 +516,7 @@ app.post("/editRegister", upload.none(), (req, res) =>{
         bairro, numCasa, cep, rua, logadouro, estadoSelecionado, cidadeSelecionada,
         banco, bancoAgencia, bancoConta,
         escolaridade, cursos, curso1, curso2, curso3, curso4,
-        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes
+        vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes
     } = req.body;
 
     
@@ -593,8 +606,8 @@ app.post("/editRegister", upload.none(), (req, res) =>{
                                     console.log("-Dados escolares editados com sucesso");
                                 }
 
-                                let sqlVinculo = "UPDATE dadosvinculo SET vinculo = ?, setorDepartamento = ?, cargoFuncao = ?, cargoEfetivo = ?, statusServidor = ?, matriculaOrigem = ?, orgaoOrigem = ?, matriculaSeai = ?, dataEntregaDocs = ?, anotacoes = ? WHERE idFuncionario = ?";
-                                db.query(sqlVinculo, [vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaSeai, dataEntregaDocs, anotacoes, idFuncionario], (err, result) =>{
+                                let sqlVinculo = "UPDATE dadosvinculo SET vinculo = ?, setorDepartamento = ?, cargoFuncao = ?, cargoEfetivo = ?, statusServidor = ?, matriculaOrigem = ?, orgaoOrigem = ?, matriculaEmpresa = ?, dataEntregaDocs = ?, anotacoes = ? WHERE idFuncionario = ?";
+                                db.query(sqlVinculo, [vinculo, setorDepartamento, cargoFuncao, cargoEfetivo, statusServidor, matriculaOrigem, orgaoOrigem, matriculaEmpresa, dataEntregaDocs, anotacoes, idFuncionario], (err, result) =>{
                                     if (err) {
                                         return db.rollback(() =>{
                                             console.log("Erro ao atualizar dados vínculo:", err);
@@ -789,11 +802,8 @@ app.post("/uploadsEdit", upload.fields([{ name: 'imagem' }, { name: 'pdfs', maxC
 
 
 app.post("/logEdicao", (req, res) =>{
-    const date = new Date()
-    const hour = date.toLocaleTimeString()
+    const { data: dataMySQL, hora: hour } = agora()
     const { nomeUsuario, nomeFuncionario } = req.body;
-
-    const dataMySQL = date.toISOString().split('T')[0];
 
     db.beginTransaction((err) =>{
         if(err){
@@ -889,20 +899,20 @@ app.delete("/deleteRegister/:id", (req, res) =>{
 
 //TODO: LOGIN
 app.post("/login", (req, res) =>{
-    const date = new Date()
-    const hour = date.toLocaleTimeString()
+    const { data: dataMySQL, hora: hour } = agora()
     const { nomeUsuario, senhaUsuario } = req.body;
     const jwt = require('jsonwebtoken');
-
-    const dataMySQL = date.toISOString().split('T')[0];
 
     db.query(
         "SELECT * FROM usuarios WHERE nomeUsuario = ? AND senhaUsuario = ?",
         [nomeUsuario, senhaUsuario],
         (err, results) => {
-            if(err) throw err
+            if(err){
+                console.error("Erro ao consultar usuário:", err);
+                return res.status(500).json({ sucess: false });
+            }
             if(results.length > 0){
-                const token = jwt.sign({ userId: results[0].id }, '140946')
+                const token = jwt.sign({ userId: results[0].idUsuario }, JWT_SECRET)
                 res.json({ sucess: true, token });
                 console.log("\n☑ Usuário %s Logado com sucesso dia %s ☑\n", nomeUsuario, dataMySQL)
                 db.query(
@@ -919,6 +929,7 @@ app.post("/login", (req, res) =>{
 })
 
 
-app.listen(5000, '0.0.0.0', () => {
-    console.log("↺ Serv rodando, porta 5000 ↺")
+const PORT = Number(process.env.PORT || 5000);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`↺ Serv rodando, porta ${PORT} ↺`)
 });

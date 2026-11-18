@@ -25,6 +25,8 @@ const Editar = () =>{
 
   //ao retornar a data do banco de dados ela retornava, exemplo, como 4444-04-04T14:30:00.000Z(datetime) mesno que no banco de dados esteja como date e o input só aceita yyyy-mm-dd, entao para que o valor seja aceito pelo input esse valor do banco foi transformado para yyyy-mm-dd(4444-04-04)
   const formateDataInput = (date) =>{
+    // a API já devolve 'YYYY-MM-DD': usa direto (new Date() leria como UTC e voltaria um dia no fuso do Brasil)
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date
     const data  = new Date(date)
     const year = data.getFullYear()
     const month = (data.getMonth() + 1).toString().padStart(2, '0')
@@ -102,7 +104,7 @@ const Editar = () =>{
     statusServidor: funcionario.statusServidor,
     matriculaOrigem: funcionario.matriculaOrigem,
     orgaoOrigem: funcionario.orgaoOrigem,
-    matriculaSeai: funcionario.matriculaSeai,
+    matriculaEmpresa: funcionario.matriculaEmpresa,
     dataEntregaDocs: funcionario.dataEntregaDocs,
     anotacoes: funcionario.anotacoes,
 
@@ -154,7 +156,7 @@ const Editar = () =>{
         cpfMae: funcionario.cpfMae,
         dataNascMae: formatedDataNascMae,
         estadoCivil: funcionario.estadoCivil,
-        nomeEsposoa: funcionario.nomeEsposoA,
+        nomeEsposoa: funcionario.nomeEsposoa,
         filhos: funcionario.filhos,
         nomeFilhos: funcionario.nomeFilhos,
 
@@ -198,7 +200,7 @@ const Editar = () =>{
         statusServidor: funcionario.statusServidor,
         matriculaOrigem: funcionario.matriculaOrigem,
         orgaoOrigem: funcionario.orgaoOrigem,
-        matriculaSeai: funcionario.matriculaSeai,
+        matriculaEmpresa: funcionario.matriculaEmpresa,
         dataEntregaDocs: formatedDataEntregaDocs,
         anotacoes: funcionario.anotacoes
       });  // Atualiza os dados caso o funcionario mude
@@ -611,7 +613,7 @@ const Editar = () =>{
       return false;
     }
 
-    if(visData.matriculaSeai.trim() === ''){
+    if(visData.matriculaEmpresa.trim() === ''){
       setModalMessageError(`Preencha a Matrícula ${EMPRESA.sigla}`)
       setOpenModalError(true)
       return false;
@@ -717,7 +719,7 @@ const Editar = () =>{
     formData.append('statusServidor', visData.statusServidor)
     formData.append('matriculaOrigem', visData.matriculaOrigem)
     formData.append('orgaoOrigem', visData.orgaoOrigem)
-    formData.append('matriculaSeai', visData.matriculaSeai)
+    formData.append('matriculaEmpresa', visData.matriculaEmpresa)
     formData.append('dataEntregaDocs', emptyInputsDate(visData.dataEntregaDocs))
     formData.append('anotacoes', emptyInputs(visData.anotacoes))
 
@@ -1691,13 +1693,13 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="matriculaSeai">Matrícula {EMPRESA.sigla}:</label>
+                  <label for="matriculaEmpresa">Matrícula {EMPRESA.sigla}:</label>
                   <input 
-                    className={styles.input_matriculaSeai} 
+                    className={styles.input_matriculaEmpresa} 
                     type='text' 
-                    id='matriculaSeai' 
-                    name='matriculaSeai' 
-                    value={visData.matriculaSeai} 
+                    id='matriculaEmpresa' 
+                    name='matriculaEmpresa' 
+                    value={visData.matriculaEmpresa} 
                     maxLength={15}
                     onChange={handleEditValue}>
                   </input>

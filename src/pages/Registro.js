@@ -158,7 +158,7 @@ function Registro() {
   const [statusServidor, setStatusServidor] = useState('')
   const [matriculaOrigem, setMatriculaOrigem] = useState('')
   const [orgaoOrigem, setOrgaoOrigem] = useState('')
-  const [matriculaSeai, setMatriculaSeai] = useState('')
+  const [matriculaEmpresa, setMatriculaEmpresa] = useState('')
   const [files, setFiles] = useState([])
   const fileInputRhef = useRef(null)
   const [dataEntregaDocs, setDataEntregaDocs] = useState('')
@@ -557,7 +557,7 @@ function Registro() {
     formData.append("statusServidor", statusServidor);
     formData.append("matriculaOrigem", emptyInputs(matriculaOrigem));
     formData.append("orgaoOrigem", emptyInputs(orgaoOrigem));
-    formData.append("matriculaSeai", emptyInputs(matriculaSeai));
+    formData.append("matriculaEmpresa", emptyInputs(matriculaEmpresa));
     formData.append("arquivosNome", files);
     formData.append("dataEntregaDocs", emptyInputsDate(dataEntregaDocs));
     formData.append("anotacoes", emptyInputs(anotacoes));
@@ -678,7 +678,7 @@ function Registro() {
         setStatusServidor("");
         setMatriculaOrigem("");
         setOrgaoOrigem("");
-        setMatriculaSeai("");
+        setMatriculaEmpresa("");
         setFiles([]);
         fileInputRhef.current.value = ""
         setDataEntregaDocs("");
@@ -1545,14 +1545,14 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaSeai">Matrícula {EMPRESA.sigla}:</label>
+                  <label for="matriculaEmpresa">Matrícula {EMPRESA.sigla}:</label>
                   <input 
                     type='text' 
-                    id='matriculaSeai' 
-                    name='matriculaSeai' 
-                    value={matriculaSeai} 
+                    id='matriculaEmpresa' 
+                    name='matriculaEmpresa' 
+                    value={matriculaEmpresa} 
                     maxLength={15}
-                    onChange={(e) => {setMatriculaSeai(e.target.value)}}>
+                    onChange={(e) => {setMatriculaEmpresa(e.target.value)}}>
                   </input>
                 </div>
               </div>

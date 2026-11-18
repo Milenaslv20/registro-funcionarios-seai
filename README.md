@@ -1,70 +1,69 @@
-# Getting Started with Create React App
+# Vértix · Registro de Funcionários
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sistema de cadastro de funcionários (React + Node/Express + MySQL) da empresa fictícia **Vértix Soluções Corporativas**.
 
-## Available Scripts
+## Rodando com Docker
 
-In the project directory, you can run:
+Pré-requisito: Docker com Docker Compose.
 
-### `npm start`
+```bash
+docker compose up -d --build
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Serviço  | Endereço                 | Descrição                          |
+|----------|--------------------------|------------------------------------|
+| Frontend | http://localhost:8080    | Aplicação React (nginx)            |
+| API      | http://localhost:5000    | Servidor Node/Express              |
+| MySQL    | `localhost:3307`         | Banco `vertix_funcionarios`        |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Acesso de teste
 
-### `npm test`
+| Usuário | Senha      | Perfil |
+|---------|------------|--------|
+| `admin` | `admin123` | ADM    |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+O perfil ADM também é exigido para confirmar o cadastro de novos usuários em `/cadastroUsuario`.
+Outras telas sem link no menu: `/visualizarLogsLogin` e `/visualizarLogsEdicao`.
 
-### `npm run build`
+### Banco de dados
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- O schema e os dados de exemplo estão em `database/init.sql`. O MySQL executa esse script **apenas na primeira vez**, quando o volume está vazio.
+- Credenciais do banco: usuário `vertix`, senha `vertix123` (root: `root123`).
+- Para recriar o banco do zero (apaga todos os dados e uploads):
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  ```bash
+  docker compose down -v
+  docker compose up -d --build
+  ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Variáveis opcionais
 
-### `npm run eject`
+Podem ser definidas num arquivo `.env` na raiz ou no ambiente antes do `docker compose up`:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+| Variável           | Padrão                  | Uso                                                       |
+|--------------------|-------------------------|-----------------------------------------------------------|
+| `DB_USER`          | `vertix`                | Usuário do MySQL                                          |
+| `DB_PASSWORD`      | `vertix123`             | Senha do MySQL                                            |
+| `DB_ROOT_PASSWORD` | `root123`               | Senha root do MySQL                                       |
+| `JWT_SECRET`       | `troque-este-segredo`   | Segredo de assinatura do token                            |
+| `API_PUBLIC_URL`   | `http://localhost:5000` | URL da API usada pelo navegador (embutida no build do front) |
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Rodando sem Docker (desenvolvimento)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+# banco: suba só o MySQL do compose
+docker compose up -d db
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# API (porta 5000)
+cd server && npm install && npm start
 
-## Learn More
+# Frontend (porta 3000), em outro terminal
+npm install && npm start
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+O frontend lê a URL da API de `REACT_APP_API_BASE_URL` no `.env` da raiz.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Marca
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Nome, nome completo e sigla da empresa ficam em `src/config/empresa.js`; o logo em `src/svg/logo.svg`;
+as cores em `src/index.css`. O cabeçalho/rodapé dos PDFs é desenhado em `src/utils/pdfMarca.js`.
