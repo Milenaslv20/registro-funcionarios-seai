@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styles from './styles.module.css'
-import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 import { FilterX } from 'lucide-react'
 
@@ -59,14 +59,8 @@ function VisualizarLogsEdicao() {
 
   return (
     <div>
-        <div className={styles.nav_register2}>
-            <div className={styles.navigation_bar2}>
-                <div className={styles.nav_history}>
-                    <Link to={"/visualizarLogsLogin"} className={styles.link_register2}>Logs Login</Link>
-                    <h1 className={styles.link_history2}>Logs Edição</h1>
-                </div>
-            </div>
-        </div>
+      <Header links={[{ to: '/visualizarLogsLogin', label: 'Logs Login' }, { to: '/visualizarLogsEdicao', label: 'Logs Edição' }]} />
+      <div className={styles.page}>
 
         <div className={styles.filters_history}>
           <div className={styles.input_filters}>
@@ -175,7 +169,7 @@ function VisualizarLogsEdicao() {
               autoComplete='off'
             />
           </div>
-          <FilterX className={styles.filter_icon} size={30} onClick={clearFilters}></FilterX>
+          <button type='button' className={styles.filter_icon} onClick={clearFilters} title='Limpar filtros'><FilterX size={20}/></button>
         </div>
 
         <div className={styles.container_table}>
@@ -202,6 +196,7 @@ function VisualizarLogsEdicao() {
             </tbody>
           </table>
         </div>
+      </div>
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { isAuth } from '../isAuth';
 import { useFuncionario } from './FuncionarioContext'
 
-import logoSeai from '../svg/logoSeai.svg'
+import logo from '../svg/logo.svg'
+import EMPRESA from '../config/empresa'
 
 import ModalError from '../components/ModalError';
 
@@ -48,19 +49,22 @@ function Login({ onLogin }) {
     }
 
   return (
-    <div>
+    <div className={styles.login_page}>
       <div className={styles.container_left}>
+        <img src={logo} alt={`Logo ${EMPRESA.nome}`}/>
+        <span className={styles.login_brand}>{EMPRESA.nomeCompleto}</span>
         <h1>Registro de Funcionários</h1>
-
-        <img src={logoSeai} alt=''/>
       </div>
 
       <div className={styles.container_right}>
         <div className={styles.container_login}>
-          <h1>Login</h1>
+          <h2>Entrar</h2>
+          <p>Acesse com seu usuário e senha.</p>
 
-          <input id='usuario' type='text' placeholder='Usuário' maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
-          <input id={styles.input_password} type='password' placeholder='Senha' maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyPress={enterPress}></input>
+          <label htmlFor='usuario'>Usuário</label>
+          <input id='usuario' type='text' placeholder='Seu usuário' maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
+          <label htmlFor='senha'>Senha</label>
+          <input id='senha' type='password' placeholder='Sua senha' maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyDown={enterPress}></input>
           <button className={styles.button_login} onClick={handleLogin}>Entrar</button>
         </div>
       </div>

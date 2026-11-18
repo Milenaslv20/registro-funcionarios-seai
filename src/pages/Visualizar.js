@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import styles from './styles.module.css'
+import EMPRESA from '../config/empresa'
 import { jsPDF } from 'jspdf'
 import { useFuncionario } from './FuncionarioContext'
 import Axios from 'axios'
 
 import { FolderDown } from 'lucide-react'
 import defaultImage from '../svg/icon-person.jpg'
+import Header from '../components/Header'
 
 function Visualizar() {
   const endpoint = process.env.REACT_APP_API_BASE_URL;
@@ -138,8 +140,8 @@ function Visualizar() {
 
         doc.setFontSize(10)
         doc.setFont("helvetica", "bold");
-        doc.text(`SECRETARIA DE ESTADO DE SEGURANÇA PÚBLICA \n SECRETARIA EXECUTIVA ADJUNTA DE INTELIGÊNCIA`, 105, 48, { align: "center" })
-        doc.text(`FICHA CADASTRAL DE SERVIDORES`, 105, 59, { align: "center" })
+        doc.text(EMPRESA.nomeCompleto.toUpperCase(), 105, 50, { align: "center" })
+        doc.text(`FICHA CADASTRAL DE FUNCIONÁRIOS`, 105, 59, { align: "center" })
 
       //  
         doc.addImage(cropBase64, 'JPEG', 12, 75, squareSize / scaleFactor, squareSize / scaleFactor);
@@ -262,7 +264,7 @@ function Visualizar() {
         doc.text(`CARGO/FUNÇÃO: ${funcionario.cargoFuncao}`, 130, 117.5)
         doc.text(`ORGÃO ORIGEM: ${funcionario.orgaoOrigem}`, 12, 123.5)
         doc.text(`MATRÍCULA ORIGEM: ${funcionario.matriculaOrigem}`, 130, 123)
-        doc.text(`MATRÍCULA SEAI: ${funcionario.matriculaSeai}`, 12, 129.5)
+        doc.text(`MATRÍCULA ${EMPRESA.sigla}: ${funcionario.matriculaSeai}`, 12, 129.5)
         doc.text(`STATUS: ${funcionario.statusServidor}`, 130, 129)
         doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 12, 135)
         doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 140.5)
@@ -282,15 +284,18 @@ function Visualizar() {
 
   return (
     <div className={styles.container_register}>
+      <Header title='Visualizar Dados' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
       <div className={styles.container_record}>
         <div className={styles.record}>
-        <FolderDown onClick={getPdf} className={styles.button_download} size={55} strokeWidth={1.5}/>
-          <img
-              className={styles.img_vis}
-              src={selectedImage || imageUrl} 
-              alt='Imagem do Funcionário' 
-              onError={handleImageError}
-          />
+          <div className={styles.foto_vis}>
+            <img
+                className={styles.img_vis}
+                src={selectedImage || imageUrl} 
+                alt='Imagem do Funcionário' 
+                onError={handleImageError}
+            />
+            <button type='button' onClick={getPdf} className={styles.button_download} title='Baixar ficha em PDF'><FolderDown size={20} strokeWidth={1.75}/> Baixar PDF</button>
+          </div>
 
           <div className={styles.inputs}>
             {/***TODO: INPUT DADOS PESSOAIS***/}
@@ -344,7 +349,7 @@ function Visualizar() {
               <div className={styles.form_group}>
                 <div className={styles.div_input} id={styles.inptspan}>
                   <label for="email">Email:</label>
-                  <span className={styles.span}>{funcionario.nacionalidade}</span>
+                  <span className={styles.span}>{funcionario.email}</span>
                 </div>
               </div>
             </form>
@@ -664,7 +669,7 @@ function Visualizar() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaSeai">Matricula SEAI:</label>
+                  <label for="matriculaSeai">Matrícula {EMPRESA.sigla}:</label>
                   <span className={styles.span}>{funcionario.matriculaSeai}</span>
                 </div>
               </div>

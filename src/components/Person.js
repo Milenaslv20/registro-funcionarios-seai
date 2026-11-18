@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styles from '../pages/styles.module.css'
+import EMPRESA from '../config/empresa'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 
@@ -137,8 +138,8 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
 
         doc.setFontSize(10)
         doc.setFont("helvetica", "bold");
-        doc.text(`SECRETARIA DE ESTADO DE SEGURANÇA PÚBLICA \n SECRETARIA EXECUTIVA ADJUNTA DE INTELIGÊNCIA`, 105, 48, { align: "center" })
-        doc.text(`FICHA CADASTRAL DE SERVIDORES`, 105, 59, { align: "center" })
+        doc.text(EMPRESA.nomeCompleto.toUpperCase(), 105, 50, { align: "center" })
+        doc.text(`FICHA CADASTRAL DE FUNCIONÁRIOS`, 105, 59, { align: "center" })
 
       //  
         // Adicionar ao PDF no tamanho desejado (convertendo para uma escala normal
@@ -262,7 +263,7 @@ const Person = ({ funcionario, handleOpenDeleteModal }) => {
         doc.text(`CARGO/FUNÇÃO: ${funcionario.cargoFuncao}`, 130, 117.5)
         doc.text(`ORGÃO ORIGEM: ${funcionario.orgaoOrigem}`, 12, 123.5)
         doc.text(`MATRÍCULA ORIGEM: ${funcionario.matriculaOrigem}`, 130, 123)
-        doc.text(`MATRÍCULA SEAI: ${funcionario.matriculaSeai}`, 12, 129.5)
+        doc.text(`MATRÍCULA ${EMPRESA.sigla}: ${funcionario.matriculaSeai}`, 12, 129.5)
         doc.text(`STATUS: ${funcionario.statusServidor}`, 130, 129)
         doc.text(`DATA DE ENTREGA DOS DOCUMENTOS: ${formatedDataEntregaDocs}`, 12, 135)
         doc.text(`ANOTAÇÕES: ${funcionario.anotacoes}`, 12, 140.5)

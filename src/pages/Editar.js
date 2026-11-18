@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './styles.module.css'
+import EMPRESA from '../config/empresa'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
 import { IMaskInput } from 'react-imask';
@@ -9,6 +10,7 @@ import defaultImage from '../svg/icon-person.jpg'
 
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
+import Header from '../components/Header'
 
 const Editar = () =>{
   const endpoint = process.env.REACT_APP_API_BASE_URL;
@@ -610,7 +612,7 @@ const Editar = () =>{
     }
 
     if(visData.matriculaSeai.trim() === ''){
-      setModalMessageError("Preencha a Matrícula SEAI")
+      setModalMessageError(`Preencha a Matrícula ${EMPRESA.sigla}`)
       setOpenModalError(true)
       return false;
     }
@@ -779,11 +781,7 @@ const Editar = () =>{
 
   return (
     <div className={styles.container_register}>
-      <div className={styles.nav_edit}>
-        <div className={styles.navigation_bar_edit}>
-          <h1 className={styles.nav_history_edit}>Editar Dados</h1>
-        </div>
-      </div>
+      <Header title='Editar Dados' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
 
       <div className={styles.container_record}>
         <div className={styles.record}>
@@ -1133,6 +1131,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
+                  <label for="selectCnh">Possui CNH?</label>
                   <select id='selectCnh' name='selectCnh' value={selectCnh} onChange={(e) => {setSelectCnh(e.target.value)}}>
                     <option value="Não">Não</option>
                     <option value="Sim">Sim</option>
@@ -1304,6 +1303,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
+                  <label for="selectDocMilitar">Possui Doc. Militar?</label>
                   <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
                     <option value="Não">Não</option>
                     <option value="Sim">Sim</option>
@@ -1611,14 +1611,14 @@ const Editar = () =>{
                   <label for="setorDepartamento">Setor/Departamento:</label>
                   <select id='setorDepartamento' name='setorDepartamento' value={visData.setorDepartamento} onChange={handleEditValue}>
                     <option disabled={true} value="">Selecione</option>
-                    <option value="Apoio Administrativo">Apoio Administrativo</option>
-                    <option value="Transporte">Transporte</option>
-                    <option value="Gabinete">Gabinete</option>
-                    <option value="Gerência de Análise">Gerência de Análise</option>
-                    <option value="Gerência de Operações">Gerência de Operações</option>
-                    <option value="Gerência de Contra Inteligência">Gerência de Contra Inteligência</option>
-                    <option value="Laboratório">Laboratório</option>
-                    <option value="Inteligência Cibernética">Inteligência Cibernética</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Recursos Humanos">Recursos Humanos</option>
+                    <option value="Tecnologia da Informação">Tecnologia da Informação</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Operações">Operações</option>
+                    <option value="Logística">Logística</option>
+                    <option value="Jurídico">Jurídico</option>
                     <option value="Outros">Outros</option>
                     <option value="NI">NI</option>
                   </select>
@@ -1691,7 +1691,7 @@ const Editar = () =>{
                 </div>
 
                 <div className={styles.div_input}>
-                  <label for="matriculaSeai">Matricula SEAI:</label>
+                  <label for="matriculaSeai">Matrícula {EMPRESA.sigla}:</label>
                   <input 
                     className={styles.input_matriculaSeai} 
                     type='text' 

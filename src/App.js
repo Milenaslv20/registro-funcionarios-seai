@@ -24,7 +24,11 @@ const PrivateRoute = ({ element, isAuth, onLogin }) => {
 }
 
 function App() {
-  const [isAuth, setIsAuth] = useState(false)
+  // Lê o token já na primeira renderização para não redirecionar ao login ao recarregar a página
+  const [isAuth, setIsAuth] = useState(() => {
+    const token = sessionStorage.getItem('token')
+    return !!token && token.length >= 5
+  })
   
   const handleLogin = (token) =>{
     sessionStorage.setItem('token', token);

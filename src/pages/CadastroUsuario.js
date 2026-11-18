@@ -4,6 +4,7 @@ import Axios from 'axios'
 
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
+import Header from '../components/Header'
 
 function CadastroUsuario() {
   const endpoint = process.env.REACT_APP_API_BASE_URL;
@@ -74,7 +75,9 @@ function CadastroUsuario() {
   }
 
   return (
-    <div className={styles.container_cadastro_usuario}>
+    <div>
+      <Header title='Cadastrar Usuário' links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <div className={styles.container_cadastro_usuario}>
       <div className={styles.container_cad}>
         <div className={styles.container_inputs}>
           <h1>Cadastrar Usuário</h1>
@@ -110,8 +113,9 @@ function CadastroUsuario() {
             </select>
           </div>
 
-          <button className={styles.button_send} id={styles.button_send_cad}  onClick={modal}>Enviar</button>
+          <button className={styles.button_send} onClick={modal}>Enviar</button>
         </div>
+      </div>
       </div>
       <Modal openModal={openModal} setOpenModal={setOpenModal} message={modalMessage}/>
       <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError} onConfirmPassword={validateUser}/>

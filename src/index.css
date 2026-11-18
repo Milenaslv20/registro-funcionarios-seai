@@ -1,8 +1,133 @@
-*{
+/* ===== Tokens da marca (Vértix) ===== */
+:root {
+  --brand: #0F4C5C;
+  --brand-strong: #0B3945;
+  --brand-soft: #E3F1F1;
+  --brand-bright: #14B8A6;
+  --accent: #F2A541;
+  --accent-strong: #E08E1B;
+
+  --bg: #F3F5F7;
+  --surface: #FFFFFF;
+  --surface-muted: #F7F9FA;
+  --border: #D9DFE5;
+  --border-strong: #B8C2CC;
+
+  --text: #1A2230;
+  --text-muted: #5B6676;
+  --text-on-brand: #FFFFFF;
+
+  --success: #16794C;
+  --danger: #B42318;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow: 0 4px 16px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 20px 48px rgba(16, 24, 40, 0.18);
+
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --page-gutter: clamp(16px, 4vw, 40px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body{
-  background-color: #828288;
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Campos de formulário padrão */
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 15px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-bright);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: var(--surface-muted);
+  cursor: not-allowed;
+}
+
+input[type="file"] {
+  padding: 8px;
+  font-size: 14px;
+  background-color: var(--surface-muted);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-bright);
+  outline-offset: 2px;
 }

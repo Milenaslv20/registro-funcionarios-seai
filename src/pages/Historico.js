@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import styles from './styles.module.css'
-import { Link } from 'react-router-dom'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
 
@@ -10,11 +9,12 @@ import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
 
 import { FilterX } from 'lucide-react'
+import Header from '../components/Header'
 
 function Historico ({ funcionarios }){
   const endpoint = process.env.REACT_APP_API_BASE_URL;
 
-  const [dataSeaiFuncionarios, setDataSeaiFuncionarios] = useState([])
+  const [dataFuncionarios, setDataFuncionarios] = useState([])
   const [totalFunc, setTotalFunc] = useState(0)
 
   const { usuario } = useFuncionario();
@@ -37,17 +37,17 @@ function Historico ({ funcionarios }){
 
   //TODO: GET TOTALFUNC AND TOTAL DATA
   useEffect(() =>{
-    const dataSeaiFuncionarios = async() =>{
+    const fetchFuncionarios = async() =>{
       const reqData = await fetch(`${endpoint}/getRegisters`)
       const resData = await reqData.json()
-      setDataSeaiFuncionarios(resData)
+      setDataFuncionarios(resData)
       setFiltros(resData || [])
 
       const reqTotal = await fetch(`${endpoint}/getRegisterstot`);
       const resTotal = await reqTotal.json();
       setTotalFunc(resTotal.totalFunc);
     }
-    dataSeaiFuncionarios()
+    fetchFuncionarios()
   }, [])
 
   //TODO: DELETE FUNC
@@ -114,12 +114,9 @@ function Historico ({ funcionarios }){
 
   return (
     <div>
-      <div className={styles.nav_register2}>
-        <div className={styles.navigation_bar2}>
-          <div className={styles.nav_history}>
-            <Link to={"/registro"} className={styles.link_register2}>Registrar Funcionário</Link>
-            <h1 className={styles.link_history2}>Histórico Funcionários</h1>
-          </div>
+      <Header links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <div className={styles.page}>
+        <div>
 
           <div className={styles.filters_history}>
             <div className={styles.totalFunc}>
@@ -153,21 +150,21 @@ function Historico ({ funcionarios }){
             <div className={styles.input_filters}>
               <select id='setorDepartamento' name='setorDepartamento' onChange={(e) => setfiltroSetorDepartamento(e.target.value)} value={filtroSetorDepartamento}>
                 <option disabled={true} value="">Setor/Departamento</option>
-                <option value="Apoio Administrativo">Apoio Administrativo</option>
-                <option value="Transporte">Transporte</option>
-                <option value="Gabinete">Gabinete</option>
-                <option value="Gerência de Análise">Gerência de Análise</option>
-                <option value="Gerência de Operações">Gerência de Operações</option>
-                <option value="Gerência de Contra Inteligência">Gerência de Contra Inteligência</option>
-                <option value="Laboratório">Laboratório</option>
-                <option value="Inteligência Cibernética">Inteligência Cibernética</option>
+                <option value="Administrativo">Administrativo</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Recursos Humanos">Recursos Humanos</option>
+                <option value="Tecnologia da Informação">Tecnologia da Informação</option>
+                <option value="Comercial">Comercial</option>
+                <option value="Operações">Operações</option>
+                <option value="Logística">Logística</option>
+                <option value="Jurídico">Jurídico</option>
                 <option value="Outros">Outros</option>
                 <option value="">-Limpar-</option>
               </select>
             </div>
 
-            <div className={styles.input_filters} onChange={(e) => setFiltroVinculo(e.target.value)} value={filtroVinculo}>
-              <select id='vinculo' name='vinculo'>
+            <div className={styles.input_filters}>
+              <select id='vinculo' name='vinculo' onChange={(e) => setFiltroVinculo(e.target.value)} value={filtroVinculo}>
                 <option disabled={true} value="">Vínculo</option>
                 <option value="Cargo Comissionado">Cargo Comissionado</option>
                 <option value="Estagiário(a)">Estagiário(a)</option>
@@ -177,7 +174,7 @@ function Historico ({ funcionarios }){
               </select>
             </div>
 
-            <FilterX className={styles.filter_icon} size={30} onClick={clearFilters}></FilterX>
+            <button type='button' className={styles.filter_icon} onClick={clearFilters} title='Limpar filtros'><FilterX size={20}/></button>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import styles from './styles.module.css'
-import { Link } from 'react-router-dom'
+import EMPRESA from '../config/empresa'
 import Axios from 'axios'
 import { useFuncionario } from './FuncionarioContext'
 import { IMaskInput } from 'react-imask';
@@ -9,6 +9,7 @@ import { Paperclip } from 'lucide-react'
 
 import Modal from '../components/Modal'
 import ModalError from '../components/ModalError'
+import Header from '../components/Header'
 
 function Registro() {
   const endpoint = process.env.REACT_APP_API_BASE_URL;
@@ -693,12 +694,7 @@ function Registro() {
 
   return (
     <div className={styles.container_register}>
-      <div className={styles.nav_register}>
-        <div className={styles.navigation_bar}>
-          <h1 className={styles.link_register}>Registrar Funcionário</h1>
-          <Link to={"/historico"} className={styles.link_history}>Histórico de Funcionários</Link>
-        </div>
-      </div>
+      <Header links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
 
       <div className={styles.container_record}>
         <div className={styles.record}>
@@ -1011,6 +1007,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input}>
+                  <label for="selectCnh">Possui CNH?</label>
                   <select id='selectCnh' name='selectCnh' value={selectCnh} onChange={(e) => {setSelectCnh(e.target.value)}}>
                     <option value="Não">Não</option>
                     <option value="Sim">Sim</option>
@@ -1179,6 +1176,7 @@ function Registro() {
 
               <div className={styles.form_group}>
                 <div className={styles.div_input}>
+                    <label for="selectDocMilitar">Possui Doc. Militar?</label>
                     <select id='selectDocMilitar' name='selectDocMilitar' value={selectDocMilitar} onChange={(e) => {setSelectDocMilitar(e.target.value)}}>
                       <option value="Não">Não</option>
                       <option value="Sim">Sim</option>
@@ -1472,14 +1470,14 @@ function Registro() {
                   <label for="setorDepartamento">Setor/Departamento:</label>
                   <select id='setorDepartamento' name='setorDepartamento' value={setorDepartamento} onChange={(e) => {setSetorDepartamento(e.target.value)}}>
                     <option disabled={true} value="">Selecione</option>
-                    <option value="Apoio Administrativo">Apoio Administrativo</option>
-                    <option value="Transporte">Transporte</option>
-                    <option value="Gabinete">Gabinete</option>
-                    <option value="Gerência de Análise">Gerência de Análise</option>
-                    <option value="Gerência de Operações">Gerência de Operações</option>
-                    <option value="Gerência de Contra Inteligência">Gerência de Contra Inteligência</option>
-                    <option value="Laboratório">Laboratório</option>
-                    <option value="Inteligência Cibernética">Inteligência Cibernética</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Recursos Humanos">Recursos Humanos</option>
+                    <option value="Tecnologia da Informação">Tecnologia da Informação</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Operações">Operações</option>
+                    <option value="Logística">Logística</option>
+                    <option value="Jurídico">Jurídico</option>
                     <option value="Outros">Outros</option>
                     <option value="NI">NI</option>
                   </select>
@@ -1547,7 +1545,7 @@ function Registro() {
                 </div>
 
                 <div className={styles.div_input} id={styles.inptspan}>
-                  <label for="matriculaSeai">Matricula SEAI:</label>
+                  <label for="matriculaSeai">Matrícula {EMPRESA.sigla}:</label>
                   <input 
                     type='text' 
                     id='matriculaSeai' 
@@ -1596,6 +1594,7 @@ function Registro() {
                     )}
                   </div>
 
+                  <button type='button' className={styles.clear_files} onClick={clearFiles}>Limpar anexos</button>
                 </div>
 
                 <div className={styles.div_input} id={styles.anotacoes}>
@@ -1615,7 +1614,6 @@ function Registro() {
               </div>
             </form>
 
-            <button className={styles.clear_files} onClick={clearFiles}>Limpar</button>
           </div>
         </div>
         <button onClick={submitForm} className={styles.button_send}>Salvar</button>
