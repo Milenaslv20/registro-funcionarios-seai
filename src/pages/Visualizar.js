@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './styles.module.css'
 import EMPRESA from '../config/empresa'
-import { desenharCabecalho, desenharRodape } from '../utils/pdfMarca'
+import { desenharCabecalho, desenharRodape, desenharTituloSecao } from '../utils/pdfMarca'
 import { jsPDF } from 'jspdf'
 import { useFuncionario } from './FuncionarioContext'
 import Axios from 'axios'
@@ -149,8 +149,7 @@ function Visualizar() {
       //  
         doc.addImage(cropBase64, 'JPEG', 12, 75, squareSize / scaleFactor, squareSize / scaleFactor);
         
-        doc.text(t('1 - DADOS PESSOAIS'), 30, 70, { align: "center" })
-        doc.line(52, 68.5, 196, 68.5)
+        desenharTituloSecao(doc, t('1 - DADOS PESSOAIS'), 70)
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(11)
@@ -166,8 +165,7 @@ function Visualizar() {
       //   
 
         doc.setFont("helvetica", "bold");
-        doc.text(t('2 - DADOS FAMILIARES'), 34, 128, { align: "center" })
-        doc.line(60, 126.5, 195, 126.5)
+        desenharTituloSecao(doc, t('2 - DADOS FAMILIARES'), 128)
 
         doc.text(t('Pai'), 12, 136)
         doc.setFont("helvetica", "normal");
@@ -190,8 +188,7 @@ function Visualizar() {
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(t('3 - DOCUMENTOS'), 29, 192, { align: "center" })
-        doc.line(49, 190.5, 195, 190.5)
+        desenharTituloSecao(doc, t('3 - DOCUMENTOS'), 192)
 
         doc.setFont("helvetica", "normal");
         doc.text(`${t('CPF')}: ${t(funcionario.cpf)}`, 12, 199)
@@ -211,8 +208,7 @@ function Visualizar() {
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(t('4 - ENDEREÇO'), 25.5, 225, { align: "center" })
-        doc.line(43, 224, 195, 224)
+        desenharTituloSecao(doc, t('4 - ENDEREÇO'), 225)
 
         doc.setFont("helvetica", "normal");
         doc.text(`${t('BAIRRO')}: ${t(funcionario.bairro)}`, 12, 232)
@@ -230,8 +226,7 @@ function Visualizar() {
         doc.addPage()
       //
         doc.setFont("helvetica", "bold");
-        doc.text(t('5 - DADOS BANCÁRIOS'), 34, 48, { align: "center" })
-        doc.line(60, 46.5, 194, 46.5)
+        desenharTituloSecao(doc, t('5 - DADOS BANCÁRIOS'), 48)
 
         doc.setFont("helvetica", "normal");
         doc.text(`${t('BANCO')}: ${t(funcionario.banco)}`, 12, 55)
@@ -241,8 +236,7 @@ function Visualizar() {
       //
 
         doc.setFont("helvetica", "bold");
-        doc.text(t('6 - FORMAÇÃO ESCOLAR'), 36, 65, { align: "center" })
-        doc.line(64, 64, 194, 64)
+        desenharTituloSecao(doc, t('6 - FORMAÇÃO ESCOLAR'), 65)
 
         doc.setFont("helvetica", "normal");
         doc.text(`${t('ESCOLARIDADE')}: ${t(funcionario.escolaridade)}`, 12, 72)
@@ -255,8 +249,7 @@ function Visualizar() {
     //
 
         doc.setFont("helvetica", "bold");
-        doc.text(t('7 - VÍNCULO'), 23.5, 105, { align: "center" })
-        doc.line(39, 103.5, 194, 103.5)
+        desenharTituloSecao(doc, t('7 - VÍNCULO'), 105)
 
         doc.setFont("helvetica", "normal");
         doc.text(`${t('VÍNCULO')}: ${t(funcionario.vinculo)}`, 12, 112)

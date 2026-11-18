@@ -52,3 +52,10 @@ export function desenharRodape(doc, t = (s) => s) {
 
   resetarEstilo(doc)
 }
+
+// Título de seção ("1 - DADOS PESSOAIS ———"): texto alinhado à esquerda e a linha
+// começando logo após o texto, medido em tempo real (funciona com qualquer idioma)
+export function desenharTituloSecao(doc, texto, y, { x = 12, fim = 196, espaco = 3 } = {}) {
+  doc.text(texto, x, y)
+  doc.line(x + doc.getTextWidth(texto) + espaco, y - 1.5, fim, y - 1.5)
+}
