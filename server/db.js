@@ -39,15 +39,28 @@ const lerSql = (arquivo) => fs.readFileSync(path.join(__dirname, "db", arquivo),
 async function inicializarBanco() {
     await query(lerSql("schema.sql"));
 
-    const { rows: [{ total: usuarios }] } = await query("SELECT COUNT(*)::int AS total FROM usuarios");
-    if (usuarios === 0) {
-        const nome = process.env.ADMIN_USER || "admin";
-        const senha = process.env.ADMIN_PASSWORD || "admin123";
-        await query(
-            "INSERT INTO usuarios (nome_usuario, senha_hash, tipo_acesso) VALUES ($1, $2, 'ADM')",
-            [nome, await bcrypt.hash(senha, 10)]
+    // Administrador: com ADMIN_PASSWORD definido, a senha é sincronizada a cada inicialização
+    // (trocar a variável no painel do Render e reiniciar já atualiza a senha).
+    // Sem a variável, cria "admin/admin123" apenas se ainda não houver nenhum usuário (uso local).
+    const nome = (process.env.ADMIN_USER || "admin").trim();
+    const senhaEnv = (process.env.ADMIN_PASSWORD || "").trim(); // remove espaço/quebra de linha acidental
+    if (senhaEnv) {
+        const { rows } = await query(
+            `INSERT INTO usuarios (nome_usuario, senha_hash, tipo_acesso) VALUES ($1, $2, 'ADM')
+             ON CONFLICT (nome_usuario) DO UPDATE SET senha_hash = EXCLUDED.senha_hash, tipo_acesso = 'ADM'
+             RETURNING (xmax = 0) AS criado`,
+            [nome, await bcrypt.hash(senhaEnv, 10)]
         );
-        console.log(`👤 Usuário administrador "${nome}" criado`);
+        console.log(`👤 Administrador "${nome}" ${rows[0].criado ? "criado" : "com senha sincronizada (ADMIN_PASSWORD)"}`);
+    } else {
+        const { rows: [{ total }] } = await query("SELECT COUNT(*)::int AS total FROM usuarios");
+        if (total === 0) {
+            await query(
+                "INSERT INTO usuarios (nome_usuario, senha_hash, tipo_acesso) VALUES ($1, $2, 'ADM')",
+                [nome, await bcrypt.hash("admin123", 10)]
+            );
+            console.log(`👤 Administrador "${nome}" criado com a senha padrão (defina ADMIN_PASSWORD em produção)`);
+        }
     }
 
     if (process.env.SEED_DEMO !== "false") {
