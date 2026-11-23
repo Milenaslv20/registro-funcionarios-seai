@@ -786,7 +786,7 @@ const Editar = () =>{
 
   return (
     <div className={styles.container_register}>
-      <Header title={t('Editar Dados')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header title={t('Editar Dados')} />
 
       <div className={styles.container_record}>
         <div className={styles.record}>

@@ -11,6 +11,8 @@ const en = {
   'Cadastrar Usuário': 'Create User',
   'Logs Login': 'Login Logs',
   'Logs Edição': 'Edit Logs',
+  'Mostrar senha': 'Show password',
+  'Ocultar senha': 'Hide password',
   'Recursos Humanos': 'Human Resources',
   'Documento de uso interno': 'Internal use only',
   'Salvar': 'Save',

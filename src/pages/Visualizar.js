@@ -281,7 +281,7 @@ function Visualizar() {
 
   return (
     <div className={styles.container_register}>
-      <Header title={t('Visualizar Dados')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header title={t('Visualizar Dados')} />
       <div className={styles.container_record}>
         <div className={styles.record}>
           <div className={styles.foto_vis}>

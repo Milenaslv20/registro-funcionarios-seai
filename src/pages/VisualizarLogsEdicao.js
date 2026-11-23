@@ -63,7 +63,7 @@ function VisualizarLogsEdicao() {
 
   return (
     <div>
-      <Header links={[{ to: '/visualizarLogsLogin', label: 'Logs Login' }, { to: '/visualizarLogsEdicao', label: 'Logs Edição' }]} />
+      <Header />
       <div className={styles.page}>
 
         <div className={styles.filters_history}>

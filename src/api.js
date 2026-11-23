@@ -55,3 +55,20 @@ export function urlApi(caminho) {
 }
 
 export const urlFoto = (idFuncionario) => urlApi(`foto/${idFuncionario}`)
+
+// Lê o perfil (tipoAcesso) gravado no token. Só serve para montar o menu: a API valida de novo.
+export function getTipoAcesso() {
+  const token = getToken()
+  if (!token) return null
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64).split('').map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+    )
+    return JSON.parse(json).tipoAcesso || null
+  } catch {
+    return null
+  }
+}
+
+export const isAdmin = () => getTipoAcesso() === 'ADM'

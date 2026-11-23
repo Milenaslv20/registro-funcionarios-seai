@@ -8,6 +8,7 @@ import logo from '../svg/logo.svg'
 import EMPRESA from '../config/empresa'
 
 import ModalError from '../components/ModalError';
+import { Eye, EyeOff } from 'lucide-react'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useLanguage } from '../i18n/LanguageContext'
 
@@ -16,6 +17,7 @@ function Login({ onLogin }) {
 
   const[nomeUsuario, setNomeUsuario] = useState('')
   const[senhaUsuario, setSenhaUsuario] = useState('')
+  const[mostrarSenha, setMostrarSenha] = useState(false)
   const[openModalError, setOpenModalError] = useState(false)
   const[modalMessageError, setModalMessageError] = useState('')
   const navigate = useNavigate()
@@ -24,12 +26,6 @@ function Login({ onLogin }) {
   const { setUsuario } = useFuncionario();
 
   const from = location.state?.from || '/registro'
-
-  function enterPress(e){
-    if(e.key === 'Enter'){
-        handleLogin(e)
-    }
-  }
 
   const handleLogin = async (e) =>{
     e.preventDefault();
@@ -60,16 +56,28 @@ function Login({ onLogin }) {
 
       <div className={styles.container_right}>
         <div className={styles.login_lang}><LanguageSwitcher variant='light' /></div>
-        <div className={styles.container_login}>
+        {/* form: a tecla Enter em qualquer campo envia o login */}
+        <form className={styles.container_login} onSubmit={handleLogin}>
           <h2>{t('Entrar')}</h2>
           <p>{t('Acesse com seu usuário e senha.')}</p>
 
           <label htmlFor='usuario'>{t('Usuário')}</label>
           <input id='usuario' type='text' placeholder={t('Seu usuário')} maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
           <label htmlFor='senha'>{t('Senha')}</label>
-          <input id='senha' type='password' placeholder={t('Sua senha')} maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}} onKeyDown={enterPress}></input>
-          <button className={styles.button_login} onClick={handleLogin}>{t('Entrar')}</button>
-        </div>
+          <div className={styles.campo_senha}>
+            <input id='senha' type={mostrarSenha ? 'text' : 'password'} placeholder={t('Sua senha')} maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}}></input>
+            <button
+              type='button'
+              className={styles.botao_olho}
+              onClick={() => setMostrarSenha((v) => !v)}
+              aria-label={t(mostrarSenha ? 'Ocultar senha' : 'Mostrar senha')}
+              title={t(mostrarSenha ? 'Ocultar senha' : 'Mostrar senha')}
+            >
+              {mostrarSenha ? <EyeOff size={20}/> : <Eye size={20}/>}
+            </button>
+          </div>
+          <button type='submit' className={styles.button_login}>{t('Entrar')}</button>
+        </form>
       </div>
       <ModalError openModalError={openModalError} setOpenModalError={setOpenModalError} message={modalMessageError}/>
     </div>

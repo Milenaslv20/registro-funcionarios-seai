@@ -198,6 +198,12 @@ function autenticar(req, res, next) {
     }
 }
 
+// Só administradores (tipo_acesso = 'ADM')
+function exigirAdmin(req, res, next) {
+    if (req.usuario?.tipoAcesso === "ADM") return next();
+    res.status(403).json({ message: "Acesso restrito a administradores" });
+}
+
 // ===================== Rotas públicas =====================
 app.get("/health", rota(async (req, res) => {
     await query("SELECT 1");
@@ -226,7 +232,7 @@ app.post("/login", rota(async (req, res) => {
     const { data, hora } = agora();
     await query("INSERT INTO logs_login (nome_usuario, data_login, hora_login) VALUES ($1, $2, $3)", [usuario.nome_usuario, data, hora]);
     console.log(`☑ Usuário ${usuario.nome_usuario} logado em ${data} ${hora}`);
-    res.json({ sucess: true, token });
+    res.json({ sucess: true, token, tipoAcesso: usuario.tipo_acesso });
 }));
 
 // Daqui para baixo, todas as rotas exigem login
@@ -339,7 +345,7 @@ app.get("/arquivo/:id", rota(async (req, res) => {
 }));
 
 // ===================== Usuários =====================
-app.post("/validateUser", rota(async (req, res) => {
+app.post("/validateUser", exigirAdmin, rota(async (req, res) => {
     const { usuario, senha } = req.body;
     const { rows } = await query(
         "SELECT senha_hash FROM usuarios WHERE nome_usuario = $1 AND tipo_acesso = 'ADM'",
@@ -350,7 +356,7 @@ app.post("/validateUser", rota(async (req, res) => {
     res.status(401).json({ success: false, message: "Usuário não autorizado" });
 }));
 
-app.post("/cadastrarUsuario", rota(async (req, res) => {
+app.post("/cadastrarUsuario", exigirAdmin, rota(async (req, res) => {
     const { nomeUsuario, senhaUsuario, tipoAcesso } = req.body;
     if (!nomeUsuario || !senhaUsuario) return res.status(400).json({ message: "Usuário e senha obrigatórios" });
 
@@ -368,7 +374,7 @@ app.post("/cadastrarUsuario", rota(async (req, res) => {
 }));
 
 // ===================== Logs =====================
-app.get("/getLogsLogin", rota(async (req, res) => {
+app.get("/getLogsLogin", exigirAdmin, rota(async (req, res) => {
     const { rows } = await query(`
         SELECT nome_usuario AS "nomeUsuario",
                to_char(data_login, 'FMDD/MM/YY') AS "dataLogin",
@@ -377,7 +383,7 @@ app.get("/getLogsLogin", rota(async (req, res) => {
     res.json(rows);
 }));
 
-app.get("/getLogsEdit", rota(async (req, res) => {
+app.get("/getLogsEdit", exigirAdmin, rota(async (req, res) => {
     const { rows } = await query(`
         SELECT nome_usuario AS "nomeUsuario",
                to_char(data_edit, 'FMDD/MM/YY') AS "dataEdit",

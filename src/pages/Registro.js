@@ -696,7 +696,7 @@ function Registro() {
 
   return (
     <div className={styles.container_register}>
-      <Header links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header />
 
       <div className={styles.container_record}>
         <div className={styles.record}>

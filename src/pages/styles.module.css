@@ -77,6 +77,34 @@
     padding: 12px 14px;
     font-size: 16px;
 }
+.campo_senha {
+    position: relative;
+    display: flex;
+}
+.campo_senha input {
+    flex: 1;
+    min-width: 0;
+    padding-right: 48px;
+}
+.botao_olho {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.botao_olho:hover {
+    color: var(--brand);
+}
 
 .button_login {
     margin-top: 20px;

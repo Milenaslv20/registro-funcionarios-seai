@@ -8,35 +8,16 @@ Sistema de cadastro de funcionários (React + Node/Express + PostgreSQL) da empr
 
 ---
 
-## Publicar no Render + Neon (gratuito)
+## Acesso web
 
-### 1. Banco no Neon
-1. Crie uma conta em [neon.tech](https://neon.tech) e um projeto (região mais próxima, ex.: São Paulo).
-2. Copie a **connection string** (formato `postgresql://...neon.tech/neondb?sslmode=require`).
+[ Acessar o sistema ](https://vertix-web.onrender.com)
 
-Não é preciso rodar SQL: na primeira inicialização a API cria as tabelas, o usuário administrador e os funcionários de exemplo.
+O sistema se encontra disponível para acesso público via web link Render, onde está hospedado. Há um único link de acesso; o menu muda conforme o perfil do usuário:
 
-### 2. Serviços no Render
-1. Envie o código para o GitHub.
-2. No Render: **New → Blueprint** → escolha o repositório. O arquivo `render.yaml` cria dois serviços:
-   - `vertix-api` (Web Service, Node)
-   - `vertix-web` (Static Site, React)
-3. Preencha as variáveis pedidas:
-
-   | Serviço | Variável | Valor |
-   |---|---|---|
-   | vertix-api | `DATABASE_URL` | connection string do Neon |
-   | vertix-api | `ADMIN_PASSWORD` | senha do usuário `admin` |
-   | vertix-api | `CORS_ORIGIN` | URL do front, ex.: `https://vertix-web.onrender.com` |
-   | vertix-web | `REACT_APP_API_BASE_URL` | URL da API, ex.: `https://vertix-api.onrender.com` |
-
-   As URLs seguem o padrão `https://<nome-do-serviço>.onrender.com`. Se o nome já estiver em uso, o Render acrescenta um sufixo: nesse caso, ajuste as duas variáveis de URL depois do primeiro deploy (em **Environment**) e faça **Manual Deploy** dos dois serviços.
-
-4. Acesse a URL do `vertix-web` e entre com `admin` e a senha definida em `ADMIN_PASSWORD`.
-
-### Limitações do plano gratuito
-- A API **"dorme" após ~15 min sem acesso**; o primeiro acesso seguinte leva de 30 s a 1 min.
-- O Neon gratuito tem cerca de **0,5 GB**; fotos e PDFs ocupam esse espaço (limite de 10 MB por arquivo, ajustável em `MAX_FILE_MB`).
+| Perfil | Acesso |
+|---|---|
+| **Usuário** | Registrar funcionário e ver o histórico de funcionários cadastrados |
+| **ADM** | Tudo acima + Logs de login, Logs de edição e Cadastro de usuário |
 
 ---
 
@@ -85,6 +66,7 @@ O front lê a URL da API de `REACT_APP_API_BASE_URL` (arquivo `.env` na raiz).
 - Todas as rotas da API (exceto `/login` e `/health`) exigem o token JWT obtido no login.
 - Senhas guardadas com hash **bcrypt**.
 - O autor dos logs de edição vem do token, não do navegador.
+- Logs e cadastro de usuário são restritos a `ADM` também na API (resposta 403 para os demais).
 
 ## Personalização
 - **Marca:** `src/config/empresa.js` (nome/sigla), `src/svg/logo.svg`, cores em `src/index.css`, cabeçalho do PDF em `src/utils/pdfMarca.js`.

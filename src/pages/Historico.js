@@ -118,7 +118,7 @@ function Historico ({ funcionarios }){
 
   return (
     <div>
-      <Header links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header />
       <div className={styles.page}>
         <div>
 

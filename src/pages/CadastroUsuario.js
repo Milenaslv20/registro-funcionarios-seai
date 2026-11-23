@@ -79,7 +79,7 @@ function CadastroUsuario() {
 
   return (
     <div>
-      <Header title={t('Cadastrar Usuário')} links={[{ to: '/registro', label: 'Registrar Funcionário' }, { to: '/historico', label: 'Histórico de Funcionários' }]} />
+      <Header />
       <div className={styles.container_cadastro_usuario}>
       <div className={styles.container_cad}>
         <div className={styles.container_inputs}>
