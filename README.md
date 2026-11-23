@@ -19,6 +19,8 @@ O sistema se encontra disponível para acesso público via web link Render, onde
 | **Usuário** | Registrar funcionário e ver o histórico de funcionários cadastrados |
 | **ADM** | Tudo acima + Logs de login, Logs de edição e Cadastro de usuário |
 
+- **User:** adm
+- **Password** p@ss3523
 ---
 
 ## Rodar localmente com Docker
