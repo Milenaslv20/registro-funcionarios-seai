@@ -104,7 +104,7 @@ function CadastroUsuario() {
               name='senhaUsuario'
               type='password'
               placeholder={t('Senha')} 
-              maxLength={8}
+              maxLength={12}
               value={senhaUsuario}
               onChange={(e) => {setSenhaUsuario(e.target.value)}}>
             </input>

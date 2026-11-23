@@ -65,7 +65,7 @@ function Login({ onLogin }) {
           <input id='usuario' type='text' placeholder={t('Seu usuário')} maxLength={25} autoComplete='off' value={nomeUsuario} onChange={(e) => {setNomeUsuario(e.target.value)}}></input>
           <label htmlFor='senha'>{t('Senha')}</label>
           <div className={styles.campo_senha}>
-            <input id='senha' type={mostrarSenha ? 'text' : 'password'} placeholder={t('Sua senha')} maxLength={8} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}}></input>
+            <input id='senha' type={mostrarSenha ? 'text' : 'password'} placeholder={t('Sua senha')} maxLength={12} autoComplete='off' value={senhaUsuario} onChange={(e) => {setSenhaUsuario(e.target.value)}}></input>
             <button
               type='button'
               className={styles.botao_olho}
