@@ -211,7 +211,9 @@ app.get("/health", rota(async (req, res) => {
 }));
 
 app.post("/login", rota(async (req, res) => {
-    const { nomeUsuario, senhaUsuario } = req.body;
+    // Espaços nas pontas são ignorados (a senha do ADMIN_PASSWORD também é gravada sem eles)
+    const nomeUsuario = String(req.body.nomeUsuario ?? "").trim();
+    const senhaUsuario = String(req.body.senhaUsuario ?? "").trim();
     const { rows } = await query(
         "SELECT id_usuario, nome_usuario, senha_hash, tipo_acesso FROM usuarios WHERE nome_usuario = $1",
         [nomeUsuario]
@@ -357,7 +359,9 @@ app.post("/validateUser", exigirAdmin, rota(async (req, res) => {
 }));
 
 app.post("/cadastrarUsuario", exigirAdmin, rota(async (req, res) => {
-    const { nomeUsuario, senhaUsuario, tipoAcesso } = req.body;
+    const nomeUsuario = String(req.body.nomeUsuario ?? "").trim();
+    const senhaUsuario = String(req.body.senhaUsuario ?? "").trim();
+    const { tipoAcesso } = req.body;
     if (!nomeUsuario || !senhaUsuario) return res.status(400).json({ message: "Usuário e senha obrigatórios" });
 
     try {
